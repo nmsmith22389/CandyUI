@@ -7,7 +7,7 @@
 -- This work is licensed under the GNU GENERAL PUBLIC LICENSE.
 -- A copy of this license is included with this release.
 -----------------------------------------------------------------------------------------------
- --test
+
 require "Window"
  
 -----------------------------------------------------------------------------------------------
