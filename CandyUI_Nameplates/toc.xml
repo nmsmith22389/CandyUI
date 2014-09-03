@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Neil Smith" APIVersion="9" Name="CandyUI_Nameplates" Description="">
+    <Script Name="CandyUI_Nameplates.lua"/>
+    <Form Name="CandyUI_Nameplates.xml"/>
+    <ReplaceAddon Name="Nameplates"/>
+</Addon>
