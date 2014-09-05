@@ -108,4 +108,22 @@
     <Sprite Name="HealthEmpty_Grey1" Cycle="1">
         <Frame Texture="CandyUI_UnitFrames\Sprites\Bars\HealthEmpty_Grey.tga" x0="0" x1="5" x2="5" x3="5" x4="148" x5="150" y0="0" y1="5" y2="5" y3="5" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
+    <Sprite Name="TargetIcon_Fodder_Large" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Fodder_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="TargetIcon_Minion_Large" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Minion_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="TargetIcon_Standard_Large" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Standard_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="TargetIcon_Champion_Large" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Champion_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="TargetIcon_Superior_Large" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Superior_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="TargetIcon_Elite_Large" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Elite_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
 </Sprites>

@@ -98,15 +98,6 @@ end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_OptionsForm Functions
 -----------------------------------------------------------------------------------------------
--- when the OK button is clicked
-function CandyUI_Options:OnOK()
-	self.wndMain:Close() -- hide the window
-end
-
--- when the Cancel button is clicked
-function CandyUI_Options:OnCancel()
-	self.wndMain:Close() -- hide the window
-end
 
 
 ---------------------------------------------------------------------------------------------------
@@ -123,6 +114,10 @@ function CandyUI_Options:OnOptionsHomeClick( wndHandler, wndControl, eMouseButto
 	self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
 	
 	
+end
+
+function CandyUI_Options:OnCloseButtonClick( wndHandler, wndControl, eMouseButton )
+	self.wndOptions:Close()
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -30,12 +30,12 @@ end
 
 local karClassToIcon =
 {
-	[GameLib.CodeEnumClass.Warrior] 		= "IconSprites:Icon_Windows_UI_CRB_Warrior",
-	[GameLib.CodeEnumClass.Engineer] 		= "IconSprites:Icon_Windows_UI_CRB_Engineer",
-	[GameLib.CodeEnumClass.Esper] 			= "IconSprites:Icon_Windows_UI_CRB_Esper",
-	[GameLib.CodeEnumClass.Medic] 			= "IconSprites:Icon_Windows_UI_CRB_Medic",
-	[GameLib.CodeEnumClass.Stalker] 		= "IconSprites:Icon_Windows_UI_CRB_Stalker",
-	[GameLib.CodeEnumClass.Spellslinger] 	= "IconSprites:Icon_Windows_UI_CRB_Spellslinger",
+	[GameLib.CodeEnumClass.Warrior] 		= "Sprites:Class_Warrior",
+	[GameLib.CodeEnumClass.Engineer] 		= "Sprites:Class_Engineer",
+	[GameLib.CodeEnumClass.Esper] 			= "Sprites:Class_Esper",
+	[GameLib.CodeEnumClass.Medic] 			= "Sprites:Class_Medic",
+	[GameLib.CodeEnumClass.Stalker] 		= "Sprites:Class_Stalker",
+	[GameLib.CodeEnumClass.Spellslinger] 	= "Sprites:Class_Spellslinger",
 }
 -----------------------------------------------------------------------------------------------
 -- Initialization
@@ -388,10 +388,36 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	--Mana
 	local nManaMax = uUnit:GetMaxMana()
 	local nManaCurr = uUnit:GetMana()
-	
+	local nShowManaText = wndFrame:GetName() == "PlayerUF" and self.db.profile.player.nManaText or wndFrame:GetName() == "TargetUF" and self.db.profile.target.nManaText or wndFrame:GetName() == "FocusUF" and self.db.profile.focus.nManaText
+	local nManaFormat = wndFrame:GetName() == "PlayerUF" and self.db.profile.player.nManaFormat or wndFrame:GetName() == "TargetUF" and self.db.profile.target.nManaFormat or wndFrame:GetName() == "FocusUF" and self.db.profile.focus.nManaFormat
+	local bShowManaText = nShowManaText == 1 or nShowManaText == 2
+	local nManaPerc = round((nManaCurr /nManaMax ) * 100)
+			
 	if nManaMax ~= nil and nManaMax > 5  then
 		if barMana:IsShown() then
 			self:SetBarValue(barMana, nManaCurr, 0, nManaMax)
+			
+			--Text
+			barMana:FindChild("Text"):Show(bShowManaText, true)
+			barMana:FindChild("Text"):SetStyle("AutoFade", nShowManaText == 2)
+			if nShowManaText == 1 and barMana:FindChild("Text"):GetOpacity() < 1 then
+				barMana:FindChild("Text"):SetOpacity(1)
+			end
+			local strManaText = ""
+			if nManaFormat == 0 then
+				--Min / Max
+				strManaText = nManaCurr.." / "..nManaMax
+			elseif nManaFormat == 1 then
+				--Min / Max (Short)
+				strManaText = self:HelperFormatBigNumber(nManaCurr).." / "..self:HelperFormatBigNumber(nManaMax)
+			elseif nManaFormat == 2 then
+				--Percent
+				strManaText = nManaPerc.."%"
+			elseif nManaFormat == 3 then
+				--Min / Max (Percent)
+				strManaText = self:HelperFormatBigNumber(nManaCurr).." / "..self:HelperFormatBigNumber(nManaMax).." ("..nManaPerc.."%)"
+			end
+			barMana:FindChild("Text"):SetText(strManaText)
 		else
 			barMana:Show(true, true)
 			wndFrame:FindChild("ManaBarBG"):Show(true)
@@ -404,6 +430,28 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 			wndFrame:FindChild("ShieldBarBG"):SetAnchorOffsets(nsl, nst, nsr, nst+29)
 			
 			self:SetBarValue(barMana, nManaCurr, 0, nManaMax)
+			
+			--Text
+			barMana:FindChild("Text"):Show(bShowManaText, true)
+			barMana:FindChild("Text"):SetStyle("AutoFade", nShowManaText == 2)
+			if nShowManaText == 1 and barMana:FindChild("Text"):GetOpacity() < 1 then
+				barMana:FindChild("Text"):SetOpacity(1)
+			end
+			local strManaText = ""
+			if nManaFormat == 0 then
+				--Min / Max
+				strManaText = nManaCurr.." / "..nManaMax
+			elseif nManaFormat == 1 then
+				--Min / Max (Short)
+				strManaText = self:HelperFormatBigNumber(nManaCurr).." / "..self:HelperFormatBigNumber(nManaMax)
+			elseif nManaFormat == 2 then
+				--Percent
+				strManaText = nManaPerc.."%"
+			elseif nManaFormat == 3 then
+				--Min / Max (Percent)
+				strManaText = self:HelperFormatBigNumber(nManaCurr).." / "..self:HelperFormatBigNumber(nManaMax).." ("..nManaPerc.."%)"
+			end
+			barMana:FindChild("Text"):SetText(strManaText)
 		end
 	else
 		barMana:Show(false, true)
@@ -426,16 +474,22 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 		strPlayerIconSprite = karClassToIcon[uUnit:GetClassId()]
 	elseif eRank == Unit.CodeEnumRank.Elite then
 		strClassIconSprite = "Sprites:TargetIcon_Elite"
+		strPlayerIconSprite = strClassIconSprite.."_Large"
 	elseif eRank == Unit.CodeEnumRank.Superior then
 		strClassIconSprite = "Sprites:TargetIcon_Superior"
+		strPlayerIconSprite = strClassIconSprite.."_Large"
 	elseif eRank == Unit.CodeEnumRank.Champion then
 		strClassIconSprite = "Sprites:TargetIcon_Champion"
+		strPlayerIconSprite = strClassIconSprite.."_Large"
 	elseif eRank == Unit.CodeEnumRank.Standard then
 		strClassIconSprite = "Sprites:TargetIcon_Standard"
+		strPlayerIconSprite = strClassIconSprite.."_Large"
 	elseif eRank == Unit.CodeEnumRank.Minion then
 		strClassIconSprite = "Sprites:TargetIcon_Minion"
+		strPlayerIconSprite = strClassIconSprite.."_Large"
 	elseif eRank == Unit.CodeEnumRank.Fodder then
 		strClassIconSprite = "Sprites:TargetIcon_Fodder"
+		strPlayerIconSprite = strClassIconSprite.."_Large"
 	end
 		
 	wndFrame:FindChild("TargetIcons"):FindChild("TargetIcon"):SetSprite(strClassIconSprite)
@@ -797,6 +851,10 @@ kmuiUFDefaults = {
 			bGlow = true,
 			tAnchorOffsets = {-256,-258,0,-202}
 		},
+		tot = {
+			
+			tAnchorOffsets = {-256,-248,-106,-223}
+		},
 	},
 }
 
@@ -1061,7 +1119,9 @@ function CandyUI_UnitFrames:OnHealthTextClick( wndHandler, wndControl, eMouseBut
 	CreateDropdownMenu(self, wndControl:GetParent(), tBarTextOptions, "OnHealthTextItemClick")
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColor"):Enable(false)
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(false)
-	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText"):Enable(false)
+	if self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText") then
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText"):Enable(false)
+	end
 	wndControl:GetParent():FindChild("DropdownBox"):Show(true)
 end
 
@@ -1075,18 +1135,27 @@ function CandyUI_UnitFrames:OnHealthTextItemClick(wndHandler, wndControl, eMouse
 end
 
 function CandyUI_UnitFrames:OnHealthTextHide( wndHandler, wndControl )
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColor"):Enable(true)
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(true)
-	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText"):Enable(true)
+	if self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText") then
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText"):Enable(true)
+	end
 end
 
 function CandyUI_UnitFrames:OnHealthFormatClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
 	CreateDropdownMenu(self, wndControl:GetParent(), tBarTextFormatOptions, "OnHealthFormatItemClick")
+	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ColorByHealthToggle"):Enable(false)
+	--self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(false)
+	if self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaFormat") then
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaFormat"):Enable(false)
+	end
 	wndControl:GetParent():FindChild("DropdownBox"):Show(true)
 end
 
 function CandyUI_UnitFrames:OnHealthFormatItemClick(wndHandler, wndControl, eMouseButton)
+	local strUnit = wndControl:GetParent():GetParent():GetParent():GetParent():FindChild("Title"):GetText()
 	wndControl:GetParent():GetParent():GetParent():FindChild("Dropdown"):SetText(wndControl:GetText())
 	
 	self.db.profile[string.lower(strUnit)]["nHealthFormat"] = wndControl:GetData()
@@ -1095,6 +1164,12 @@ function CandyUI_UnitFrames:OnHealthFormatItemClick(wndHandler, wndControl, eMou
 end
 
 function CandyUI_UnitFrames:OnHealthFormatHide( wndHandler, wndControl )
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ColorByHealthToggle"):Enable(true)
+	--self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(false)
+	if self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaFormat") then
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaFormat"):Enable(true)
+	end
 end
 
 function CandyUI_UnitFrames:OnHealthBarColorClick( wndHandler, wndControl, eMouseButton )
@@ -1125,6 +1200,7 @@ end
 
 function CandyUI_UnitFrames:OnPlayerManaTextClick( wndHandler, wndControl, eMouseButton )
 	CreateDropdownMenu(self, wndControl:GetParent(), tBarTextOptions, "OnPlayerManaTextItemClick")
+	self.wndControls:FindChild("PlayerControls"):FindChild("ManaBarColor"):Enable(false)
 	wndControl:GetParent():FindChild("DropdownBox"):Show(true)
 end
 
@@ -1137,6 +1213,7 @@ function CandyUI_UnitFrames:OnPlayerManaTextItemClick(wndHandler, wndControl, eM
 end
 
 function CandyUI_UnitFrames:OnPlayerManaTextHide( wndHandler, wndControl )
+	self.wndControls:FindChild("PlayerControls"):FindChild("ManaBarColor"):Enable(true)
 end
 
 function CandyUI_UnitFrames:OnPlayerManaFormatClick( wndHandler, wndControl, eMouseButton )
