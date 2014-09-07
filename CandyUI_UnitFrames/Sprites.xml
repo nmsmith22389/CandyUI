@@ -126,4 +126,7 @@
     <Sprite Name="TargetIcon_Elite_Large" Cycle="1">
         <Frame Texture="CandyUI_UnitFrames\Sprites\TargetIcons\Elite_Large.tga" x0="0" x1="0" x2="0" x3="64" x4="64" x5="64" y0="0" y1="0" y2="0" y3="64" y4="64" y5="64" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
+	<Sprite Name="InterruptArmor" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\InterruptArmor.tga" x0="0" x1="0" x2="0" x3="56" x4="56" x5="56" y0="0" y1="0" y2="0" y3="56" y4="56" y5="56" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
 </Sprites>

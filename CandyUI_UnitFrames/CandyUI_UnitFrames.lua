@@ -91,7 +91,7 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	self.wndFocusUF = Apollo.LoadForm(self.xmlDoc, "TargetUF", nil, self)
 	self.wndFocusUF:SetName("FocusUF")
 	self.wndFocusUF:Show(false, true)
-	self.wndFocusUF:FindChild("Outline"):Show(true, true)
+	self.wndFocusUF:FindChild("Glow"):Show(true, true)
 	
 	self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
 	self.wndOptionsMain = self.OptionsAddon.wndOptions
@@ -134,7 +134,9 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
 	self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))	
 	
-	self:OnTargetUnitChanged(GameLib.GetPlayerUnit():GetTarget())
+	if GameLib.GetPlayerUnit() and GameLib.GetPlayerUnit():GetTarget() then
+		self:OnTargetUnitChanged(GameLib.GetPlayerUnit():GetTarget())
+	end
 	
 	self:SetOptions()	
 	self:SetLooks()
@@ -171,7 +173,7 @@ function CandyUI_UnitFrames:OnTargetUnitChanged(unitTarget)
 		self.wndTargetUF:Show(true)
 		--self.arTargetClusters = self:GetClusters(unitTarget)
 		self:UpdateUnitFrame(self.wndTargetUF, unitTarget)
-		if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil then
+		if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil and self.db.profile.tot.bShow then
 			self.wndToTUF:Show(true)
 			self:UpdateToT(unitTarget:GetTarget())
 		else
@@ -233,7 +235,7 @@ function CandyUI_UnitFrames:OnCharacterLoaded()
 			self:UpdateUnitFrame(self.wndTargetUF, unitTarget)
 			self.wndTargetUF:SetData(unitTarget)
 			if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil then
-				self.wndToTUF:Show(true)
+				--self.wndToTUF:Show(true)
 				self:UpdateToT(unitTarget:GetTarget())
 			end
 		end
@@ -494,7 +496,9 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 		
 	wndFrame:FindChild("TargetIcons"):FindChild("TargetIcon"):SetSprite(strClassIconSprite)
 	wndFrame:FindChild("Icon"):FindChild("IconPic"):SetSprite(strPlayerIconSprite)
-	
+	--if wndFrame:FindChild("Icon"):FindChild("IconPic"):GetOpacity() ~= 0.4 then
+	--	wndFrame:FindChild("Icon"):FindChild("IconPic"):SetOpacity(0.4)
+	--end
 --Group Size
 	if wndFrame:FindChild("TargetIcons:GroupSize") then
 		wndFrame:FindChild("TargetIcons:GroupSize"):Show(uUnit:GetGroupValue() > 0)
@@ -590,6 +594,10 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	wndFrame:FindChild("InterruptArmor"):Show(nInterruptValue > 0)
 	wndFrame:FindChild("InterruptArmor"):SetText(nInterruptValue)
 
+	--Focus Glow
+	if wndFrame:GetName() == "FocusUF" then
+		wndFrame:FindChild("Glow"):Show(self.db.profile.focus.bGlow, true)
+	end
 	
 	--[[
 	-RewardInfo
@@ -605,6 +613,8 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 end
 
 function CandyUI_UnitFrames:UpdateToT(uUnit)
+	local wndFrame = self.wndToTUF
+
 	--Name
 	local strSeperator = " - "
 	local strName = uUnit:GetName()
@@ -618,44 +628,92 @@ function CandyUI_UnitFrames:UpdateToT(uUnit)
 	self.wndToTUF:FindChild("BuffContainerWindow"):SetUnit(uUnit) --are debuffs
 	--self.wndToTUF:FindChild("DebuffContainerWindow"):SetUnit(uUnit)
 	
-	
 	--Bars
-	local barHealth = self.wndToTUF:FindChild("HealthBar")
-	local barShield = self.wndToTUF:FindChild("ShieldBar")
-	
+	local barHealth = wndFrame:FindChild("HealthBar:Bar")
+	local barShield = wndFrame:FindChild("ShieldBar:Bar")
+
 	--Health
 	local nHealthMax = uUnit:GetMaxHealth()
 	local nHealthCurr = uUnit:GetHealth()
-	
+	local nHealthPerc = round((nHealthCurr/nHealthMax) * 100)
 	self:SetBarValue(barHealth, nHealthCurr, 0, nHealthMax)
 	
+	--Health Text
+	local nShowHealthText = self.db.profile.tot.nHealthText
+	local nHealthFormat = self.db.profile.tot.nHealthFormat
+	local bShowHealthText = nShowHealthText == 1 or nShowHealthText == 2
+	
+	barHealth:FindChild("Text"):Show(bShowHealthText, true)
+	barHealth:FindChild("Text"):SetStyle("AutoFade", nShowHealthText == 2)
+	if nShowHealthText == 1 and barHealth:FindChild("Text"):GetOpacity() < 1 then
+		barHealth:FindChild("Text"):SetOpacity(1)
+	end
+	local strHealthText = ""
+	if nHealthFormat == 0 then
+		--Min / Max
+		strHealthText = nHealthCurr.." / "..nHealthMax
+	elseif nHealthFormat == 1 then
+		--Min / Max (Short)
+		strHealthText = self:HelperFormatBigNumber(nHealthCurr).." / "..self:HelperFormatBigNumber(nHealthMax)
+	elseif nHealthFormat == 2 then
+		--Percent
+		strHealthText = nHealthPerc.."%"
+	elseif nHealthFormat == 3 then
+		--Min / Max (Percent)
+		strHealthText = self:HelperFormatBigNumber(nHealthCurr).." / "..self:HelperFormatBigNumber(nHealthMax).." ("..nHealthPerc.."%)"
+	end
+	local bShowShieldText = self.db.profile.tot.bShowShieldText 
+	local nShieldPerc = "" --replace with text
+	local nShieldText = "["..nShieldPerc.."%]"
+	if bShowShieldText then
+		barHealth:FindChild("Text"):SetText(strHealthText.." "..nShieldText)
+	else
+		barHealth:FindChild("Text"):SetText(strHealthText)
+	end
+	
+	--Color by health
+	local bColorByHealth = self.db.profile.tot.bColorByHealth
+	if bColorByHealth then
+		local nPercDec = nHealthPerc/100
+		local crRed = 1-nPercDec
+		local crGreen = nPercDec
+		local crBlue = 0
+		barHealth:SetBarColor(ApolloColor.new(crRed, crGreen, crBlue))
+	end
+	
 	--Shield
+	--wndFrame:FindChild("HealthBarBG"):SetSprite("Sprites:HealthEmpty_Grey")
 	local nShieldMax = uUnit:GetShieldCapacityMax()
 	local nShieldCurr = uUnit:GetShieldCapacity()
-	
-	if nShieldMax > 0 then
+	if nShieldMax ~= nil and nShieldMax > 0 then
 		if barShield:IsShown() then
 			self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
 		else
 			barShield:Show(true, true)
-			self.wndToTUF:FindChild("ShieldBarBG"):Show(true, true)
-			self.wndToTUF:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_Grey")
+			wndFrame:FindChild("ShieldBarBG"):Show(true, true)
+			wndFrame:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_Grey")
+			--barHealth:SetEmptySprite("Sprites:HealthEmpty_Grey")
 			barHealth:SetFullSprite("Sprites:HealthFull_Grey")
 			local nsl, nst, nsr, nsb = barShield:GetAnchorOffsets()
-			local nhl, nht, nhr, nhb = barHealth:GetAnchorOffsets()
-			self.wndToTUF:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsl-4, nhb)
+			local nhl, nht, nhr, nhb = wndFrame:FindChild("HealthBar"):GetAnchorOffsets()
+			wndFrame:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsl-4, nhb)
 			--barHealth:SetAnchorOffsets(nhl, nht, nsl-4, nhb)
 			self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
 		end
 	else
+		if not barShield:IsShown() then
+			self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
+		else
 		barShield:Show(false, true)
-		self.wndToTUF:FindChild("ShieldBarBG"):Show(false, true)
-		self.wndToTUF:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_RoundedGrey")
+		wndFrame:FindChild("ShieldBarBG"):Show(false, true)
+		wndFrame:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_RoundedGrey")
+		--barHealth:SetEmptySprite("Sprites:HealthEmpty_RoundedGrey")
 		barHealth:SetFullSprite("Sprites:HealthFull_RoundedGrey")
-		local nhl, nht, nhr, nhb = barHealth:GetAnchorOffsets()
+		local nhl, nht, nhr, nhb = wndFrame:FindChild("HealthBar"):GetAnchorOffsets()
 		local nsl, nst, nsr, nsb = barShield:GetAnchorOffsets()
-		self.wndToTUF:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
+		wndFrame:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
 		--barHealth:SetAnchorOffsets(nhl, nht, nsr, nhb)
+		end
 	end
 end
 
@@ -803,7 +861,7 @@ kmuiUFDefaults = {
 			
 		},
 		player = {
-			nPortraitStyle = 1,
+			nPortraitStyle = 2,
 			nWidth = 256,
 			nHealthText = 2,
 			nHealthFormat = 3,
@@ -819,7 +877,7 @@ kmuiUFDefaults = {
 			tAnchorOffsets = {0,-324,256,-268}
 		},
 		target = {
-			nPortraitStyle = 1,
+			nPortraitStyle = 2,
 			nWidth = 256,
 			nHealthText = 2,
 			nHealthFormat = 3,
@@ -852,8 +910,15 @@ kmuiUFDefaults = {
 			tAnchorOffsets = {-256,-258,0,-202}
 		},
 		tot = {
-			
-			tAnchorOffsets = {-256,-248,-106,-223}
+			bShow = true,
+			nHealthText = 2,
+			nHealthFormat = 3,
+			crHealthBar = "ffff0000",
+			bColorByHealth = true,
+			crShieldBar = "ff00bff3",
+			nOpacity = 1,
+			nBGOpacity = 1,
+			tAnchorOffsets = {-261,-293,-111,-268}
 		},
 	},
 }
@@ -936,9 +1001,7 @@ local tBarTextFormatOptions = {
 --===============================
 --			Set Options
 --===============================
---make sure to set dropdown box data to player/target/whatever --dont need anymore
 function CandyUI_UnitFrames:SetOptions()
---Player
 	for _, strUnit in ipairs({"Player", "Target", "Focus"}) do
 		local strUnitLower = string.lower(strUnit)
 		
@@ -967,14 +1030,29 @@ function CandyUI_UnitFrames:SetOptions()
 		--Shield Bar Color
 		controls:FindChild("ShieldBarColor:Swatch"):SetBGColor(self.db.profile[strUnitLower]["crShieldBar"])
 	end
+--Player
 	--Mana Text
 	self.wndControls:FindChild("PlayerControls"):FindChild("ManaText:Dropdown"):SetText(GetKey(tBarTextOptions, self.db.profile.player.nManaText))
 	--Mana Format
 	self.wndControls:FindChild("PlayerControls"):FindChild("ManaFormat:Dropdown"):SetText(GetKey(tBarTextFormatOptions, self.db.profile.player.nManaFormat))
 	--Mana Bar Color
 	self.wndControls:FindChild("PlayerControls"):FindChild("ManaBarColor:Swatch"):SetBGColor(self.db.profile.player.crManaBar)
+--Focus
 	--Focus Glow
 	self.wndControls:FindChild("FocusControls"):FindChild("GlowToggle"):SetCheck(self.db.profile.focus.bGlow)
+--ToT
+	--show
+	self.wndControls:FindChild("ToTControls"):FindChild("ShowToggle"):SetCheck(self.db.profile.tot.bShow)
+	--Health Text
+	self.wndControls:FindChild("ToTControls"):FindChild("HealthText:Dropdown"):SetText(GetKey(tBarTextOptions, self.db.profile.tot.nHealthText))
+	--Health Format
+	self.wndControls:FindChild("ToTControls"):FindChild("HealthFormat:Dropdown"):SetText(GetKey(tBarTextFormatOptions, self.db.profile.tot.nHealthFormat))
+	--Health Bar Color
+	self.wndControls:FindChild("ToTControls"):FindChild("HealthBarColor:Swatch"):SetBGColor(self.db.profile.tot.crHealthBar)
+	--Color By Health
+	self.wndControls:FindChild("ToTControls"):FindChild("ColorByHealthToggle"):SetCheck(self.db.profile.tot.bColorByHealth)
+	--Shield Bar Color
+	self.wndControls:FindChild("ToTControls"):FindChild("ShieldBarColor:Swatch"):SetBGColor(self.db.profile.tot.crShieldBar)
 end
 
 function CandyUI_UnitFrames:SetLooks()
@@ -989,7 +1067,7 @@ function CandyUI_UnitFrames:SetLooks()
 	--Opacity
 	self.wndPlayerUF:SetOpacity(self.db.profile.player.nOpacity)
 	self.wndPlayerUF:FindChild("BG"):SetOpacity(self.db.profile.player.nBGOpacity)
---Player
+--target
 	--Bar Colors
 	self.wndTargetUF:FindChild("HealthBar"):FindChild("Bar"):SetBarColor(self.db.profile.target.crHealthBar)
 	self.wndTargetUF:FindChild("HealthBar"):SetBGColor(self.db.profile.target.crHealthBar)
@@ -1000,7 +1078,7 @@ function CandyUI_UnitFrames:SetLooks()
 	--Opacity
 	self.wndTargetUF:SetOpacity(self.db.profile.target.nOpacity)
 	self.wndTargetUF:FindChild("BG"):SetOpacity(self.db.profile.target.nBGOpacity)
---Player
+--focus
 	--Bar Colors
 	self.wndFocusUF:FindChild("HealthBar"):FindChild("Bar"):SetBarColor(self.db.profile.focus.crHealthBar)
 	self.wndFocusUF:FindChild("HealthBar"):SetBGColor(self.db.profile.focus.crHealthBar)
@@ -1011,6 +1089,15 @@ function CandyUI_UnitFrames:SetLooks()
 	--Opacity
 	self.wndFocusUF:SetOpacity(self.db.profile.focus.nOpacity)
 	self.wndFocusUF:FindChild("BG"):SetOpacity(self.db.profile.focus.nBGOpacity)
+--ToT
+	--Bar Colors
+	self.wndToTUF:FindChild("HealthBar"):FindChild("Bar"):SetBarColor(self.db.profile.tot.crHealthBar)
+	self.wndToTUF:FindChild("HealthBar"):SetBGColor(self.db.profile.tot.crHealthBar)
+	self.wndToTUF:FindChild("ShieldBar"):FindChild("Bar"):SetBarColor(self.db.profile.tot.crShieldBar)
+	self.wndToTUF:FindChild("ShieldBar"):SetBGColor(self.db.profile.tot.crShieldBar)
+	--Opacity
+	self.wndToTUF:SetOpacity(self.db.profile.tot.nOpacity)
+	self.wndToTUF:FindChild("BG"):SetOpacity(self.db.profile.tot.nBGOpacity)
 end
 -------------------------
 -- Player Option Events
@@ -1065,9 +1152,10 @@ end
 
 --Portrait Style
 function CandyUI_UnitFrames:OnPortraitStyleClick(wndHandler, wndControl, eMouseButton)
-	--local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
 	CreateDropdownMenu(self, wndControl:GetParent(), tPortraitOptions, "OnPortraitStyleItemClick", true)
 	--self.wndControls:FindChild("PlayerControls")
+	self.wndControls:FindChild(strUnit.."Controls"):FindChild("Opacity"):Enable(false)
 	wndControl:GetParent():FindChild("DropdownBox"):Show(true)
 end
 
@@ -1076,16 +1164,17 @@ function CandyUI_UnitFrames:OnPortraitStyleItemClick(wndHandler, wndControl, eMo
 	wndControl:GetParent():GetParent():GetParent():FindChild("Dropdown"):SetText(wndControl:GetText())
 	
 	self.db.profile[string.lower(strUnit)]["nPortraitStyle"] = wndControl:GetData()
-	
 	wndControl:GetParent():GetParent():Show(false)
 end
 
 function CandyUI_UnitFrames:OnPortraitStyleHide( wndHandler, wndControl )
-	
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	self.wndControls:FindChild(strUnit.."Controls"):FindChild("Opacity"):Enable(true)
 end
 
 function CandyUI_UnitFrames:OnWidthReturn( wndHandler, wndControl, strText )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	local value = round(tonumber(strText))
 	self.db.profile[string.lower(strUnit)]["nWidth"] = value
 	
@@ -1095,6 +1184,7 @@ end
 
 function CandyUI_UnitFrames:OnBGOpacityChanged( wndHandler, wndControl, fNewValue, fOldValue )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	local value = round(fNewValue, 1)
 	wndControl:GetParent():FindChild("EditBox"):SetText(value)
 	self.db.profile[string.lower(strUnit)]["nBGOpacity"] = value
@@ -1105,6 +1195,7 @@ end
 
 function CandyUI_UnitFrames:OnOpacityChanged( wndHandler, wndControl, fNewValue, fOldValue )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	--self["wnd"..strUnit.."UF"]
 	local value = round(fNewValue, 1)
 	wndControl:GetParent():FindChild("EditBox"):SetText(value)
@@ -1116,6 +1207,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthTextClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "ToT" end
 	CreateDropdownMenu(self, wndControl:GetParent(), tBarTextOptions, "OnHealthTextItemClick")
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColor"):Enable(false)
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(false)
@@ -1127,6 +1219,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthTextItemClick(wndHandler, wndControl, eMouseButton)
 	local strUnit = wndControl:GetParent():GetParent():GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	wndControl:GetParent():GetParent():GetParent():FindChild("Dropdown"):SetText(wndControl:GetText())
 	
 	self.db.profile[string.lower(strUnit)]["nHealthText"] = wndControl:GetData()
@@ -1136,6 +1229,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthTextHide( wndHandler, wndControl )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColor"):Enable(true)
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(true)
 	if self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaText") then
@@ -1145,6 +1239,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthFormatClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "ToT" end
 	CreateDropdownMenu(self, wndControl:GetParent(), tBarTextFormatOptions, "OnHealthFormatItemClick")
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ColorByHealthToggle"):Enable(false)
 	--self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(false)
@@ -1156,6 +1251,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthFormatItemClick(wndHandler, wndControl, eMouseButton)
 	local strUnit = wndControl:GetParent():GetParent():GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	wndControl:GetParent():GetParent():GetParent():FindChild("Dropdown"):SetText(wndControl:GetText())
 	
 	self.db.profile[string.lower(strUnit)]["nHealthFormat"] = wndControl:GetData()
@@ -1165,6 +1261,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthFormatHide( wndHandler, wndControl )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "ToT" end
 	self.wndControls:FindChild(strUnit.."Controls"):FindChild("ColorByHealthToggle"):Enable(true)
 	--self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):Enable(false)
 	if self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaFormat") then
@@ -1174,6 +1271,7 @@ end
 
 function CandyUI_UnitFrames:OnHealthBarColorClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	--Open Color Picker
 	self.strColorPickerTargetUnit = strUnit
 	self.strColorPickerTargetControl = "HealthBar"
@@ -1183,6 +1281,7 @@ end
 
 function CandyUI_UnitFrames:OnColorByHealthClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	self.db.profile[string.lower(strUnit)]["bColorByHealth"] = wndControl:IsChecked()
 	if not wndControl:IsChecked() then
 		self:SetLooks()
@@ -1191,6 +1290,7 @@ end
 
 function CandyUI_UnitFrames:OnShieldBarColorClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "tot" end
 	--Open Color Picker
 	self.strColorPickerTargetUnit = strUnit
 	self.strColorPickerTargetControl = "ShieldBar"
@@ -1237,7 +1337,14 @@ function CandyUI_UnitFrames:OnPlayerManaBarColorClick( wndHandler, wndControl, e
 	self.colorPicker:ToFront()
 end
 
+function CandyUI_UnitFrames:OnFocusShowGlowClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.focus.bGlow = wndControl:IsChecked()
+end
 
+function CandyUI_UnitFrames:OnToTShowClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.tot.bShow = wndControl:IsChecked()
+	self:OnTargetUnitChanged(GameLib.GetTargetUnit())
+end
 ---------------------------------------------------------------------------------------------------
 -- OptionsControlsList Functions
 ---------------------------------------------------------------------------------------------------
@@ -1246,8 +1353,7 @@ end
 
 
 
-function CandyUI_UnitFrames:OnFocusShowGlowClick( wndHandler, wndControl, eMouseButton )
-end
+
 
 -----------------------------------------------------------------------------------------------
 -- CandyUI_UnitFrames Instance
