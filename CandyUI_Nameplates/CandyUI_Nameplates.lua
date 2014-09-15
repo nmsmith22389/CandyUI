@@ -455,7 +455,7 @@ function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
 			wndName = wnd:FindChild("NameRewardContainer:Name"),
 			certainDeath = wnd:FindChild("CertainDeath"),
 			targetScalingMark = wnd:FindChild("TargetScalingMark"),
-			nameRewardContainer = wnd:FindChild("NameRewardContainer:RewardContainer:QuestRewards"),
+			nameRewardContainer = wnd:FindChild("NameRewardContainer:RewardContainer"),
 			--healthMaxShield = wnd:FindChild("ShieldBarBG"),
 			--healthShieldFill = wnd:FindChild("ShieldBar"),
 			--healthMaxAbsorb = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb"),
@@ -656,10 +656,10 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 			
 			-- Resize
 			local wndNameplate = tNameplate.wndNameplate
-			local nLeft, nTop, nRight, nBottom = wndNameplate:GetAnchorOffsets()
+			local nLeft, nTop, nRight, nBottom = wndName:GetAnchorOffsets()
 			local nHalfNameWidth = math.ceil(math.max(Apollo.GetTextWidth("Nameplates", strNewName), Apollo.GetTextWidth("CRB_Interface9_BO", strNewGuild)) / 2)
 			nHalfNameWidth = math.max(nHalfNameWidth, self.nHealthWidth / 2)
-			--wndNameplate:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
+			wndName:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
 		end
 	end
 end
@@ -705,10 +705,10 @@ function CandyUI_Nameplates:DrawGuild(tNameplate)
 		end
 
 		-- Resize
-		local nLeft, nTop, nRight, nBottom = wndNameplate:GetAnchorOffsets()
+		local nLeft, nTop, nRight, nBottom = wndGuild:GetAnchorOffsets()
 		local nHalfNameWidth = math.ceil(math.max(Apollo.GetTextWidth("Nameplates", strNewName), Apollo.GetTextWidth("CRB_Interface9_BO", strNewGuild)) / 2)
 		nHalfNameWidth = math.max(nHalfNameWidth, self.nHealthWidth / 2)
-		--wndNameplate:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
+		wndGuild:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
 	end
 
 	wndGuild:Show(bShow and strNewGuild ~= nil and strNewGuild ~= "")
@@ -941,7 +941,7 @@ function CandyUI_Nameplates:DrawRewards(tNameplate)
 
 		local wndnameRewardContainer = tNameplate.wnd.nameRewardContainer
 		local nLeft, nTop, nRight, nBottom = wndnameRewardContainer:GetAnchorOffsets()
-		--wndnameRewardContainer:SetAnchorOffsets(nHalfNameWidth, nTop, nHalfNameWidth + wndnameRewardContainer:ArrangeChildrenHorz(0), nBottom)
+		wndnameRewardContainer:SetAnchorOffsets(nHalfNameWidth, nTop, nHalfNameWidth + wndnameRewardContainer:ArrangeChildrenHorz(0), nBottom)
 	end
 end
 
