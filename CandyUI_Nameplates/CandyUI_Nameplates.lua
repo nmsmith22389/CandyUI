@@ -124,6 +124,13 @@ local kcrFlaggedEnemyWhenFlagged		= ApolloColor.new("DispositionHostile")
 local kcrDeadColor 						= ApolloColor.new("crayGray")
 
 local kcrDefaultTaggedColor = ApolloColor.new("crayGray")
+
+local karUnitType = {
+	Player = 1,
+	NPC = 2,
+	Harvest = 3,
+}
+
 -----------------------------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------------------------
@@ -162,6 +169,7 @@ end
 -- CandyUI_Nameplates OnLoad
 -----------------------------------------------------------------------------------------------
 function CandyUI_Nameplates:OnLoad()
+	self.arPreloadUnits = {}
 	Apollo.RegisterEventHandler("UnitCreated", 					"OnPreloadUnitCreated", self)
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_Nameplates.xml")
@@ -170,6 +178,9 @@ function CandyUI_Nameplates:OnLoad()
 end
 
 function CandyUI_Nameplates:OnPreloadUnitCreated(unitNew)
+	if self.arPreloadUnits == nil then
+		self.arPreloadUnits = {}
+	end
 	self.arPreloadUnits[unitNew:GetId()] = unitNew
 end
 -----------------------------------------------------------------------------------------------
@@ -212,9 +223,9 @@ function CandyUI_Nameplates:OnDocLoaded()
 		candyUI_Cats = {}
 	end
 	table.insert(candyUI_Cats, "Nameplates")
-		self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
+	self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
 		
-		local tRewardUpdateEvents = {
+	local tRewardUpdateEvents = {
 		"QuestObjectiveUpdated", "QuestStateChanged", "ChallengeAbandon", "ChallengeLeftArea",
 		"ChallengeFailTime", "ChallengeFailArea", "ChallengeActivate", "ChallengeCompleted",
 		"ChallengeFailGeneric", "PublicEventObjectiveUpdate", "PublicEventUnitUpdate",
@@ -244,7 +255,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 		
 		-- Cache defaults
 		local wndTemp = Apollo.LoadForm(self.xmlDoc, "Nameplate", nil, self)
-		self.nFrameLeft, self.nFrameTop, self.nFrameRight, self.nFrameBottom = wndTemp:FindChild("HealthBarBGNoShield"):GetAnchorOffsets()
+		self.nFrameLeft, self.nFrameTop, self.nFrameRight, self.nFrameBottom = wndTemp:FindChild("HealthBarNoShield"):GetAnchorOffsets()
 		self.nHealthWidth = self.nFrameRight - self.nFrameLeft
 		wndTemp:Destroy()
 	
@@ -283,7 +294,7 @@ function CandyUI_Nameplates:OnOptionsHeaderCheck(wndHandler, wndControl, eMouseB
 end
 
 function CandyUI_Nameplates:CreateUnitsFromPreload()
-	if self.bAddonRestoredOrLoaded then
+	if true then --self.bAddonRestoredOrLoaded then
 		self.unitPlayer = GameLib.GetPlayerUnit()
 
 		-- Process units created while form was loading
@@ -304,15 +315,35 @@ function CandyUI_Nameplates:RequestUpdateAllNameplateRewards()
 end
 
 function CandyUI_Nameplates:UpdateNameplateRewardInfo(tNameplate)
+	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
+	local unitOwner = tNameplate.unitOwner
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
+	local bHide = (not self.db.profile[strUnitTypeLower].bShowRewards and not unitOwner:IsInCombat()) or (not self.db.profile[strUnitTypeLower].bShowRewardsCombat and unitOwner:IsInCombat())
 	local tFlags =
 	{
 		bVert = false,
-		bHideQuests = not self.db.profile.rewards.bShowRewardTypeQuest,
-		bHideChallenges = not self.db.profile.rewards.bShowRewardTypeChallenge,
-		bHideMissions = not self.db.profile.rewards.bShowRewardTypeMission,
-		bHidePublicEvents = not self.db.profile.rewards.bShowRewardTypePublicEvent,
-		bHideRivals = not self.db.profile.rewards.bShowRivals,
-		bHideFriends = not self.db.profile.rewards.bShowFriends
+		bHideQuests = bHide,
+		bHideChallenges = bHide,
+		bHideMissions = bHide,
+		bHidePublicEvents = bHide,
+		bHideRivals = bHide,
+		bHideFriends = bHide
 	}
 
 	if RewardIcons ~= nil and RewardIcons.GetUnitRewardIconsForm ~= nil then
@@ -322,6 +353,7 @@ end
 
 function CandyUI_Nameplates:UpdateAllNameplateVisibility()
 	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
+		--Print(tNameplate.unitOwner:GetName())
 		self:UpdateNameplateVisibility(tNameplate)
 		if self.bRedrawRewardIcons then
 			self:UpdateNameplateRewardInfo(tNameplate)
@@ -356,13 +388,13 @@ end
 function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
 	if unitNew == nil
 		or not unitNew:IsValid()
-		or not unitNew:ShouldShowNamePlate()
+		--or not unitNew:ShouldShowNamePlate()
 		or unitNew:GetType() == "Collectible"
 		or unitNew:GetType() == "PinataLoot" then
 		-- Never have nameplates
 		return
 	end
-
+	
 	local idUnit = unitNew:GetId()
 	if self.arUnit2Nameplate[idUnit] ~= nil and self.arUnit2Nameplate[idUnit].wndNameplate:IsValid() then
 		return
@@ -403,42 +435,45 @@ function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
 		bShow			= false,
 		wnd				= wndReferences,
 	}
-
+	
 	if wndReferences == nil then
 		tNameplate.wnd =
 		{
-			health = wnd:FindChild("HealthBar"),
-			healthBG = wnd:FindChild("HealthBarBG"),
-			healthNoShield = wnd:FindChild("HealthBarNoShield"),
-			healthNoShieldBG = wnd:FindChild("HealthBarBGNoShield"),
-			shield = wnd:FindChild("ShieldBar"),
-			shieldBG = wnd:FindChild("ShieldBarBG"),
-			absorb = wnd:FindChild("AbsorbBar"),
+			bars = wnd:FindChild("BG"), --Bars, Health, BG, etc
+			health = wnd:FindChild("BG:HealthBar:Bar"),
+			healthBG = wnd:FindChild("BG:HealthBar"),
+			healthNoShield = wnd:FindChild("BG:HealthBarNoShield:Bar"),
+			healthNoShieldBG = wnd:FindChild("BG:HealthBarNoShield"),
+			shield = wnd:FindChild("BG:ShieldBar:Bar"),
+			shieldBG = wnd:FindChild("BG:ShieldBar"),
+			absorb = wnd:FindChild("BG:HealthBar:AbsorbBar"),
+			absorbNoShield = wnd:FindChild("BG:HealthBarNoShield:AbsorbBar"),
 			castBar = wnd:FindChild("CastBar"),
 			vulnerable = wnd:FindChild("Vulnerable"),
 			level = wnd:FindChild("Level"),
 			wndGuild = wnd:FindChild("Guild"),
 			wndName = wnd:FindChild("NameRewardContainer:Name"),
-			certainDeath = wnd:FindChild("TargetAndDeathContainer:CertainDeath"),
+			certainDeath = wnd:FindChild("CertainDeath"),
 			targetScalingMark = wnd:FindChild("TargetScalingMark"),
-			nameRewardContainer = wnd:FindChild("NameRewardContainer:RewardContainer"),
-			healthMaxShield = wnd:FindChild("ShieldBarBG"),
-			healthShieldFill = wnd:FindChild("ShieldBar"),
-			healthMaxAbsorb = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb"),
-			healthAbsorbFill = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb:AbsorbFill"),
-			healthMaxHealth = wnd:FindChild("HealthBarBG"),
-			healthHealthLabel = wnd:FindChild("HealthBar:Label"),
+			nameRewardContainer = wnd:FindChild("NameRewardContainer:RewardContainer:QuestRewards"),
+			--healthMaxShield = wnd:FindChild("ShieldBarBG"),
+			--healthShieldFill = wnd:FindChild("ShieldBar"),
+			--healthMaxAbsorb = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb"),
+			--healthAbsorbFill = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb:AbsorbFill"),
+			--healthMaxHealth = wnd:FindChild("HealthBarBG"),
+			--healthHealthLabel = wnd:FindChild("HealthBar:Bar:Label"),
 			castBarLabel = wnd:FindChild("CastBar:Label"),
 			castBarCastFill = wnd:FindChild("CastBar:CastFill"),
 			vulnerableVulnFill = wnd:FindChild("Vulnerable:VulnFill"),
-			questRewards = wnd:FindChild("TargetIcons:TargetGoal:Img"),
-			targetMarkerArrow = wnd:FindChild("TargetAndDeathContainer:TargetMarkerArrow"),
+			questRewards = wnd:FindChild("NameRewardContainer:RewardContainer:QuestRewards"),
+			targetMarkerArrow = wnd:FindChild("TargetMarkerArrow"),
 			--targetMarker = wnd:FindChild("Container:TargetMarker"),
 		}
 	end
 
 	self.arUnit2Nameplate[idUnit] = tNameplate
 	self.arWnd2Nameplate[wnd:GetId()] = tNameplate
+
 
 	self:DrawName(tNameplate)
 	self:DrawGuild(tNameplate)
@@ -492,7 +527,7 @@ function CandyUI_Nameplates:OnFrame()
 			fnDrawHealth(self, tNameplate)
 
 			nCon = fnHelperCalculateConValue(self, unitOwner)
-			tNameplate.wnd.certainDeath:Show(self.db.profile.individual.bShowCertainDeath and nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
+			tNameplate.wnd.certainDeath:Show(false) -- replace with option --self.db.profile.individual.bShowCertainDeath and nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
 			tNameplate.wnd.targetScalingMark:Show(unitOwner:IsScaled())
 
 			fnDrawRewards(self, tNameplate)
@@ -565,14 +600,32 @@ end
 
 function CandyUI_Nameplates:DrawName(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
-
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
 	local wndName = tNameplate.wnd.wndName
 	local bUseTarget = tNameplate.bIsTarget
-	local bShow = self.db.profile.individual.bShowName
-	if bUseTarget then
-		bShow = self.db.profile.target.bShowName
-	end
+	local bShow = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowName) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowNameCombat)
+	local bShowGuild = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowGuildTitle) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowGuildTitleCombat)
+	--if bUseTarget then
+	--	bShow = self.db.profile.target.bShowName
+	--end
 
 	if wndName:IsShown() ~= bShow then
 		wndName:Show(bShow)
@@ -580,13 +633,19 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 
 	if bShow then
 		local strNewName
-		if self.db.profile.individual.bShowTitle then
-			strNewName = unitOwner:GetTitleOrName()
+		
+		if bShowGuild then
+			strNewName =  unitOwner:GetTitleOrName()
 		else
-			strNewName = unitOwner:GetName()
+			strNewName =  unitOwner:GetName()
 		end
-
+		--This is to show level with the name [broken]
+		--if tNameplate.wnd.bars:IsVisible() == false and unitOwner:GetLevel() then
+		--	strNewName = strNewName.." ["..unitOwner:GetLevel().."]"
+			--wndName:SetText(strNewName)
+		--end
 		if wndName:GetText() ~= strNewName then
+			
 			wndName:SetText(strNewName)
 
 			-- Need to consider guild as well for the resize code
@@ -594,7 +653,7 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 			if unitOwner:GetType() == "Player" and strNewGuild ~= nil and strNewGuild ~= "" then
 				strNewGuild = String_GetWeaselString(Apollo.GetString("Nameplates_GuildDisplay"), strNewGuild)
 			end
-
+			
 			-- Resize
 			local wndNameplate = tNameplate.wndNameplate
 			local nLeft, nTop, nRight, nBottom = wndNameplate:GetAnchorOffsets()
@@ -607,14 +666,27 @@ end
 
 function CandyUI_Nameplates:DrawGuild(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
-
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
 	local wndGuild = tNameplate.wnd.wndGuild
 	local bUseTarget = tNameplate.bIsTarget
-	local bShow = self.db.profile.individual.bShowTitle
-	if bUseTarget then
-		bShow = self.db.profile.target.bShowGuildName
-	end
+	local bShow = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowGuildTitle) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowGuildTitleCombat)
 
 	local strNewGuild = unitOwner:GetAffiliationName()
 	if unitOwner:GetType() == "Player" and strNewGuild ~= nil and strNewGuild ~= "" then
@@ -626,7 +698,7 @@ function CandyUI_Nameplates:DrawGuild(tNameplate)
 
 		-- Need to consider name as well for the resize code
 		local strNewName
-		if self.db.profile.individual.bShowTitle then
+		if bShow then
 			strNewName = unitOwner:GetTitleOrName()
 		else
 			strNewName = unitOwner:GetName()
@@ -645,23 +717,48 @@ end
 
 function CandyUI_Nameplates:DrawLevel(tNameplate)
 	local unitOwner = tNameplate.unitOwner
-
-	tNameplate.wnd.level:SetText(unitOwner:GetLevel() or "-")
+	
+	tNameplate.wnd.level:SetText(unitOwner:GetLevel() or "")
+	
 end
 
 function CandyUI_Nameplates:DrawHealth(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
-
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
+	local bShow = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowHealthShield) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowHealthShield)
+	local bShowDamaged = self.db.profile[strUnitTypeLower].bOnlyDamaged
+	
 	local wndHealth = tNameplate.wnd.health
 	local wndHealthBG = tNameplate.wnd.healthBG
 	local wndHealthNoShield = tNameplate.wnd.healthNoShield
 	local wndHealthNoShieldBG = tNameplate.wnd.healthNoShieldBG
 	local wndShield = tNameplate.wnd.shield
 	local wndShieldBG = tNameplate.wnd.shieldBG
-
-	if unitOwner:GetHealth() == nil then
-		wndHealth:Show(false)
+	local wndAbsorb = tNameplate.wnd.absorb
+	local wndAbsorbNoShield = tNameplate.wnd.absorbNoShield
+	local wndBars = tNameplate.wnd.bars
+	
+	local wndHealthText
+	
+	if unitOwner:GetHealth() == nil or unitOwner:IsDead() then
+		wndBars:Show(false)
 		return
 	end
 	
@@ -674,62 +771,89 @@ function CandyUI_Nameplates:DrawHealth(tNameplate)
 	local wndHealthUpdate
 	if bHasShield then
 		wndHealthUpdate = wndHealth
+		wndHealthText = wndHealth:FindChild("Label")
 		
-		wndHealth:Show(true, true)
+		--wndHealth:Show(true, true)
 		wndHealthBG:Show(true, true)
-		wndShield:Show(true, true)
+		--wndShield:Show(true, true)
 		wndShieldBG:Show(true, true)
-		wndHealthNoShield:Show(false, true)
+		--wndHealthNoShield:Show(false, true)
 		wndHealthNoShieldBG:Show(false, true)
+		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColor)
 	else
 		wndHealthUpdate = wndHealthNoShield
-		
-		wndHealth:Show(false, true)
+		wndHealthText = wndHealthNoShield:FindChild("Label")
+
+		--wndHealth:Show(false, true)
 		wndHealthBG:Show(false, true)
-		wndShield:Show(false, true)
+		--wndShield:Show(false, true)
 		wndShieldBG:Show(false, true)
-		wndHealthNoShield:Show(true, true)
+		--wndHealthNoShield:Show(true, true)
 		wndHealthNoShieldBG:Show(true, true)
+		wndHealthNoShieldBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColor)
 	end
 	
 	self:SetBarValue(wndHealthUpdate, 0, unitOwner:GetHealth(), unitOwner:GetMaxHealth())
+	wndHealthUpdate:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColor)
 	if bHasShield then
 		self:SetBarValue(wndShield, 0, unitOwner:GetShieldCapacity(), unitOwner:GetShieldCapacityMax())
+		wndShield:SetBarColor(self.db.profile[strUnitTypeLower].crShieldBarColor)
+		wndShieldBG:SetBGColor(self.db.profile[strUnitTypeLower].crShieldBarColor)
 	end
-	--[[
-	local bUseTarget = tNameplate.bIsTarget
-	if bUseTarget then
-		wndHealth:Show(self.db.profile.target.bShowHealth)
+	
+	if false then
+		wndBars:Show(self.db.profile.target.bShowHealth)
 	else
-		if self.db.profile.healthbar.bShowHealth then
-			wndHealth:Show(true)
-		elseif self.db.profile.healthbar.bShowHealthDamaged then
-			wndHealth:Show(unitOwner:GetHealth() ~= unitOwner:GetMaxHealth())
+		if bShowDamaged then
+			wndBars:Show(unitOwner:GetHealth() ~= unitOwner:GetMaxHealth())
+			tNameplate.wnd.level:Show(unitOwner:GetHealth() ~= unitOwner:GetMaxHealth())
+		elseif bShow then
+			wndBars:Show(true)
+			tNameplate.wnd.level:Show(true)
 		else
-			wndHealth:Show(false)
+			wndBars:Show(false)
+			tNameplate.wnd.level:Show(false)
 		end
 	end
-	if wndHealth:IsShown() then
-		self:HelperDoHealthShieldBar(wndHealth, unitOwner, tNameplate.eDisposition, tNameplate)
+	
+	if wndBars:IsShown() then
+		self:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, tNameplate.eDisposition, tNameplate)
 	end
-	]]
+	
 end
 
 function CandyUI_Nameplates:DrawCastBar(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
 
 	-- Casting; has some onDraw parameters we need to check
 	tNameplate.bIsCasting = unitOwner:ShouldShowCastBar()
 
 	local bShowTarget = tNameplate.bIsTarget
 	local wndCastBar = tNameplate.wnd.castBar
-	local bShow = tNameplate.bIsCasting and self.db.profile.individual.bShowCastBar
-	if tNameplate.bIsCasting and bShowTarget then
-		bShow = self.db.profile.target.bShowCastBar
-	end
+	local bShow = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowCastBar) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowCastBar)
+	--if tNameplate.bIsCasting and bShowTarget then
+	--	bShow = true
+	--end
 
-	wndCastBar:Show(bShow)
+	wndCastBar:Show(tNameplate.bIsCasting and bShow)
 	if bShow then
 		tNameplate.wnd.castBarLabel:SetText(unitOwner:GetCastName())
 		tNameplate.wnd.castBarCastFill:SetMax(unitOwner:GetCastDuration())
@@ -739,13 +863,33 @@ end
 
 function CandyUI_Nameplates:DrawVulnerable(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
-
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
+	
+	local bShowHealth = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowHealthShield) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowHealthShieldCombat)
+	local bShowDamaged = self.db.profile[strUnitTypeLower].bOnlyDamaged
+	
 	local bUseTarget = tNameplate.bIsTarget
 	local wndVulnerable = tNameplate.wnd.vulnerable
 
 	local bIsVulnerable = false
-	if (not bUseTarget and (self.db.profile.healthbar.bShowHealth or self.db.profile.healthbar.bShowHealthDamaged)) or (bUseTarget and self.db.profile.target.bShowHealth) then
+	if bShowHealth or bShowDamaged then
 		local nVulnerable = unitOwner:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability)
 		if nVulnerable == nil then
 			wndVulnerable:Show(false)
@@ -766,13 +910,27 @@ end
 
 function CandyUI_Nameplates:DrawRewards(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
 
 	local bUseTarget = tNameplate.bIsTarget
-	local bShow = self.db.profile.individual.bShowRewards
-	if bUseTarget then
-		bShow = self.db.profile.target.bShowRewards
-	end
+	local bShow = (not unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowRewards) or (unitOwner:IsInCombat() and self.db.profile[strUnitTypeLower].bShowRewardsCombat)
 
 	tNameplate.wnd.questRewards:Show(bShow)
 	local tRewardsData = tNameplate.wnd.questRewards:GetData()
@@ -840,64 +998,178 @@ function CandyUI_Nameplates:CheckDrawDistance(tNameplate)
 	end
 end
 
+function CandyUI_Nameplates:GetUnitType(unitOwner)
+	local strUnitType
+	if unitOwner == self.unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == self.unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif unitOwner:GetType() == "Harvest" then
+		strUnitType = "Harvest"
+	else
+		return nil
+	end
+	
+	return strUnitType, string.lower(strUnitType)
+end
+
+function CandyUI_Nameplates:GetDispString(eDisposition)
+	local strUnitType
+	if eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
+	return strUnitType, strUnitTypeLower
+end
+
 function CandyUI_Nameplates:HelperVerifyVisibilityOptions(tNameplate)
 	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
-
+	local strDisp, strDispLower = self:GetDispString(eDisposition)
+	local strUnitType, strUnitTypeLower = self:GetUnitType(unitOwner)
+	local strUnit, strUnitLower
+	
+	--if true then return true end
+	--[[
 	local bHiddenUnit = not unitOwner:ShouldShowNamePlate()
 	if bHiddenUnit and not tNameplate.bIsTarget then
 		return false
 	end
-
-	if (self.bUseOcclusion and tNameplate.bOccluded) or not tNameplate.bOnScreen then
+	]]
+	if unitOwner:GetType() == "Mount" then
 		return false
 	end
-
+	
+	if (self.bUseOcclusion and tNameplate.bOccluded) then
+		return false
+	end
+	if not tNameplate.bOnScreen then
+		return false
+	end
 	if tNameplate.bGibbed or tNameplate.bSpeechBubble then
 		return false
 	end
-
+	
+	if unitOwner:GetType() == "Harvest" and self.db.profile.neutral.bShowHarvestNodes then
+		return true
+	end
+	
+	if strUnitType then
+		strUnit = strUnitType
+		strUnitLower = strUnitTypeLower
+	else
+		strUnit = strDisp
+		strUnitLower = strDispLower
+	end
+	
 	local bShowNameplate = false
+	
+	if self.db.profile[strUnitLower] and self.db.profile[strUnitLower].bShow then
+		local tActivation = unitOwner:GetActivationState()
+		bShowNameplate = true
+		
+		
+		if unitOwner:GetType() == "Simple" and self.db.profile[strUnitLower].bShowSimple == false then
+			bShowNameplate = false
+		elseif unitOwner:GetType() == "NonPlayer" and self.db.profile[strUnitLower].bShowNPCS == false then
+			bShowNameplate = false
+		elseif unitOwner:GetType() == "Player" and self.db.profile[strUnitLower].bShowPlayers == false then
+			bShowNameplate = false
+		elseif tNameplate.bIsGuildMember and self.db.profile[strUnitLower].bShowGuild == false then
+			bShowNameplate = false
+		elseif unitOwner:IsInYourGroup() and self.db.profile[strUnitLower].bShowGroup == false then
+			bShowNameplate = false	
+		end
+		
+		if tActivation.Vendor ~= nil and self.db.profile[strUnitLower].bShowVendors then
+			bShowNameplate = true
+		end
+		
+		if self.db.profile.general.bShowQuestItems then
+			if tNameplate.bIsObjective then
+				bShowNameplate = true
+			end
+		
+			if tActivation.QuestReward ~= nil then
+				bShowNameplate = true
+			end
 
+			if tActivation.QuestNew ~= nil or tActivation.QuestNewMain ~= nil then
+				bShowNameplate = true
+			end
+
+			if tActivation.QuestReceiving ~= nil then
+				bShowNameplate = true
+			end
+			if tActivation.TalkTo ~= nil then
+				bShowNameplate = true
+			end
+		end
+		
+		if tActivation.Interact and tActivation.Interact.bShowOverhead ~= nil then
+			bShowNameplate = true
+		end
+	end
+	--=========================================================================================
+	--if not self.db.profile[strUnitLower].bShow then
+	--	return false
+	--end
+	--[[
+	local bShowNameplate = false -- false
+	
+	if strUnitType == "Harvest" then
+		if self.db.profile.neutral.bShowHarvestNodes then
+			--return true
+			bShowNameplate = true
+		else
+			bShowNameplate = false
+		end
+	end
+	--Use as option???????????
 	if self.db.profile.general.bShowMainObjective and tNameplate.bIsObjective then
 		bShowNameplate = true
 	end
-
-	if self.db.profile.general.bShowMainGroup and unitOwner:IsInYourGroup() then
+	
+	local bHiddenUnit = not unitOwner:ShouldShowNamePlate()
+	if bHiddenUnit and not tNameplate.bIsTarget then
+		return false
+	end
+	if self.db.profile[strUnitLower] then
+	if self.db.profile[strUnitLower].bShowGroup and unitOwner:IsInYourGroup() then
 		bShowNameplate = true
 	end
-
-	if self.db.profile.disposition.bShowDispositionHostile and eDisposition == Unit.CodeEnumDisposition.Hostile then
+	
+	if self.db.profile[strUnitLower].bShow then
 		bShowNameplate = true
 	end
-
-	if self.db.profile.disposition.bShowDispositionNeutral and eDisposition == Unit.CodeEnumDisposition.Neutral then
-		bShowNameplate = true
-	end
-
-	if self.db.profile.disposition.bShowDispositionFriendly and eDisposition == Unit.CodeEnumDisposition.Friendly then
-		bShowNameplate = true
-	end
-
-	if self.db.profile.disposition.bShowDispositionFriendlyPlayer and eDisposition == Unit.CodeEnumDisposition.Friendly and unitOwner:GetType() == "Player" then
-		bShowNameplate = true
-	end
+	
+	--if self.db.profile[strUnitTypeLower].bShow and eDisposition == Unit.CodeEnumDisposition.Hostile then
+	--	bShowNameplate = true
+	--end
 
 	local tActivation = unitOwner:GetActivationState()
 
-	if self.db.profile.general.bShowVendor and tActivation.Vendor ~= nil then
+	if strDisp == "Friendly" and self.db.profile[strUnitLower].bShowVendor and tActivation.Vendor ~= nil then
 		bShowNameplate = true
 	end
 
-	if self.db.profile.general.bShowTaxi and (tActivation.FlightPathSettler ~= nil or tActivation.FlightPath ~= nil or tActivation.FlightPathNew) then
+	--Show Taxi (Dont have as an option right now)
+	--if self.db.profile.general.bShowTaxi and (tActivation.FlightPathSettler ~= nil or tActivation.FlightPath ~= nil or tActivation.FlightPathNew) then
+	--	bShowNameplate = true
+	--end
+
+	if strDisp == "Friendly" and self.db.profile[strUnitLower].bShowGuild and tNameplate.bIsGuildMember then
 		bShowNameplate = true
 	end
-
-	if self.db.profile.general.bShowOrganization and tNameplate.bIsGuildMember then
-		bShowNameplate = true
-	end
-
+	]]
+	--[[ --Make these options!!!!!!!!!!!!!!!!
 	if self.db.profile.general.bShowMainObjective then
 		-- QuestGivers too
 		if tActivation.QuestReward ~= nil then
@@ -916,28 +1188,62 @@ function CandyUI_Nameplates:HelperVerifyVisibilityOptions(tNameplate)
 			bShowNameplate = true
 		end
 	end
-
+	]]
+	--[[
 	if bShowNameplate then
 		bShowNameplate = not (self.bPlayerInCombat and self.db.profile.general.bHideCombatNonTargets)
 	end
-
+	]]
+	--end
 	if unitOwner:IsThePlayer() then
-		if self.db.profile.general.bShowMyNameplate and not unitOwner:IsDead() then
+		if not unitOwner:IsDead() then --self.db.profile.general.bShowMyNameplate and not unitOwner:IsDead() then
 			bShowNameplate = true
 		else
 			bShowNameplate = false
 		end
 	end
 
-	return bShowNameplate or tNameplate.bIsTarget
+	return bShowNameplate-- or tNameplate.bIsTarget
 end
 
-function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealth, unitOwner, eDisposition, tNameplate)
+function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, eDisposition, tNameplate)
+	local wndNameplate = tNameplate.wndNameplate
+	local unitPlayer = self.unitPlayer
+	local unitOwner = tNameplate.unitOwner
+	local eDisposition = tNameplate.eDisposition
+	local strUnitType
+	if unitOwner == unitPlayer then
+		strUnitType = "Player"
+	elseif unitOwner == unitPlayer:GetTarget() then
+		strUnitType = "Target"
+	elseif eDisposition == Unit.CodeEnumDisposition.Friendly then
+		strUnitType = "Friendly"
+	elseif eDisposition == Unit.CodeEnumDisposition.Hostile then
+		strUnitType = "Enemy"
+	elseif eDisposition == Unit.CodeEnumDisposition.Neutral then
+		strUnitType = "Neutral"
+	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
+		strUnitType = "Other"
+	end
+	local strUnitTypeLower = string.lower(strUnitType)
+	
+	local wndHealth = wndHealthUpdate
+	local wndHealthBG = wndHealthUpdate:GetParent()
+	--local wndHealthNoShield = tNameplate.wnd.healthNoShield
+	--local wndHealthNoShieldBG = tNameplate.wnd.healthNoShieldBG
+	local wndShield = tNameplate.wnd.shield
+	local wndShieldBG = tNameplate.wnd.shieldBG
+	local wndAbsorb = wndHealthUpdate:GetParent():FindChild("AbsorbBar")
+	--local wndAbsorbNoShield = tNameplate.wnd.absorbNoShield
+	local wndBars = tNameplate.wnd.bars
+	------------------------------------------------------------
+	
 	local nVulnerabilityTime = unitOwner:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability)
 
 	if unitOwner:GetType() == "Simple" or unitOwner:GetHealth() == nil then
-		tNameplate.wnd.healthMaxHealth:SetAnchorOffsets(self.nFrameLeft, self.nFrameTop, self.nFrameRight, self.nFrameBottom)
-		tNameplate.wnd.healthHealthLabel:SetText("")
+		--tNameplate.wnd.healthMaxHealth:SetAnchorOffsets(self.nFrameLeft, self.nFrameTop, self.nFrameRight, self.nFrameBottom)
+		--tNameplate.wnd.healthHealthLabel:SetText("")
+		wndBars:Show(false)
 		return
 	end
 
@@ -950,44 +1256,14 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealth, unitOwner, eDispo
 	if nAbsorbMax > 0 then
 		nAbsorbCurr = unitOwner:GetAbsorptionValue() -- Since it doesn't clear when the buff drops off
 	end
-	local nTotalMax = nHealthMax + nShieldMax + nAbsorbMax
+	--local nTotalMax = nHealthMax + nShieldMax + nAbsorbMax
 
 	if unitOwner:IsDead() then
 		nHealthCurr = 0
 	end
-
-	-- Scaling
-	--[[local nPointHealthRight = self.nFrameR * (nHealthCurr / nTotalMax) -
-	local nPointShieldRight = self.nFrameR * ((nHealthCurr + nShieldMax) / nTotalMax)
-	local nPointAbsorbRight = self.nFrameR * ((nHealthCurr + nShieldMax + nAbsorbMax) / nTotalMax)--]]
-
-	local nPointHealthRight = self.nFrameLeft + (self.nHealthWidth * (nHealthCurr / nTotalMax)) -- applied to the difference between L and R
-	local nPointShieldRight = self.nFrameLeft + (self.nHealthWidth * ((nHealthCurr + nShieldMax) / nTotalMax))
-	local nPointAbsorbRight = self.nFrameLeft + (self.nHealthWidth * ((nHealthCurr + nShieldMax + nAbsorbMax) / nTotalMax))
-
-
-	if nShieldMax > 0 and nShieldMax / nTotalMax < 0.2 then
-		local nMinShieldSize = 0.2 -- HARDCODE: Minimum shield bar length is 20% of total for formatting
-		--nPointHealthRight = self.nFrameR * math.min(1-nMinShieldSize, nHealthCurr / nTotalMax) -- Health is normal, but caps at 80%
-		--nPointShieldRight = self.nFrameR * math.min(1, (nHealthCurr / nTotalMax) + nMinShieldSize) -- If not 1, the size is thus healthbar + hard minimum
-
-		nPointHealthRight = self.nFrameLeft + (self.nHealthWidth*(math.min(1 - nMinShieldSize, nHealthCurr / nTotalMax)))
-		nPointShieldRight = self.nFrameLeft + (self.nHealthWidth*(math.min(1, (nHealthCurr / nTotalMax) + nMinShieldSize)))
-	end
-
-	-- Resize
-	tNameplate.wnd.healthShieldFill:EnableGlow(nShieldCurr > 0 and nShieldCurr ~= nShieldMax)
-	self:SetBarValue(tNameplate.wnd.healthShieldFill, 0, nShieldCurr, nShieldMax) -- Only the Curr Shield really progress fills
-	self:SetBarValue(tNameplate.wnd.healthAbsorbFill, 0, nAbsorbCurr, nAbsorbMax)
-	tNameplate.wnd.healthMaxHealth:SetAnchorOffsets(self.nFrameLeft, self.nFrameTop, nPointHealthRight, self.nFrameBottom)
-	tNameplate.wnd.healthMaxShield:SetAnchorOffsets(nPointHealthRight - 1, self.nFrameTop, nPointShieldRight, self.nFrameBottom)
-	tNameplate.wnd.healthMaxAbsorb:SetAnchorOffsets(nPointShieldRight - 1, self.nFrameTop, nPointAbsorbRight, self.nFrameBottom)
-
-	-- Bars
-	tNameplate.wnd.healthShieldFill:Show(nHealthCurr > 0)
-	tNameplate.wnd.healthMaxHealth:Show(nHealthCurr > 0)
-	tNameplate.wnd.healthMaxShield:Show(nHealthCurr > 0 and nShieldMax > 0)
-	tNameplate.wnd.healthMaxAbsorb:Show(nHealthCurr > 0 and nAbsorbMax > 0)
+	
+	--Show / Hide Absorb !!!!!!!!!!!!!
+	wndAbsorb:Show(nHealthCurr > 0 and nAbsorbMax > 0)
 
 	-- Text
 	local strHealthMax = self:HelperFormatBigNumber(nHealthMax)
@@ -998,15 +1274,23 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealth, unitOwner, eDispo
 	if nShieldMax > 0 and nShieldCurr > 0 then
 		strText = String_GetWeaselString(Apollo.GetString("TargetFrame_HealthShieldText"), strText, strShieldCurr)
 	end
-	tNameplate.wnd.healthHealthLabel:SetText(strText)
-
+	if self.db.profile[strUnitTypeLower].bShowHealthText then
+		wndHealthUpdate:FindChild("Label"):SetText(strText)
+	else
+		wndHealthUpdate:FindChild("Label"):SetText("")
+	end
+	
+	--[[
+	--%%%%%%%%%%%%%SAVE THIS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	--Maybe could use this idea of switching sprites, or better yet, colors depending on stuff like health, vuln, cast, poison etc 
+	--============================================================
 	-- Sprite
 	if nVulnerabilityTime and nVulnerabilityTime > 0 then
 		tNameplate.wnd.healthMaxHealth:SetSprite("CRB_Nameplates:sprNP_PurpleProg")
 	else
 		tNameplate.wnd.healthMaxHealth:SetSprite(karDisposition.tHealthBar[eDisposition])
 	end
-
+	]]
 	--[[
 	elseif nHealthCurr / nHealthMax < .3 then
 		wndHealth:FindChild("MaxHealth"):SetSprite(ktHealthBarSprites[3])
@@ -1264,42 +1548,149 @@ kcuiNPDefaults = {
 			--non target \/
 			bHideCombatNonTargets = false,
 			bUseOcclusion = true,
+			bShowQuestItems = true,
 		},
-		disposition = {
-			bShowDispositionHostile = true,
-			bShowDispositionNeutral = false,
-			bShowDispositionFriendly = false,
-			bShowDispositionFriendlyPlayer = false,
-		},
-		individual = {
+		player = {
+			bShow = true,
 			bShowName = true,
-			bShowTitle = true,
-			bShowCertainDeath = true,
+			bShowNameCombat = true,
+			bShowGuildTitle = true,
+			bShowGuildTitleCombat = true,
+			bShowHealthShield = false,
+			bShowHealthShieldCombat = false,
 			bShowCastBar = false,
-			bShowRewards = true,
-		},
-		healthbar = {
-			bShowHealth = false,
-			bShowHealthDamaged = true,
+			bShowCastBarCombat = false,
+			bShowVulnBar = false,
+			bShowVulnBarCombat = false,
+			crHealthBarColor = "ffff0000",
+			crShieldBarColor = "ff00bff3",
+			bShowHealthText = false,
+			bOnlyDamaged = false,
+			bUseColorThreshold = false,
 		},
 		target = {
-			bShowMarker = true,
+			bShow = true,
 			bShowName = true,
+			bShowNameCombat = true,
+			bShowGuildTitle = true,
+			bShowGuildTitleCombat = true,
+			bShowHealthShield = false,
+			bShowHealthShieldCombat = true,
+			bShowCastBar = true,
+			bShowCastBarCombat = true,
+			bShowVulnBar = true,
+			bShowVulnBarCombat = true,
+			bShowTargetMarker = true,
+			bShowTargetMarkerCombat = true,
 			bShowRewards = true,
-			bShowGuildName = true,
-			bShowHealth = true,
-			bShowRange = false,
-			bShowCastBar = true
+			bShowRewardsCombat = true,
+			bShowIcons = true,
+			bShowIconsCombat = true,
+			crHealthBarColor = "ffff0000",
+			crShieldBarColor = "ff00bff3",
+			bShowHealthText = true,
+			bOnlyDamaged = false,
+			bUseColorThreshold = true,
 		},
-		rewards = {
-			bShowRewardTypeQuest = true,
-			bShowRewardTypeMission = true,
-			bShowRewardTypeAchievement = false,
-			bShowRewardTypeChallenge = true,
-			bShowRewardTypeReputation = false,
-			bShowRewardTypePublicEvent = true,
-			bShowRivals = true,
-			bShowFriends = true
+		friendly = {
+			bShow = true,
+			bShowNPCS = true,
+			bShowPlayers = true,
+			bShowVendors = true,
+			bShowGroup = true,
+			bShowGuild = true,
+			bShowSimple = false,
+			bShowName = true,
+			bShowNameCombat = true,
+			bShowGuildTitle = true,
+			bShowGuildTitleCombat = true,
+			bShowHealthShield = false,
+			bShowHealthShieldCombat = true,
+			bShowCastBar = false,
+			bShowCastBarCombat = true,
+			bShowVulnBar = false,
+			bShowVulnBarCombat = true,
+			bShowRewards = true,
+			bShowRewardsCombat = true,
+			bShowIcons = true,
+			bShowIconsCombat = true,
+			crHealthBarColor = "ffff0000",
+			crShieldBarColor = "ff00bff3",
+			bShowHealthText = false,
+			bOnlyDamaged = true,
+			bUseColorThreshold = true,
+		},
+		enemy = {
+			bShow = true,
+			bShowNPCS = true,
+			bShowPlayers = true,
+			bShowName = true,
+			bShowNameCombat = true,
+			bShowGuildTitle = true,
+			bShowGuildTitleCombat = true,
+			bShowHealthShield = true,
+			bShowHealthShieldCombat = true,
+			bShowCastBar = true,
+			bShowCastBarCombat = true,
+			bShowVulnBar = true,
+			bShowVulnBarCombat = true,
+			bShowRewards = true,
+			bShowRewardsCombat = true,
+			bShowIcons = true,
+			bShowIconsCombat = true,
+			crHealthBarColor = "ffff0000",
+			crShieldBarColor = "ff00bff3",
+			bShowHealthText = false,
+			bOnlyDamaged = false,
+			bUseColorThreshold = true,
+		},
+		neutral = {
+			bShow = true,
+			bShowNPCS = true,
+			bShowPlayers = true,
+			bShowHarvestNodes = true,
+			bShowName = true,
+			bShowNameCombat = true,
+			bShowGuildTitle = true,
+			bShowGuildTitleCombat = true,
+			bShowHealthShield = false,
+			bShowHealthShieldCombat = true,
+			bShowCastBar = false,
+			bShowCastBarCombat = true,
+			bShowVulnBar = false,
+			bShowVulnBarCombat = true,
+			bShowRewards = true,
+			bShowRewardsCombat = true,
+			bShowIcons = true,
+			bShowIconsCombat = true,
+			crHealthBarColor = "ffff0000",
+			crShieldBarColor = "ff00bff3",
+			bShowHealthText = false,
+			bOnlyDamaged = true,
+			bUseColorThreshold = true,
+		},
+		other = {
+			bShow = false,
+			bShowHarvestNodes = true,
+			bShowName = true,
+			bShowNameCombat = true,
+			bShowGuildTitle = true,
+			bShowGuildTitleCombat = true,
+			bShowHealthShield = false,
+			bShowHealthShieldCombat = true,
+			bShowCastBar = false,
+			bShowCastBarCombat = true,
+			bShowVulnBar = false,
+			bShowVulnBarCombat = true,
+			bShowRewards = true,
+			bShowRewardsCombat = true,
+			bShowIcons = true,
+			bShowIconsCombat = true,
+			crHealthBarColor = "ffff0000",
+			crShieldBarColor = "ff00bff3",
+			bShowHealthText = false,
+			bOnlyDamaged = true,
+			bUseColorThreshold = true,
 		},
 	},
 }
@@ -1366,189 +1757,458 @@ end
 --			Set Options
 --===============================
 --make sure to set dropdown box data to player/target/whatever --dont need anymore
+
 function CandyUI_Nameplates:SetOptions()
+	local Options = self.db.profile
 --General
 	local generalControls = self.wndControls:FindChild("GeneralControls")
+	--Quest
+	generalControls:FindChild("ShowQuestItemsToggle"):SetCheck(Options.general.bShowQuestItems)
 --Player
-	local playerControls = nil--self.wndControls:FindChild("PlayerControls")
+	local playerControls = self.wndControls:FindChild("PlayerControls")
+	--Show
+	playerControls:FindChild("ShowToggle"):SetCheck(Options.player.bShow)
+	--Name
+	playerControls:FindChild("NameToggle"):SetCheck(Options.player.bShowName)
+	playerControls:FindChild("NameCombatToggle"):SetCheck(Options.player.bShowNameCombat)
+	--Guild
+	playerControls:FindChild("GuildToggle"):SetCheck(Options.player.bShowGuildTitle)
+	playerControls:FindChild("GuildCombatToggle"):SetCheck(Options.player.bShowGuildTitleCombat)
+	--Health and Shield
+	playerControls:FindChild("HealthToggle"):SetCheck(Options.player.bShowHealthShield)
+	playerControls:FindChild("HealthCombatToggle"):SetCheck(Options.player.bShowHealthShieldCombat)
+	--CastBar
+	playerControls:FindChild("CastToggle"):SetCheck(Options.player.bShowCastBar)
+	playerControls:FindChild("CastCombatToggle"):SetCheck(Options.player.bShowCastBarCombat)
+	--Name
+	playerControls:FindChild("VulnToggle"):SetCheck(Options.player.bShowVulnBar)
+	playerControls:FindChild("VulnCombatToggle"):SetCheck(Options.player.bShowVulnBarCombat)
+	--Health Bar Color
+	playerControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.player.crHealthBarColor)
+	--Shield Bar Color
+	playerControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.player.crShieldBarColor)
+	--Show HealthT ext
+	playerControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.player.bShowHealthText)
+	--Show
+	playerControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.player.bOnlyDamaged)
+	--Show
+	playerControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.player.bUseColorThreshold)
+--Target
+	local targetControls = self.wndControls:FindChild("TargetControls")
+	--Show
+	targetControls:FindChild("ShowToggle"):SetCheck(Options.target.bShow)
+	--Name
+	targetControls:FindChild("NameToggle"):SetCheck(Options.target.bShowName)
+	targetControls:FindChild("NameCombatToggle"):SetCheck(Options.target.bShowNameCombat)
+	--Guild
+	targetControls:FindChild("GuildToggle"):SetCheck(Options.target.bShowGuildTitle)
+	targetControls:FindChild("GuildCombatToggle"):SetCheck(Options.target.bShowGuildTitleCombat)
+	--Health and Shield
+	targetControls:FindChild("HealthToggle"):SetCheck(Options.target.bShowHealthShield)
+	targetControls:FindChild("HealthCombatToggle"):SetCheck(Options.target.bShowHealthShieldCombat)
+	--CastBar
+	targetControls:FindChild("CastToggle"):SetCheck(Options.target.bShowCastBar)
+	targetControls:FindChild("CastCombatToggle"):SetCheck(Options.target.bShowCastBarCombat)
+	--VulnToggle
+	targetControls:FindChild("VulnToggle"):SetCheck(Options.target.bShowVulnBar)
+	targetControls:FindChild("VulnCombatToggle"):SetCheck(Options.target.bShowVulnBarCombat)
+	--TargetMarkerToggle
+	targetControls:FindChild("TargetMarkerToggle"):SetCheck(Options.target.bShowTargetMarker)
+	targetControls:FindChild("TargetMarkerCombatToggle"):SetCheck(Options.target.bShowTargetMarkerCombat)
+	--Rewards
+	targetControls:FindChild("RewardsToggle"):SetCheck(Options.target.bShowRewards)
+	targetControls:FindChild("RewardsCombatToggle"):SetCheck(Options.target.bShowRewardsCombat)
+	--Icons
+	targetControls:FindChild("IconsToggle"):SetCheck(Options.target.bShowIcons)
+	targetControls:FindChild("IconsCombatToggle"):SetCheck(Options.target.bShowIconsCombat)
+	--Health Bar Color
+	targetControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.target.crHealthBarColor)
+	--Shield Bar Color
+	targetControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.target.crShieldBarColor)
+	--Show HealthT ext
+	targetControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.target.bShowHealthText)
+	--ShowIfDamagedToggle
+	targetControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.target.bOnlyDamaged)
+	--HealthColorThresholdToggle
+	targetControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.target.bUseColorThreshold)
+--Friendly
+	local friendlyControls = self.wndControls:FindChild("FriendlyControls")
+	--Show
+	friendlyControls:FindChild("ShowToggle"):SetCheck(Options.friendly.bShow)
+	--NPCs
+	friendlyControls:FindChild("ShowNPCToggle"):SetCheck(Options.friendly.bShowNPCS)
+	--Players
+	friendlyControls:FindChild("ShowPlayersToggle"):SetCheck(Options.friendly.bShowPlayers)
+	--Vendors
+	friendlyControls:FindChild("ShowVendorToggle"):SetCheck(Options.friendly.bShowVendors)
+	--Group
+	friendlyControls:FindChild("ShowGroupToggle"):SetCheck(Options.friendly.bShowGroup)
+	--Guild
+	friendlyControls:FindChild("ShowGuildToggle"):SetCheck(Options.friendly.bShowGuild)
+	--Guild
+	friendlyControls:FindChild("ShowSimpleToggle"):SetCheck(Options.friendly.bShowSimple)
+	--Name
+	friendlyControls:FindChild("NameToggle"):SetCheck(Options.friendly.bShowName)
+	friendlyControls:FindChild("NameCombatToggle"):SetCheck(Options.friendly.bShowNameCombat)
+	--Guild
+	friendlyControls:FindChild("GuildToggle"):SetCheck(Options.friendly.bShowGuildTitle)
+	friendlyControls:FindChild("GuildCombatToggle"):SetCheck(Options.friendly.bShowGuildTitleCombat)
+	--Health and Shield
+	friendlyControls:FindChild("HealthToggle"):SetCheck(Options.friendly.bShowHealthShield)
+	friendlyControls:FindChild("HealthCombatToggle"):SetCheck(Options.friendly.bShowHealthShieldCombat)
+	--CastBar
+	friendlyControls:FindChild("CastToggle"):SetCheck(Options.friendly.bShowCastBar)
+	friendlyControls:FindChild("CastCombatToggle"):SetCheck(Options.friendly.bShowCastBarCombat)
+	--VulnToggle
+	friendlyControls:FindChild("VulnToggle"):SetCheck(Options.friendly.bShowVulnBar)
+	friendlyControls:FindChild("VulnCombatToggle"):SetCheck(Options.friendly.bShowVulnBarCombat)
+	--Rewards
+	friendlyControls:FindChild("RewardsToggle"):SetCheck(Options.friendly.bShowRewards)
+	friendlyControls:FindChild("RewardsCombatToggle"):SetCheck(Options.friendly.bShowRewardsCombat)
+	--Icons
+	friendlyControls:FindChild("IconsToggle"):SetCheck(Options.friendly.bShowIcons)
+	friendlyControls:FindChild("IconsCombatToggle"):SetCheck(Options.friendly.bShowIconsCombat)
+	--Health Bar Color
+	friendlyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.friendly.crHealthBarColor)
+	--Shield Bar Color
+	friendlyControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.friendly.crShieldBarColor)
+	--Show HealthT ext
+	friendlyControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.friendly.bShowHealthText)
+	--ShowIfDamagedToggle
+	friendlyControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.friendly.bOnlyDamaged)
+	--HealthColorThresholdToggle
+	friendlyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.friendly.bUseColorThreshold)
+--Enemy
+	local enemyControls = self.wndControls:FindChild("EnemyControls")
+	--Show
+	enemyControls:FindChild("ShowToggle"):SetCheck(Options.enemy.bShow)
+	--NPCs
+	enemyControls:FindChild("ShowNPCToggle"):SetCheck(Options.enemy.bShowNPCS)
+	--Players
+	enemyControls:FindChild("ShowPlayersToggle"):SetCheck(Options.enemy.bShowPlayers)
+	--Name
+	enemyControls:FindChild("NameToggle"):SetCheck(Options.enemy.bShowName)
+	enemyControls:FindChild("NameCombatToggle"):SetCheck(Options.enemy.bShowNameCombat)
+	--Guild
+	enemyControls:FindChild("GuildToggle"):SetCheck(Options.enemy.bShowGuildTitle)
+	enemyControls:FindChild("GuildCombatToggle"):SetCheck(Options.enemy.bShowGuildTitleCombat)
+	--Health and Shield
+	enemyControls:FindChild("HealthToggle"):SetCheck(Options.enemy.bShowHealthShield)
+	enemyControls:FindChild("HealthCombatToggle"):SetCheck(Options.enemy.bShowHealthShieldCombat)
+	--CastBar
+	enemyControls:FindChild("CastToggle"):SetCheck(Options.enemy.bShowCastBar)
+	enemyControls:FindChild("CastCombatToggle"):SetCheck(Options.enemy.bShowCastBarCombat)
+	--VulnToggle
+	enemyControls:FindChild("VulnToggle"):SetCheck(Options.enemy.bShowVulnBar)
+	enemyControls:FindChild("VulnCombatToggle"):SetCheck(Options.enemy.bShowVulnBarCombat)
+	--Rewards
+	enemyControls:FindChild("RewardsToggle"):SetCheck(Options.enemy.bShowRewards)
+	enemyControls:FindChild("RewardsCombatToggle"):SetCheck(Options.enemy.bShowRewardsCombat)
+	--Icons
+	enemyControls:FindChild("IconsToggle"):SetCheck(Options.enemy.bShowIcons)
+	enemyControls:FindChild("IconsCombatToggle"):SetCheck(Options.enemy.bShowIconsCombat)
+	--Health Bar Color
+	enemyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.enemy.crHealthBarColor)
+	--Shield Bar Color
+	enemyControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.enemy.crShieldBarColor)
+	--Show HealthT ext
+	enemyControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.enemy.bShowHealthText)
+	--ShowIfDamagedToggle
+	enemyControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.enemy.bOnlyDamaged)
+	--HealthColorThresholdToggle
+	enemyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.enemy.bUseColorThreshold)
+--Neutral
+	local neutralControls = self.wndControls:FindChild("NeutralControls")
+	--Show
+	neutralControls:FindChild("ShowToggle"):SetCheck(Options.neutral.bShow)
+	--NPCs
+	neutralControls:FindChild("ShowNPCToggle"):SetCheck(Options.neutral.bShowNPCS)
+	--Players
+	neutralControls:FindChild("ShowPlayersToggle"):SetCheck(Options.neutral.bShowPlayers)
+	--Harvest Nodes
+	neutralControls:FindChild("ShowHarvestNodesToggle"):SetCheck(Options.neutral.bShowHarvestNodes)
+	--Name
+	neutralControls:FindChild("NameToggle"):SetCheck(Options.neutral.bShowName)
+	neutralControls:FindChild("NameCombatToggle"):SetCheck(Options.neutral.bShowNameCombat)
+	--Guild
+	neutralControls:FindChild("GuildToggle"):SetCheck(Options.neutral.bShowGuildTitle)
+	neutralControls:FindChild("GuildCombatToggle"):SetCheck(Options.neutral.bShowGuildTitleCombat)
+	--Health and Shield
+	neutralControls:FindChild("HealthToggle"):SetCheck(Options.neutral.bShowHealthShield)
+	neutralControls:FindChild("HealthCombatToggle"):SetCheck(Options.neutral.bShowHealthShieldCombat)
+	--CastBar
+	neutralControls:FindChild("CastToggle"):SetCheck(Options.neutral.bShowCastBar)
+	neutralControls:FindChild("CastCombatToggle"):SetCheck(Options.neutral.bShowCastBarCombat)
+	--VulnToggle
+	neutralControls:FindChild("VulnToggle"):SetCheck(Options.neutral.bShowVulnBar)
+	neutralControls:FindChild("VulnCombatToggle"):SetCheck(Options.neutral.bShowVulnBarCombat)
+	--Rewards
+	neutralControls:FindChild("RewardsToggle"):SetCheck(Options.neutral.bShowRewards)
+	neutralControls:FindChild("RewardsCombatToggle"):SetCheck(Options.neutral.bShowRewardsCombat)
+	--Icons
+	neutralControls:FindChild("IconsToggle"):SetCheck(Options.neutral.bShowIcons)
+	neutralControls:FindChild("IconsCombatToggle"):SetCheck(Options.neutral.bShowIconsCombat)
+	--Health Bar Color
+	neutralControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.neutral.crHealthBarColor)
+	--Shield Bar Color
+	neutralControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.neutral.crShieldBarColor)
+	--Show HealthT ext
+	neutralControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.neutral.bShowHealthText)
+	--ShowIfDamagedToggle
+	neutralControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.neutral.bOnlyDamaged)
+	--HealthColorThresholdToggle
+	neutralControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.neutral.bUseColorThreshold)
+--Other
+	--[[
+	local otherControls = self.wndControls:FindChild("OtherControls")
+	--Show
+	otherControls:FindChild("ShowToggle"):SetCheck(Options.other.bShow)
+	--NPCs
+	otherControls:FindChild("ShowNPCToggle"):SetCheck(Options.other.bShowNPCS)
+	--Players
+	otherControls:FindChild("ShowPlayersToggle"):SetCheck(Options.other.bShowPlayers)
+	--Harvest Nodes
+	otherControls:FindChild("ShowHarvestNodesToggle"):SetCheck(Options.other.bShowHarvestNodes)
+	--Name
+	otherControls:FindChild("NameToggle"):SetCheck(Options.other.bShowName)
+	otherControls:FindChild("NameCombatToggle"):SetCheck(Options.other.bShowNameCombat)
+	--Guild
+	otherControls:FindChild("GuildToggle"):SetCheck(Options.other.bShowGuildTitle)
+	otherControls:FindChild("GuildCombatToggle"):SetCheck(Options.other.bShowGuildTitleCombat)
+	--Health and Shield
+	otherControls:FindChild("HealthToggle"):SetCheck(Options.other.bShowHealthShield)
+	otherControls:FindChild("HealthCombatToggle"):SetCheck(Options.other.bShowHealthShieldCombat)
+	--CastBar
+	otherControls:FindChild("CastToggle"):SetCheck(Options.other.bShowCastBar)
+	otherControls:FindChild("CastCombatToggle"):SetCheck(Options.other.bShowCastBarCombat)
+	--VulnToggle
+	otherControls:FindChild("VulnToggle"):SetCheck(Options.other.bShowVulnBar)
+	otherControls:FindChild("VulnCombatToggle"):SetCheck(Options.other.bShowVulnBarCombat)
+	--Rewards
+	otherControls:FindChild("RewardsToggle"):SetCheck(Options.other.bShowRewards)
+	otherControls:FindChild("RewardsCombatToggle"):SetCheck(Options.other.bShowRewardsCombat)
+	--Icons
+	otherControls:FindChild("IconsToggle"):SetCheck(Options.other.bShowIcons)
+	otherControls:FindChild("IconsCombatToggle"):SetCheck(Options.other.bShowIconsCombat)
+	--Health Bar Color
+	otherControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.other.crHealthBarColor)
+	--Shield Bar Color
+	otherControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.other.crShieldBarColor)
+	--Show HealthT ext
+	otherControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.other.bShowHealthText)
+	--ShowIfDamagedToggle
+	otherControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.other.bOnlyDamaged)
+	--HealthColorThresholdToggle
+	otherControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.other.bUseColorThreshold)
+	]]
+end
+
+function CandyUI_Nameplates:SetColors()
+	--Dont Need?
+end
+--NEWWWWWW =======================================================
+
+function CandyUI_Nameplates:OnShowClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
 	
+	self.db.profile[strUnitLower].bShow = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnNameToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowName = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnNameCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowNameCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnGuildToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowGuild = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnGuildCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowGuildCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnHealthToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowHealthShield = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnHealthCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowHealthShieldCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnCastToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowCastBar = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnCastCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowCastBarCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnVulnToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowVulnBar = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnVulnCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowVulnBarCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnHealthBarColorClick( wndHandler, wndControl, eMouseButton )
+	
+end
+
+function CandyUI_Nameplates:OnShieldBarColorClick( wndHandler, wndControl, eMouseButton )
+end
+
+function CandyUI_Nameplates:OnShowHealthTextClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowHealthText = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowIfDamagedClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bOnlyDamaged = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnHealthColorThresholdClick( wndHandler, wndControl, eMouseButton )
+end
+
+function CandyUI_Nameplates:OnTargetMarkerToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowTargetMarker = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnTargetMarkerCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowTargetMarkerCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnIconsToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowIcons = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnIconsCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowIconsCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnRewardsToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowRewards = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnRewardsCombatToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowRewardsCombat = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowNPCToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowNPCS = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowPlayersToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowPlayers = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowVendorToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowVendors = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowGroupToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowGroup = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowGuildUnitsClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowGuild = wndControl:IsChecked()
 end
 
 ---------------------------------------------------------------------------------------------------
 -- OptionsControlsList Functions
 ---------------------------------------------------------------------------------------------------
-function CandyUI_Nameplates:OnShowMainObjectiveClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bShowMainObjective = wndControl:IsChecked()
+
+function CandyUI_Nameplates:OnShowHarvestNodesClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowHarvestNodes = wndControl:IsChecked()
 end
 
-function CandyUI_Nameplates:OnShowMainGroupClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bShowMainGroup = wndControl:IsChecked()
+function CandyUI_Nameplates:OnShowSimpleToggleClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowSimple = wndControl:IsChecked()
 end
 
-function CandyUI_Nameplates:OnShowOrganizationClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bShowOrganization = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnShowVendorClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bShowVendor = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnShowTaxiClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bShowTaxi = wndControl:IsChecked()
-end
---disp
-function CandyUI_Nameplates:OnShowDispositionHostileClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.disposition.bShowDispositionHostile = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnShowDispositionNeutralClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.disposition.bShowDispositionNeutral = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnShowDispositionFriendlyClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.disposition.bShowDispositionFriendly = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnShowDispositionFriendlyPlayerClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.disposition.bShowDispositionFriendlyPlayer = wndControl:IsChecked()
-end
---player
-function CandyUI_Nameplates:OnPlayerShowNameplateClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bShowMyNameplate = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnPlayerShowNameClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.individual.bShowName = wndControl:IsChecked()
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawName(tNameplate)
-	end
-end
-
-function CandyUI_Nameplates:OnPlayerShowTitleClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.individual.bShowTitle = wndControl:IsChecked()
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawGuild(tNameplate)
-	end
-end
-
-function CandyUI_Nameplates:OnPlayerShowCertainDeathClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.individual.bShowCertainDeath = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnPlayerShowCastBarClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.individual.bShowCastBar = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnPlayerShowRewardsClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.individual.bShowRewards = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnPlayerShowHealthClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.healthbar.bShowHealth = wndControl:IsChecked()
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawLevel(tNameplate)
-	end
-end
-
-function CandyUI_Nameplates:OnPlayerShowHealthDamagedClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.healthbar.bShowHealthDamaged = wndControl:IsChecked()
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawLevel(tNameplate)
-	end
-end
---target
-function CandyUI_Nameplates:OnTargetShowMarkerClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowMarker = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnTargetShowNameClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowName = wndControl:IsChecked()
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawName(tNameplate)
-	end
-end
-
-function CandyUI_Nameplates:OnTargetShowRewardsClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowRewards = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnTargetShowGuildNameClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowGuildName = wndControl:IsChecked()
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawGuild(tNameplate)
-	end
-end
-
-function CandyUI_Nameplates:OnTargetShowHealthClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowHealth = wndControl:IsChecked() --Not Coded
-	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
-		self:DrawLevel(tNameplate)
-	end
-end
-
-function CandyUI_Nameplates:OnTargetShowRangeClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowRange = wndControl:IsChecked() --Not Coded
-end
-
-function CandyUI_Nameplates:OnTargetShowCastBarClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.target.bShowCastBar = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnHideCombatNonTargetsClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.general.bHideCombatNonTargets = wndControl:IsChecked()
-end
-
-function CandyUI_Nameplates:OnMaxRangeReturn( wndHandler, wndControl, strText )
-	local val = round(tonumber(strText))
-	self.db.profile.general.nMaxRange = val
-end
---rewards
-function CandyUI_Nameplates:OnRewardsShowQuestClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRewardTypeQuest = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowMissionClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRewardTypeMission = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowAchievementClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRewardTypeAchievement = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowChallengeClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRewardTypeChallenge = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowReputationClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRewardTypeReputation = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowPublicEventClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRewardTypePublicEvent = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowRivalsClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowRivals = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnRewardsShowFriendsClick( wndHandler, wndControl, eMouseButton )
-	self.db.profile.rewards.bShowFriends = wndControl:IsChecked()
-	self:RequestUpdateAllNameplateRewards()
-end
-
-function CandyUI_Nameplates:OnUseOcclusionClick( wndHandler, wndControl, eMouseButton )
-	local bUseOcclusion = wndControl:IsChecked()
-	Apollo.SetConsoleVariable("ui.occludeNameplatePositions", bUseOcclusion)
-	self.bUseOcclusion = bUseOcclusion
-	self.db.profile.general.bUseOcclusion = bUseOcclusion
+function CandyUI_Nameplates:OnShowQuestItemsClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile.general.bShowQuestItems = wndControl:IsChecked()
 end
 
 -----------------------------------------------------------------------------------------------

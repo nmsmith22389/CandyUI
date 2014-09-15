@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Sprites>
-    <Sprite Name="PlayerBG_Stretch" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\PlayerBG.tga" x0="0" x1="12" x2="128" x3="128" x4="244" x5="256" y0="0" y1="12" y2="28" y3="28" y4="45" y5="56" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="PlayerBG" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\PlayerBG.tga" x0="0" x1="12" x2="12" x3="244" x4="244" x5="256" y0="0" y1="12" y2="12" y3="44" y4="44" y5="56" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="ShieldFull" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ShieldFull.tga" x0="0" x1="2" x2="2" x3="2" x4="35" x5="39" y0="0" y1="4" y2="4" y3="4" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="ShieldEmpty" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ShieldEmpty.tga" x0="0" x1="2" x2="2" x3="2" x4="35" x5="39" y0="0" y1="4" y2="4" y3="4" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
     <Sprite Name="Class_Engineer" Cycle="1">
         <Frame Texture="CandyUI_Nameplates\Sprites\ClassIcons\Engineer.tga" x0="0" x1="0" x2="0" x3="0" x4="56" x5="56" y0="0" y1="0" y2="0" y3="0" y4="55" y5="55" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
@@ -29,24 +17,6 @@
     </Sprite>
     <Sprite Name="Class_Warrior" Cycle="1">
         <Frame Texture="CandyUI_Nameplates\Sprites\ClassIcons\Warrior.tga" x0="0" x1="0" x2="0" x3="0" x4="56" x5="56" y0="0" y1="0" y2="0" y3="0" y4="55" y5="55" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="ResourceBG" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\ResourceBG.tga" x0="0" x1="8" x2="8" x3="8" x4="248" x5="256" y0="0" y1="8" y2="8" y3="8" y4="17" y5="25" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="ManaFull_Grey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ManaFull_Grey.tga" x0="0" x1="3" x2="3" x3="3" x4="190" x5="193" y0="0" y1="3" y2="3" y3="3" y4="7" y5="10" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="ManaEmpty_Grey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ManaEmpty_Grey.tga" x0="0" x1="3" x2="3" x3="3" x4="190" x5="193" y0="0" y1="3" y2="3" y3="3" y4="7" y5="10" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="PlayerBG_Glow" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\PlayerBG_Glow.tga" x0="0" x1="0" x2="0" x3="256" x4="256" x5="256" y0="0" y1="0" y2="0" y3="56" y4="56" y5="56" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="HealthFull_RoundedGrey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthFull_RoundedGrey.tga" x0="0" x1="4" x2="4" x3="4" x4="146" x5="150" y0="0" y1="4" y2="4" y3="4" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
-    </Sprite>
-    <Sprite Name="HealthEmpty_RoundedGrey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthEmpty_RoundedGrey.tga" x0="0" x1="4" x2="4" x3="4" x4="146" x5="150" y0="0" y1="4" y2="4" y3="4" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="PortraitAlphaMask" Cycle="1">
         <Frame Texture="CandyUI_Nameplates\Sprites\PortraitAlphaMask.tga" x0="0" x1="4" x2="4" x3="4" x4="42" x5="46" y0="0" y1="4" y2="4" y3="4" y4="42" y5="46" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
@@ -72,16 +42,49 @@
     <Sprite Name="QuestIcon" Cycle="1">
         <Frame Texture="CandyUI_Nameplates\Sprites\QuestIcon.tga" x0="0" x1="0" x2="0" x3="15" x4="15" x5="15" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
+    <Sprite Name="HealthFull_GreyRounded" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthFull_GreyRounded.tga" x0="0" x1="4" x2="4" x3="4" x4="86" x5="90" y0="0" y1="4" y2="4" y3="4" y4="11" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="HealthEmpty_GreyRounded" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthEmpty_GreyRounded.tga" x0="0" x1="3" x2="3" x3="3" x4="87" x5="90" y0="0" y1="3" y2="3" y3="3" y4="12" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
     <Sprite Name="HealthFull_Grey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthFull_Grey.tga" x0="0" x1="5" x2="5" x3="5" x4="148" x5="150" y0="0" y1="5" y2="5" y3="5" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthFull_Grey.tga" x0="0" x1="4" x2="4" x3="4" x4="88" x5="90" y0="0" y1="4" y2="4" y3="4" y4="11" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="HealthEmpty_Grey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthEmpty_Grey.tga" x0="0" x1="5" x2="5" x3="5" x4="148" x5="150" y0="0" y1="5" y2="5" y3="5" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\HealthEmpty_Grey.tga" x0="0" x1="3" x2="3" x3="3" x4="89" x5="90" y0="0" y1="3" y2="3" y3="3" y4="12" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="ShieldFull_Grey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ShieldFull_Grey.tga" x0="0" x1="2" x2="2" x3="2" x4="35" x5="39" y0="0" y1="4" y2="4" y3="4" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ShieldFull_Grey.tga" x0="0" x1="2" x2="2" x3="2" x4="19" x5="22" y0="0" y1="3" y2="3" y3="3" y4="12" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="ShieldEmpty_Grey" Cycle="1">
-        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ShieldEmpty_Grey.tga" x0="0" x1="2" x2="2" x3="2" x4="35" x5="39" y0="0" y1="4" y2="4" y3="4" y4="14" y5="18" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\ShieldEmpty_Grey.tga" x0="0" x1="2" x2="2" x3="2" x4="19" x5="22" y0="0" y1="3" y2="3" y3="3" y4="12" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="NameplateBG" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\NameplateBG.tga" x0="0" x1="120" x2="120" x3="120" x4="120" x5="120" y0="0" y1="21" y2="21" y3="21" y4="21" y5="21" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="NameplateBG_Stretch" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\NameplateBG.tga" x0="0" x1="4" x2="4" x3="4" x4="116" x5="120" y0="0" y1="4" y2="4" y3="4" y4="17" y5="21" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="TargetMarker" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\TargetMarker.tga" x0="0" x1="0" x2="35" x3="35" x4="35" x5="35" y0="0" y1="0" y2="37" y3="37" y4="37" y5="37" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="CastBar_Border" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\CastBar_Border.tga" x0="0" x1="1" x2="1" x3="1" x4="114" x5="115" y0="0" y1="1" y2="1" y3="1" y4="3" y5="4" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="CastBar_Red" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\CastBar_Red.tga" x0="0" x1="0" x2="113" x3="113" x4="113" x5="113" y0="0" y1="0" y2="2" y3="2" y4="2" y5="2" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="CastBar_Pink" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\CastBar_Pink.tga" x0="0" x1="0" x2="113" x3="113" x4="113" x5="113" y0="0" y1="0" y2="2" y3="2" y4="2" y5="2" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="EdgeGlow_Red" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\EdgeGlow_Red.tga" x0="0" x1="0" x2="0" x3="5" x4="5" x5="5" y0="0" y1="0" y2="0" y3="6" y4="6" y5="6" HotspotX="2" HotspotY="3" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="EdgeGlow_Pink" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\EdgeGlow_Pink.tga" x0="0" x1="5" x2="5" x3="5" x4="5" x5="5" y0="0" y1="6" y2="6" y3="6" y4="6" y5="6" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="Tick" Cycle="1">
+        <Frame Texture="CandyUI_Nameplates\Sprites\Bars\tick.tga" x0="0" x1="1" x2="1" x3="1" x4="1" x5="1" y0="0" y1="11" y2="11" y3="11" y4="11" y5="11" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
 </Sprites>
