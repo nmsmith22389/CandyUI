@@ -109,7 +109,7 @@ local knRewardWidth 		= 23 -- the width of a reward icon + padding
 local knTextHeight 			= 15 -- text window height
 local knNameRewardWidth 	= 400 -- the width of the name/reward container
 local knNameRewardHeight 	= 20 -- the width of the name/reward container
-local knTargetRange 		= 40000 -- the distance^2 that normal nameplates should draw within (max targeting range)
+local knTargetRange 		= 50000 -- the distance^2 that normal nameplates should draw within (max targeting range)
 local knNameplatePoolLimit	= 500 -- the window pool max size
 
 -- Todo: break these out onto options
@@ -131,6 +131,26 @@ local karUnitType = {
 	Harvest = 3,
 }
 
+--%%%%%%%%%%%
+--   ROUND
+--%%%%%%%%%%%
+local function round(num, idp)
+    local mult = 10^(idp or 0)
+    if num >= 0 then return math.floor(num * mult + 0.5) / mult
+    else return math.ceil(num * mult - 0.5) / mult end
+end
+
+--%%%%%%%%%%%%%
+--Key By Value
+--%%%%%%%%%%%%%
+local function GetKey(tTable, strValue)
+	for k, v in pairs(tTable) do
+		if tostring(v) == tostring(strValue) then
+			return k
+		end
+	end
+	return nil
+end
 -----------------------------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------------------------
@@ -218,6 +238,10 @@ function CandyUI_Nameplates:OnDocLoaded()
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
 	
 	self.wndControls:Show(false, true)
+	
+	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+  	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
+	self.colorPicker:Show(false, true)
 	
 	if not candyUI_Cats then
 		candyUI_Cats = {}
@@ -369,19 +393,33 @@ function CandyUI_Nameplates:UpdateNameplateVisibility(tNameplate)
 	local bIsMounted = unitOwner:IsMounted()
 	local unitWindow = wndNameplate:GetUnit()
 
-	if bIsMounted and unitWindow == unitOwner then
-		wndNameplate:SetUnit(unitOwner:GetUnitMount(), 1)
-	elseif not bIsMounted and unitWindow ~= unitOwner then
-		wndNameplate:SetUnit(unitOwner, 1)
-	end
+	--if bIsMounted and unitWindow == unitOwner then
+	--	wndNameplate:SetUnit(unitOwner:GetUnitMount(), 1)
+	--elseif not bIsMounted and unitWindow ~= unitOwner then
+		local bReposition = false
+		if self.db.profile.general.bAutoPosition and unitOwner ~= self.unitPlayer then
+			local locUnitOverhead = unitOwner:GetOverheadAnchor()
+			--Print(locUnitOverhead )
+			if locUnitOverhead ~= nil then
+				bReposition = not tNameplate.bOccluded and locUnitOverhead.y < 45
+			end
+		end
+		wndNameplate:SetUnit(unitOwner, bReposition and 0 or 1)
+	--end
 
 	tNameplate.bOnScreen = wndNameplate:IsOnScreen()
 	tNameplate.bOccluded = wndNameplate:IsOccluded()
 	tNameplate.eDisposition = unitOwner:GetDispositionTo(self.unitPlayer)
-	local bNewShow = self:HelperVerifyVisibilityOptions(tNameplate) and self:CheckDrawDistance(tNameplate)
+	local bNewShow = self:CheckVisibilityOptions(tNameplate) and self:CheckDrawDistance(tNameplate)
 	if bNewShow ~= tNameplate.bShow then
 		wndNameplate:Show(bNewShow)
 		tNameplate.bShow = bNewShow
+	end
+	
+	--scale
+	local nScale = wndNameplate:GetScale()
+	if tNameplate.bShow and nScale ~= self.db.profile.general.nScale then
+		wndNameplate:SetScale(self.db.profile.general.nScale)
 	end
 end
 
@@ -414,6 +452,7 @@ function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
 	end
 
 	wnd:Show(false, true)
+
 	wnd:SetUnit(unitNew, 1)
 
 	local tNameplate =
@@ -470,7 +509,7 @@ function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
 			--targetMarker = wnd:FindChild("Container:TargetMarker"),
 		}
 	end
-
+	
 	self.arUnit2Nameplate[idUnit] = tNameplate
 	self.arWnd2Nameplate[wnd:GetId()] = tNameplate
 
@@ -527,7 +566,7 @@ function CandyUI_Nameplates:OnFrame()
 			fnDrawHealth(self, tNameplate)
 
 			nCon = fnHelperCalculateConValue(self, unitOwner)
-			tNameplate.wnd.certainDeath:Show(false) -- replace with option --self.db.profile.individual.bShowCertainDeath and nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
+			tNameplate.wnd.certainDeath:Show(nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead()) -- replace with option --self.db.profile.individual.bShowCertainDeath and nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
 			tNameplate.wnd.targetScalingMark:Show(unitOwner:IsScaled())
 
 			fnDrawRewards(self, tNameplate)
@@ -646,7 +685,7 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 		--end
 		if wndName:GetText() ~= strNewName then
 			
-			wndName:SetText(strNewName)
+			wndName:SetText(strNewName)--.." = "..tostring(unitOwner:GetType()))
 
 			-- Need to consider guild as well for the resize code
 			local strNewGuild = unitOwner:GetAffiliationName()
@@ -949,10 +988,11 @@ function CandyUI_Nameplates:DrawTargeting(tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
 	local unitOwner = tNameplate.unitOwner
 
-	local bUseTarget = tNameplate.bIsTarget
+	local bUseTarget = tNameplate.bIsTarget and unitOwner ~= self.unitPlayer and unitOwner == GameLib.GetTargetUnit()
 
-	local bShowTargetMarkerArrow = bUseTarget and self.db.profile.target.bShowMarker and not tNameplate.wnd.health:IsShown()
-	tNameplate.wnd.targetMarkerArrow:SetSprite(karDisposition.tTargetSecondary[tNameplate.eDisposition])
+	local bShowTargetMarkerArrow = bUseTarget and ((not unitOwner:IsInCombat() and self.db.profile.target.bShowTargetMarker) or (unitOwner:IsInCombat() and self.db.profile.target.bShowTargetMarkerCombat))
+	
+	--tNameplate.wnd.targetMarkerArrow:SetSprite(karDisposition.tTargetSecondary[tNameplate.eDisposition])
 	--tNameplate.wnd.targetMarker:SetSprite(karDisposition.tTargetPrimary[tNameplate.eDisposition])
 
 	if tNameplate.nVulnerableTime > 0 then
@@ -993,7 +1033,7 @@ function CandyUI_Nameplates:CheckDrawDistance(tNameplate)
 		bInRange = nDistance < knTargetRange
 		return bInRange
 	else
-		bInRange = nDistance < (self.db.profile.general.nMaxRange * self.db.profile.general.nMaxRange) -- squaring for quick maths
+		bInRange = nDistance < (self.db.profile.general.nViewDistance * self.db.profile.general.nViewDistance)
 		return bInRange
 	end
 end
@@ -1028,7 +1068,7 @@ function CandyUI_Nameplates:GetDispString(eDisposition)
 	return strUnitType, strUnitTypeLower
 end
 
-function CandyUI_Nameplates:HelperVerifyVisibilityOptions(tNameplate)
+function CandyUI_Nameplates:CheckVisibilityOptions(tNameplate)
 	local unitPlayer = self.unitPlayer
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
@@ -1053,7 +1093,7 @@ function CandyUI_Nameplates:HelperVerifyVisibilityOptions(tNameplate)
 	if not tNameplate.bOnScreen then
 		return false
 	end
-	if tNameplate.bGibbed or tNameplate.bSpeechBubble then
+	if tNameplate.bGibbed or (tNameplate.bSpeechBubble and self.db.profile.general.bHideSpeech) then
 		return false
 	end
 	
@@ -1076,7 +1116,7 @@ function CandyUI_Nameplates:HelperVerifyVisibilityOptions(tNameplate)
 		bShowNameplate = true
 		
 		
-		if unitOwner:GetType() == "Simple" and self.db.profile[strUnitLower].bShowSimple == false then
+		if unitOwner:GetType() == "Simple" and self.db.profile.general.bShowSimple == false then
 			bShowNameplate = false
 		elseif unitOwner:GetType() == "NonPlayer" and self.db.profile[strUnitLower].bShowNPCS == false then
 			bShowNameplate = false
@@ -1249,6 +1289,7 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 
 	local nHealthCurr 	= unitOwner:GetHealth()
 	local nHealthMax 	= unitOwner:GetMaxHealth()
+	local nHealthPerc	= round((nHealthCurr / nHealthMax) * 100)
 	local nShieldCurr 	= unitOwner:GetShieldCapacity()
 	local nShieldMax 	= unitOwner:GetShieldCapacityMax()
 	local nAbsorbCurr 	= 0
@@ -1260,6 +1301,18 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 
 	if unitOwner:IsDead() then
 		nHealthCurr = 0
+	end
+	
+	--Health color
+	if nHealthPerc > self.db.profile.general.nHealthThresholdHigh then
+		wndHealth:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColorHigh)
+		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColorHigh)
+	elseif nHealthPerc > self.db.profile.general.nHealthThresholdLow then
+		wndHealth:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColorMid)
+		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColorMid)
+	else
+		wndHealth:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColorLow)
+		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColorLow)
 	end
 	
 	--Show / Hide Absorb !!!!!!!!!!!!!
@@ -1549,6 +1602,16 @@ kcuiNPDefaults = {
 			bHideCombatNonTargets = false,
 			bUseOcclusion = true,
 			bShowQuestItems = true,
+			
+			-- new
+			bHideSpeech = true,
+			bShowQuestItems = true,
+			nHealthThresholdHigh = 75,
+			nHealthThresholdLow = 25,
+			nScale = 1, ---Check?
+			nViewDistance = 100, --Check?
+			bAutoPosition = true,
+			bShowSimple = false,
 		},
 		player = {
 			bShow = true,
@@ -1563,6 +1626,9 @@ kcuiNPDefaults = {
 			bShowVulnBar = false,
 			bShowVulnBarCombat = false,
 			crHealthBarColor = "ffff0000",
+			crHealthBarColorHigh = "ff00ff00",
+			crHealthBarColorMid = "ffffff00",
+			crHealthBarColorLow = "ffff0000",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = false,
@@ -1587,6 +1653,9 @@ kcuiNPDefaults = {
 			bShowIcons = true,
 			bShowIconsCombat = true,
 			crHealthBarColor = "ffff0000",
+			crHealthBarColorHigh = "ff00ff00",
+			crHealthBarColorMid = "ffffff00",
+			crHealthBarColorLow = "ffff0000",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = true,
 			bOnlyDamaged = false,
@@ -1615,6 +1684,9 @@ kcuiNPDefaults = {
 			bShowIcons = true,
 			bShowIconsCombat = true,
 			crHealthBarColor = "ffff0000",
+			crHealthBarColorHigh = "ff00ff00",
+			crHealthBarColorMid = "ffffff00",
+			crHealthBarColorLow = "ffff0000",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = true,
@@ -1639,6 +1711,9 @@ kcuiNPDefaults = {
 			bShowIcons = true,
 			bShowIconsCombat = true,
 			crHealthBarColor = "ffff0000",
+			crHealthBarColorHigh = "ff00ff00",
+			crHealthBarColorMid = "ffffff00",
+			crHealthBarColorLow = "ffff0000",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = false,
@@ -1664,6 +1739,9 @@ kcuiNPDefaults = {
 			bShowIcons = true,
 			bShowIconsCombat = true,
 			crHealthBarColor = "ffff0000",
+			crHealthBarColorHigh = "ff00ff00",
+			crHealthBarColorMid = "ffffff00",
+			crHealthBarColorLow = "ffff0000",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = true,
@@ -1695,26 +1773,7 @@ kcuiNPDefaults = {
 	},
 }
 
---%%%%%%%%%%%
---   ROUND
---%%%%%%%%%%%
-local function round(num, idp)
-    local mult = 10^(idp or 0)
-    if num >= 0 then return math.floor(num * mult + 0.5) / mult
-    else return math.ceil(num * mult - 0.5) / mult end
-end
 
---%%%%%%%%%%%%%
---Key By Value
---%%%%%%%%%%%%%
-local function GetKey(tTable, strValue)
-	for k, v in pairs(tTable) do
-		if tostring(v) == tostring(strValue) then
-			return k
-		end
-	end
-	return nil
-end
 
 --%%%%%%%%%%%%%%%%%
 -- Create Dropdown
@@ -1757,13 +1816,30 @@ end
 --			Set Options
 --===============================
 --make sure to set dropdown box data to player/target/whatever --dont need anymore
-
 function CandyUI_Nameplates:SetOptions()
 	local Options = self.db.profile
 --General
 	local generalControls = self.wndControls:FindChild("GeneralControls")
 	--Quest
 	generalControls:FindChild("ShowQuestItemsToggle"):SetCheck(Options.general.bShowQuestItems)
+	--SpeechHide
+	generalControls:FindChild("SpeechHideToggle"):SetCheck(Options.general.bHideSpeech)
+	--AutoPosition
+	generalControls:FindChild("AutoPositionToggle"):SetCheck(Options.general.bAutoPosition )
+	--Simple
+	generalControls:FindChild("ShowSimpleToggle"):SetCheck(Options.general.bShowSimple)
+	--Scale
+	generalControls:FindChild("Scale:EditBox"):SetText(Options.general.nScale)
+	generalControls:FindChild("Scale:SliderBar"):SetValue(Options.general.nScale)
+	--ViewDistance
+	generalControls:FindChild("ViewDistance:EditBox"):SetText(Options.general.nViewDistance)
+	generalControls:FindChild("ViewDistance:SliderBar"):SetValue(Options.general.nViewDistance)
+	--HealthThresholdHigh
+	generalControls:FindChild("HighHealthThreshold:EditBox"):SetText(Options.general.nHealthThresholdHigh)
+	generalControls:FindChild("HighHealthThreshold:SliderBar"):SetValue(Options.general.nHealthThresholdHigh)
+	--HealthThresholdLow
+	generalControls:FindChild("LowHealthThreshold:EditBox"):SetText(Options.general.nHealthThresholdLow)
+	generalControls:FindChild("LowHealthThreshold:SliderBar"):SetValue(Options.general.nHealthThresholdLow)
 --Player
 	local playerControls = self.wndControls:FindChild("PlayerControls")
 	--Show
@@ -1784,7 +1860,11 @@ function CandyUI_Nameplates:SetOptions()
 	playerControls:FindChild("VulnToggle"):SetCheck(Options.player.bShowVulnBar)
 	playerControls:FindChild("VulnCombatToggle"):SetCheck(Options.player.bShowVulnBarCombat)
 	--Health Bar Color
-	playerControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.player.crHealthBarColor)
+	playerControls:FindChild("HealthBarColorHigh:Swatch"):SetBGColor(Options.player.crHealthBarColorHigh)
+	--Health Bar Color
+	playerControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.player.crHealthBarColorMid)
+	--Health Bar Color
+	playerControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.player.crHealthBarColorLow)
 	--Shield Bar Color
 	playerControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.player.crShieldBarColor)
 	--Show HealthT ext
@@ -1792,7 +1872,7 @@ function CandyUI_Nameplates:SetOptions()
 	--Show
 	playerControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.player.bOnlyDamaged)
 	--Show
-	playerControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.player.bUseColorThreshold)
+	--playerControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.player.bUseColorThreshold)
 --Target
 	local targetControls = self.wndControls:FindChild("TargetControls")
 	--Show
@@ -1822,7 +1902,11 @@ function CandyUI_Nameplates:SetOptions()
 	targetControls:FindChild("IconsToggle"):SetCheck(Options.target.bShowIcons)
 	targetControls:FindChild("IconsCombatToggle"):SetCheck(Options.target.bShowIconsCombat)
 	--Health Bar Color
-	targetControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.target.crHealthBarColor)
+	targetControls:FindChild("HealthBarColorHigh:Swatch"):SetBGColor(Options.target.crHealthBarColorHigh)
+	--Health Bar Color
+	targetControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.target.crHealthBarColorMid)
+	--Health Bar Color
+	targetControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.target.crHealthBarColorLow)
 	--Shield Bar Color
 	targetControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.target.crShieldBarColor)
 	--Show HealthT ext
@@ -1830,7 +1914,7 @@ function CandyUI_Nameplates:SetOptions()
 	--ShowIfDamagedToggle
 	targetControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.target.bOnlyDamaged)
 	--HealthColorThresholdToggle
-	targetControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.target.bUseColorThreshold)
+	--targetControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.target.bUseColorThreshold)
 --Friendly
 	local friendlyControls = self.wndControls:FindChild("FriendlyControls")
 	--Show
@@ -1845,8 +1929,7 @@ function CandyUI_Nameplates:SetOptions()
 	friendlyControls:FindChild("ShowGroupToggle"):SetCheck(Options.friendly.bShowGroup)
 	--Guild
 	friendlyControls:FindChild("ShowGuildToggle"):SetCheck(Options.friendly.bShowGuild)
-	--Guild
-	friendlyControls:FindChild("ShowSimpleToggle"):SetCheck(Options.friendly.bShowSimple)
+	
 	--Name
 	friendlyControls:FindChild("NameToggle"):SetCheck(Options.friendly.bShowName)
 	friendlyControls:FindChild("NameCombatToggle"):SetCheck(Options.friendly.bShowNameCombat)
@@ -1869,7 +1952,11 @@ function CandyUI_Nameplates:SetOptions()
 	friendlyControls:FindChild("IconsToggle"):SetCheck(Options.friendly.bShowIcons)
 	friendlyControls:FindChild("IconsCombatToggle"):SetCheck(Options.friendly.bShowIconsCombat)
 	--Health Bar Color
-	friendlyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.friendly.crHealthBarColor)
+	friendlyControls:FindChild("HealthBarColorHigh:Swatch"):SetBGColor(Options.friendly.crHealthBarColorHigh)
+	--Health Bar Color
+	friendlyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.friendly.crHealthBarColorMid)
+	--Health Bar Color
+	friendlyControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.friendly.crHealthBarColorLow)
 	--Shield Bar Color
 	friendlyControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.friendly.crShieldBarColor)
 	--Show HealthT ext
@@ -1877,7 +1964,7 @@ function CandyUI_Nameplates:SetOptions()
 	--ShowIfDamagedToggle
 	friendlyControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.friendly.bOnlyDamaged)
 	--HealthColorThresholdToggle
-	friendlyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.friendly.bUseColorThreshold)
+	--friendlyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.friendly.bUseColorThreshold)
 --Enemy
 	local enemyControls = self.wndControls:FindChild("EnemyControls")
 	--Show
@@ -1908,7 +1995,11 @@ function CandyUI_Nameplates:SetOptions()
 	enemyControls:FindChild("IconsToggle"):SetCheck(Options.enemy.bShowIcons)
 	enemyControls:FindChild("IconsCombatToggle"):SetCheck(Options.enemy.bShowIconsCombat)
 	--Health Bar Color
-	enemyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.enemy.crHealthBarColor)
+	enemyControls:FindChild("HealthBarColorHigh:Swatch"):SetBGColor(Options.enemy.crHealthBarColorHigh)
+	--Health Bar Color
+	enemyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.enemy.crHealthBarColorMid)
+	--Health Bar Color
+	enemyControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.enemy.crHealthBarColorLow)
 	--Shield Bar Color
 	enemyControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.enemy.crShieldBarColor)
 	--Show HealthT ext
@@ -1916,7 +2007,7 @@ function CandyUI_Nameplates:SetOptions()
 	--ShowIfDamagedToggle
 	enemyControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.enemy.bOnlyDamaged)
 	--HealthColorThresholdToggle
-	enemyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.enemy.bUseColorThreshold)
+	--enemyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.enemy.bUseColorThreshold)
 --Neutral
 	local neutralControls = self.wndControls:FindChild("NeutralControls")
 	--Show
@@ -1949,7 +2040,11 @@ function CandyUI_Nameplates:SetOptions()
 	neutralControls:FindChild("IconsToggle"):SetCheck(Options.neutral.bShowIcons)
 	neutralControls:FindChild("IconsCombatToggle"):SetCheck(Options.neutral.bShowIconsCombat)
 	--Health Bar Color
-	neutralControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.neutral.crHealthBarColor)
+	neutralControls:FindChild("HealthBarColorHigh:Swatch"):SetBGColor(Options.neutral.crHealthBarColorHigh)
+	--Health Bar Color
+	neutralControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.neutral.crHealthBarColorMid)
+	--Health Bar Color
+	neutralControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.neutral.crHealthBarColorLow)
 	--Shield Bar Color
 	neutralControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.neutral.crShieldBarColor)
 	--Show HealthT ext
@@ -1957,7 +2052,7 @@ function CandyUI_Nameplates:SetOptions()
 	--ShowIfDamagedToggle
 	neutralControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.neutral.bOnlyDamaged)
 	--HealthColorThresholdToggle
-	neutralControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.neutral.bUseColorThreshold)
+	--neutralControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.neutral.bUseColorThreshold)
 --Other
 	--[[
 	local otherControls = self.wndControls:FindChild("OtherControls")
@@ -2003,8 +2098,22 @@ function CandyUI_Nameplates:SetOptions()
 	]]
 end
 
-function CandyUI_Nameplates:SetColors()
-	--Dont Need?
+function CandyUI_Nameplates:ColorPickerCallback(strColor)
+	local strUnit = self.strColorPickerTargetUnit
+	local strUnitLower = string.lower(strUnit)
+	if self.strColorPickerTargetControl == "HealthBarHigh" then
+		self.db.profile[strUnitLower].crHealthBarColorHigh = strColor
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColorHigh"):FindChild("Swatch"):SetBGColor(strColor)
+	elseif self.strColorPickerTargetControl == "HealthBarMid" then
+		self.db.profile[strUnitLower].crHealthBarColorMid = strColor
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColor"):FindChild("Swatch"):SetBGColor(strColor)
+	elseif self.strColorPickerTargetControl == "HealthBarLow" then
+		self.db.profile[strUnitLower].crHealthBarColorLow = strColor
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColorLow"):FindChild("Swatch"):SetBGColor(strColor)
+	elseif self.strColorPickerTargetControl == "ShieldBar" then
+		self.db.profile[strUnitLower].crShieldBar = strColor
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):FindChild("Swatch"):SetBGColor(strColor)
+	end
 end
 --NEWWWWWW =======================================================
 
@@ -2086,7 +2195,19 @@ function CandyUI_Nameplates:OnVulnCombatToggleClick( wndHandler, wndControl, eMo
 end
 
 function CandyUI_Nameplates:OnHealthBarColorClick( wndHandler, wndControl, eMouseButton )
-	
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	local strControlText = wndControl:GetParent():GetText()
+	if string.find(strControlText, "High") then
+		self.strColorPickerTargetControl = "HealthBarHigh"
+	elseif string.find(strControlText, "Mid") then
+		self.strColorPickerTargetControl = "HealthBarMid"
+	elseif string.find(strControlText, "Low") then
+		self.strColorPickerTargetControl = "HealthBarLow"
+	end
+	--Open Color Picker
+	self.strColorPickerTargetUnit = strUnit
+	self.colorPicker:Show(true)
+	self.colorPicker:ToFront()
 end
 
 function CandyUI_Nameplates:OnShieldBarColorClick( wndHandler, wndControl, eMouseButton )
@@ -2198,10 +2319,7 @@ function CandyUI_Nameplates:OnShowHarvestNodesClick( wndHandler, wndControl, eMo
 end
 
 function CandyUI_Nameplates:OnShowSimpleToggleClick( wndHandler, wndControl, eMouseButton )
-	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
-	local strUnitLower = string.lower(strUnit)
-	
-	self.db.profile[strUnitLower].bShowSimple = wndControl:IsChecked()
+	self.db.profile.general.bShowSimple = wndControl:IsChecked()
 end
 
 function CandyUI_Nameplates:OnShowQuestItemsClick( wndHandler, wndControl, eMouseButton )
@@ -2209,6 +2327,41 @@ function CandyUI_Nameplates:OnShowQuestItemsClick( wndHandler, wndControl, eMous
 	local strUnitLower = string.lower(strUnit)
 	
 	self.db.profile.general.bShowQuestItems = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnScaleChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local nValue = round(fNewValue, 1)
+	self.db.profile.general.nScale = nValue
+	wndControl:GetParent():FindChild("EditBox"):SetText(string.format("%.1f", nValue))
+end
+
+function CandyUI_Nameplates:OnViewDistanceChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local nValue = round(fNewValue)
+	self.db.profile.general.nViewDistance = nValue
+	wndControl:GetParent():FindChild("EditBox"):SetText(nValue)
+end
+
+function CandyUI_Nameplates:OnHealthThresholdHighChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local nValue = round(fNewValue)
+	self.db.profile.general.nHealthThresholdHigh = nValue --in percent
+	wndControl:GetParent():FindChild("EditBox"):SetText(nValue)
+end
+
+function CandyUI_Nameplates:OnHealthThresholdLowChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local nValue = round(fNewValue)
+	self.db.profile.general.nHealthThresholdLow = nValue --in percent
+	wndControl:GetParent():FindChild("EditBox"):SetText(nValue)
+end
+
+function CandyUI_Nameplates:OnUseOcclusionClick( wndHandler, wndControl, eMouseButton )
+end
+
+function CandyUI_Nameplates:OnAutoPositionClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.general.bAutoPosition = wndControl:IsChecked()	
+end
+
+function CandyUI_Nameplates:OnHideWithSpeechClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.general.bHideSpeech = wndControl:IsChecked()
 end
 
 -----------------------------------------------------------------------------------------------
