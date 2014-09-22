@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Neil Smith" APIVersion="9" Name="CandyUI_Resources" Description="">
+    <Script Name="CandyUI_Resources.lua"/>
+    <Form Name="CandyUI_Resources.xml"/>
+    <ReplaceAddon Name="ClassResources"/>
+</Addon>

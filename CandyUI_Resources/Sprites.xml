@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+	<Sprite Name="PlayerBG_Stretch" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\PlayerBG.tga" x0="0" x1="12" x2="128" x3="128" x4="244" x5="256" y0="0" y1="12" y2="28" y3="28" y4="45" y5="56" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBar_Bright" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBar_Bright.tga" x0="0" x1="6" x2="6" x3="6" x4="240" x5="246" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+	<Sprite Name="ResourceBarBG" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarBG.tga" x0="0" x1="6" x2="6" x3="6" x4="240" x5="246" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegmented" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmented.tga" x0="0" x1="0" x2="0" x3="0" x4="56" x5="56" y0="0" y1="0" y2="0" y3="0" y4="55" y5="55" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegmented_Bright" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmented_Bright.tga" x0="0" x1="0" x2="0" x3="246" x4="246" x5="246" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegment_1" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmented_Bright.tga" x0="0" x1="6" x2="6" x3="6" x4="57" x5="58" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegment_2" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmented_Bright.tga" x0="63" x1="64" x2="64" x3="64" x4="120" x5="121" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegment_3" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmented_Bright.tga" x0="126" x1="127" x2="127" x3="127" x4="183" x5="184" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegment_4" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmented_Bright.tga" x0="189" x1="191" x2="191" x3="191" x4="240" x5="246" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegmentBG_1" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmentedBG.tga" x0="0" x1="6" x2="6" x3="6" x4="57" x5="58" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegmentBG_2" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmentedBG.tga" x0="63" x1="64" x2="64" x3="64" x4="120" x5="121" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegmentBG_3" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmentedBG.tga" x0="126" x1="127" x2="127" x3="127" x4="183" x5="184" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBarSegmentBG_4" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarSegmentedBG.tga" x0="189" x1="191" x2="191" x3="191" x4="240" x5="246" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBG" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBG.tga" x0="0" x1="10" x2="10" x3="10" x4="246" x5="256" y0="0" y1="0" y2="0" y3="25" y4="25" y5="25" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceDot" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceDot.tga" x0="0" x1="0" x2="0" x3="0" x4="8" x5="8" y0="0" y1="0" y2="0" y3="0" y4="8" y5="8" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="SpellSurgeArrow_L" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\SpellSurgeArrow_L.tga" x0="0" x1="0" x2="0" x3="14" x4="14" x5="14" y0="0" y1="0" y2="0" y3="26" y4="26" y5="26" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="SpellSurgeArrow_R" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\SpellSurgeArrow_R.tga" x0="0" x1="0" x2="0" x3="14" x4="14" x5="14" y0="0" y1="0" y2="0" y3="26" y4="26" y5="26" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+	<Sprite Name="IndicatorArrow_L" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\IndicatorArrow_L.tga" x0="0" x1="0" x2="0" x3="14" x4="14" x5="14" y0="0" y1="0" y2="0" y3="26" y4="26" y5="26" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="IndicatorArrow_R" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\IndicatorArrow_R.tga" x0="0" x1="0" x2="0" x3="14" x4="14" x5="14" y0="0" y1="0" y2="0" y3="26" y4="26" y5="26" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+</Sprites>
