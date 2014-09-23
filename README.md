@@ -24,4 +24,3 @@ A Wildstar UI Replacement
 ####CandyUI_Nameplates
 **v0.4.2**
 >* Options update.
-
