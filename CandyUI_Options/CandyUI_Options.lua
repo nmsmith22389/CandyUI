@@ -29,7 +29,7 @@ function CandyUI_Options:new(o)
     self.__index = self 
 
     -- initialize variables here
-
+	
     return o
 end
 
@@ -50,6 +50,8 @@ function CandyUI_Options:OnLoad()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_Options.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
+	
+	
 end
 
 -----------------------------------------------------------------------------------------------
@@ -65,7 +67,7 @@ function CandyUI_Options:OnDocLoaded()
 		if not candyUI_Cats then
 			candyUI_Cats = {}
 		end
-	
+		self.tAddons = {}
 		-- if the xmlDoc is no longer needed, you should set it to nil
 		-- self.xmlDoc = nil
 		
@@ -75,6 +77,7 @@ function CandyUI_Options:OnDocLoaded()
 		Apollo.RegisterSlashCommand("cui", "OnCandyUI_OptionsOn", self)
 
 		-- Do additional Addon initialization here
+		Event_FireGenericEvent("CandyUI_OptionsLoaded")
 	end
 end
 
@@ -86,15 +89,20 @@ end
 -- on SlashCommand "/CandyUI"
 function CandyUI_Options:OnCandyUI_OptionsOn()
 	self.wndOptions:Invoke() -- show the window
-	self.wndOptions:FindChild("ListControls"):DestroyChildren()
-			for i, v in ipairs(candyUI_Cats) do
-					local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
-					wndCurr:SetText(v)
-			end
-			self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
+	self:OnOptionsHomeClick()
 end
 
-
+function CUI_RegisterOptions(name, wndControls)
+	if Apollo.GetAddon("CandyUI_Options").tAddons[name] ~= nil then
+		return false
+	end
+	Apollo.GetAddon("CandyUI_Options").tAddons[name] = wndControls
+	wndControls:Show(false, true)
+	for _, wndCurr in pairs(wndControls:GetChildren()) do
+		wndCurr:Show(false, true)
+	end
+	return true
+end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_OptionsForm Functions
 -----------------------------------------------------------------------------------------------
@@ -103,8 +111,22 @@ end
 ---------------------------------------------------------------------------------------------------
 -- OptionsDialogue Functions
 ---------------------------------------------------------------------------------------------------
+function CandyUI_Options:HideAllOptions()
+	for name, wndCurr in pairs(self.tAddons) do
+		wndCurr:Show(false, true)
+	end
+end
 
 function CandyUI_Options:OnOptionsHomeClick( wndHandler, wndControl, eMouseButton )
+	self:HideAllOptions()
+	self.wndOptions:FindChild("ListControls"):DestroyChildren()
+	for name, wndControls in pairs(self.tAddons) do
+		local wndButton = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
+		wndButton:SetText(name)
+		Print(name) --debug
+	end
+	self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
+	--[[
 	self.wndOptions:FindChild("ListControls"):DestroyChildren()
 	--Event_FireGenericEvent("CandyUI_GoHome")
 	for i, v in ipairs(candyUI_Cats) do
@@ -112,7 +134,7 @@ function CandyUI_Options:OnOptionsHomeClick( wndHandler, wndControl, eMouseButto
 		wndCurr:SetText(v)
 	end
 	self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
-	
+	]]
 	
 end
 
@@ -125,11 +147,32 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function CandyUI_Options:OnOptionsCatClick( wndHandler, wndControl, eMouseButton )
+	local strAddon = wndControl:GetText()
+	self.wndOptions:FindChild("ListControls"):DestroyChildren()
+	self.tAddons[strAddon]:Show(true)
+	for _, wndCurr in pairs(self.tAddons[strAddon]:GetChildren()) do
+		local wndButton = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
+		wndButton:RemoveEventHandler("ButtonUp")
+		wndButton:AddEventHandler("ButtonUp", "OnAddonCatClick")
+		wndButton:SetText(wndCurr:FindChild("Title"):GetText())
+		wndButton:SetData(strAddon)
+	end
+	self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
 	--Print(wndControl:GetText())
-	local event = "CandyUI_"..wndControl:GetText().."Clicked"
-	Event_FireGenericEvent(event)
+	--local event = "CandyUI_"..wndControl:GetText().."Clicked"
+	--Event_FireGenericEvent(event)
 end
 
+function CandyUI_Options:OnAddonCatClick( wndHandler, wndControl, eMouseButton )
+	local strAddon = wndControl:GetData()
+	for _, wndCurr in pairs(self.tAddons[strAddon]:GetChildren()) do
+		if wndCurr:FindChild("Title"):GetText() == wndControl:GetText() then
+			wndCurr:Show(true)
+		else
+			wndCurr:Show(false)
+		end
+	end
+end
 ---------------------------------------------------------------------------------------------------
 -- OptionsControlsList Functions
 ---------------------------------------------------------------------------------------------------

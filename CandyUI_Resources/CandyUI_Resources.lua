@@ -90,26 +90,31 @@ function CandyUI_Resources:OnDocLoaded()
 	end
 	
 	Apollo.LoadSprites("Sprites.xml")
-	Apollo.RegisterEventHandler("CandyUI_ResourcesClicked", "OnOptionsHome", self)
+	--Apollo.RegisterEventHandler("CandyUI_ResourcesClicked", "OnOptionsHome", self)
 	
 	self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
 	self.wndOptionsMain = self.OptionsAddon.wndOptions
 	assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
-	
+	--self.wndOptionsMain:FindChild("OptionsDialogueControls")
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
 	
 	self.wndControls:Show(false, true)
+	--CandyUI_OptionsLoaded
+	self.bOptionsSet = CUI_RegisterOptions("Resources", self.wndControls)
+	if not self.bOptionsSet then
+		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+	end
 	
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
-	
+	--[[
 	if not candyUI_Cats then
 		candyUI_Cats = {}
 	end
 	table.insert(candyUI_Cats, "Resources")
 	self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
-	
+	]]
 	self.bLoaded = true
 	self:CheckIfLoaded()
 	self:SetOptions()
@@ -123,6 +128,11 @@ function CandyUI_Resources:CheckIfLoaded()
 			Apollo.RegisterEventHandler("CharacterCreated", "OnCharacterCreated", self)
 		end
 	end
+end
+
+function CandyUI_Resources:OnCUIOptionsLoaded()
+	CUI_RegisterOptions("Resources", self.wndControls)
+	--Print("Resources saw Options load") --debug
 end
 
 function CandyUI_Resources:OnOptionsHome()

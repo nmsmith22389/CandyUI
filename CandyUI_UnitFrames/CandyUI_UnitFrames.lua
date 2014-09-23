@@ -66,7 +66,7 @@ function CandyUI_UnitFrames:OnLoad()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_UnitFrames.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
-	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kmuiUFDefaults)
+	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiUFDefaults)
 end
 
 -----------------------------------------------------------------------------------------------
@@ -102,11 +102,12 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
 	
 	self.wndControls:Show(false, true)
-	
+	--[[
 	if not candyUI_Cats then
 		candyUI_Cats = {}
 	end
 	table.insert(candyUI_Cats, "UnitFrames")
+	]]
 		--self.wndControls:Show(false)
 		--[[
 		for i, v in ipairs(self.wndControls:GetChildren()) do
@@ -117,14 +118,20 @@ function CandyUI_UnitFrames:OnDocLoaded()
 			end
 		end
 		]]
-		self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
+		--self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
+	
+	--CandyUI_OptionsLoaded
+	self.bOptionsSet = CUI_RegisterOptions("UnitFrames", self.wndControls)
+	if not self.bOptionsSet then
+		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+	end
 		
 	--Color Picker
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
 	
-	Apollo.RegisterEventHandler("CandyUI_UnitFramesClicked", "OnOptionsHome", self)
+	--Apollo.RegisterEventHandler("CandyUI_UnitFramesClicked", "OnOptionsHome", self)
 	Apollo.RegisterEventHandler("VarChange_FrameCount", "OnCharacterLoaded", self)
 	Apollo.RegisterEventHandler("CharacterCreated", "OnCharacterLoaded", self)
 	Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
@@ -141,6 +148,11 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	
 	self:SetOptions()	
 	self:SetLooks()
+end
+
+function CandyUI_UnitFrames:OnCUIOptionsLoaded()
+	CUI_RegisterOptions("UnitFrames", self.wndControls)
+	--Print("Resources saw Options load") --debug
 end
 
 function CandyUI_UnitFrames:OnOptionsHome()
@@ -896,7 +908,7 @@ end
 -----------------------------------------------------------------------------------------------
 --#############################################################################################
 
-kmuiUFDefaults = {
+kcuiUFDefaults = {
 	char = {
 		currentProfile = nil,
 	},
@@ -1182,7 +1194,7 @@ function CandyUI_UnitFrames:ColorPickerCallback(strColor)
 			self["wnd"..strUnit.."UF"]:FindChild("ShieldBarBG"):SetBGColor(self.db.profile[strUnitLower].crShieldBar)
 		elseif self.strColorPickerTargetControl == "ManaBar" then
 			self.db.profile[strUnitLower].crManaBar = strColor
-			self["wnd"..strUnit.."UF"]:FindChild(strUnit.."Controls"):FindChild("ManaBarColor"):FindChild("Swatch"):SetBGColor(strColor)
+			self.wndControls:FindChild(strUnit.."Controls"):FindChild("ManaBarColor"):FindChild("Swatch"):SetBGColor(strColor)
 			self["wnd"..strUnit.."UF"]:FindChild("ManaBar"):SetBarColor(self.db.profile[strUnitLower].crManaBar)
 			self["wnd"..strUnit.."UF"]:FindChild("ManaBarBG"):SetBGColor(self.db.profile[strUnitLower].crManaBar)
 		elseif self.strColorPickerTargetControl == "AbsorbBar" then

@@ -228,7 +228,8 @@ function CandyUI_Nameplates:OnDocLoaded()
 		Apollo.RegisterEventHandler("UnitMemberOfGuildChange", 		"OnUnitMemberOfGuildChange", self)
 		Apollo.RegisterEventHandler("GuildChange", 					"OnGuildChange", self)
 		Apollo.RegisterEventHandler("UnitGibbed",					"OnUnitGibbed", self)
-		Apollo.RegisterEventHandler("CandyUI_NameplatesClicked", "OnOptionsHome", self)
+		--Apollo.RegisterEventHandler("CandyUI_NameplatesClicked", "OnOptionsHome", self)
+		
 		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
 	self.wndOptionsMain = self.OptionsAddon.wndOptions
 	assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
@@ -242,12 +243,19 @@ function CandyUI_Nameplates:OnDocLoaded()
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
-	
+	--[[
 	if not candyUI_Cats then
 		candyUI_Cats = {}
 	end
 	table.insert(candyUI_Cats, "Nameplates")
 	self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
+		]]
+	
+	--CandyUI_OptionsLoaded
+	self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
+	if not self.bOptionsSet then
+		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+	end
 		
 	local tRewardUpdateEvents = {
 		"QuestObjectiveUpdated", "QuestStateChanged", "ChallengeAbandon", "ChallengeLeftArea",
@@ -285,6 +293,8 @@ function CandyUI_Nameplates:OnDocLoaded()
 	
 		self:CreateUnitsFromPreload()
 	end
+	
+	self:SetOptions()	
 end
 
 -----------------------------------------------------------------------------------------------
@@ -305,6 +315,11 @@ function CandyUI_Nameplates:OnOptionsHome()
 	self.wndOptionsMain:FindChild("OptionsDialogueControls"):DestroyChildren()
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
 	self:SetOptions()	
+end
+
+function CandyUI_Nameplates:OnCUIOptionsLoaded()
+	CUI_RegisterOptions("Nameplates", self.wndControls)
+	--Print("Resources saw Options load") --debug
 end
 
 function CandyUI_Nameplates:OnOptionsHeaderCheck(wndHandler, wndControl, eMouseButton)
@@ -399,7 +414,6 @@ function CandyUI_Nameplates:UpdateNameplateVisibility(tNameplate)
 		local bReposition = false
 		if self.db.profile.general.bAutoPosition and unitOwner ~= self.unitPlayer then
 			local locUnitOverhead = unitOwner:GetOverheadAnchor()
-			--Print(locUnitOverhead )
 			if locUnitOverhead ~= nil then
 				bReposition = not tNameplate.bOccluded and locUnitOverhead.y < 45
 			end
@@ -423,13 +437,12 @@ function CandyUI_Nameplates:UpdateNameplateVisibility(tNameplate)
 	end
 end
 
-function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
+function CandyUI_Nameplates:OnUnitCreated(unitNew)
 	if unitNew == nil
 		or not unitNew:IsValid()
 		--or not unitNew:ShouldShowNamePlate()
 		or unitNew:GetType() == "Collectible"
 		or unitNew:GetType() == "PinataLoot" then
-		-- Never have nameplates
 		return
 	end
 	
@@ -495,12 +508,6 @@ function CandyUI_Nameplates:OnUnitCreated(unitNew) -- build main options here
 			certainDeath = wnd:FindChild("CertainDeath"),
 			targetScalingMark = wnd:FindChild("TargetScalingMark"),
 			nameRewardContainer = wnd:FindChild("NameRewardContainer:RewardContainer"),
-			--healthMaxShield = wnd:FindChild("ShieldBarBG"),
-			--healthShieldFill = wnd:FindChild("ShieldBar"),
-			--healthMaxAbsorb = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb"),
-			--healthAbsorbFill = wnd:FindChild("Container:Health:HealthBars:MaxAbsorb:AbsorbFill"),
-			--healthMaxHealth = wnd:FindChild("HealthBarBG"),
-			--healthHealthLabel = wnd:FindChild("HealthBar:Bar:Label"),
 			castBarLabel = wnd:FindChild("CastBar:Label"),
 			castBarCastFill = wnd:FindChild("CastBar:CastFill"),
 			vulnerableVulnFill = wnd:FindChild("Vulnerable:VulnFill"),
@@ -673,7 +680,7 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 	if bShow then
 		local strNewName
 		
-		if bShowGuild then
+		if true then --bShowGuild
 			strNewName =  unitOwner:GetTitleOrName()
 		else
 			strNewName =  unitOwner:GetName()
@@ -1097,7 +1104,7 @@ function CandyUI_Nameplates:CheckVisibilityOptions(tNameplate)
 		return false
 	end
 	
-	if unitOwner:GetType() == "Harvest" and self.db.profile.neutral.bShowHarvestNodes then
+	if unitOwner:GetType() == "Harvest" and unitOwner:CanBeHarvestedBy(self.unitPlayer) and self.db.profile.neutral.bShowHarvestNodes then
 		return true
 	end
 	
@@ -1157,93 +1164,16 @@ function CandyUI_Nameplates:CheckVisibilityOptions(tNameplate)
 			bShowNameplate = true
 		end
 	end
-	--=========================================================================================
-	--if not self.db.profile[strUnitLower].bShow then
-	--	return false
-	--end
-	--[[
-	local bShowNameplate = false -- false
-	
-	if strUnitType == "Harvest" then
-		if self.db.profile.neutral.bShowHarvestNodes then
-			--return true
-			bShowNameplate = true
-		else
-			bShowNameplate = false
-		end
-	end
-	--Use as option???????????
-	if self.db.profile.general.bShowMainObjective and tNameplate.bIsObjective then
-		bShowNameplate = true
-	end
-	
-	local bHiddenUnit = not unitOwner:ShouldShowNamePlate()
-	if bHiddenUnit and not tNameplate.bIsTarget then
-		return false
-	end
-	if self.db.profile[strUnitLower] then
-	if self.db.profile[strUnitLower].bShowGroup and unitOwner:IsInYourGroup() then
-		bShowNameplate = true
-	end
-	
-	if self.db.profile[strUnitLower].bShow then
-		bShowNameplate = true
-	end
-	
-	--if self.db.profile[strUnitTypeLower].bShow and eDisposition == Unit.CodeEnumDisposition.Hostile then
-	--	bShowNameplate = true
-	--end
 
-	local tActivation = unitOwner:GetActivationState()
-
-	if strDisp == "Friendly" and self.db.profile[strUnitLower].bShowVendor and tActivation.Vendor ~= nil then
-		bShowNameplate = true
-	end
-
-	--Show Taxi (Dont have as an option right now)
-	--if self.db.profile.general.bShowTaxi and (tActivation.FlightPathSettler ~= nil or tActivation.FlightPath ~= nil or tActivation.FlightPathNew) then
-	--	bShowNameplate = true
-	--end
-
-	if strDisp == "Friendly" and self.db.profile[strUnitLower].bShowGuild and tNameplate.bIsGuildMember then
-		bShowNameplate = true
-	end
-	]]
-	--[[ --Make these options!!!!!!!!!!!!!!!!
-	if self.db.profile.general.bShowMainObjective then
-		-- QuestGivers too
-		if tActivation.QuestReward ~= nil then
-			bShowNameplate = true
-		end
-
-		if tActivation.QuestNew ~= nil or tActivation.QuestNewMain ~= nil then
-			bShowNameplate = true
-		end
-
-		if tActivation.QuestReceiving ~= nil then
-			bShowNameplate = true
-		end
-
-		if tActivation.TalkTo ~= nil then
-			bShowNameplate = true
-		end
-	end
-	]]
-	--[[
-	if bShowNameplate then
-		bShowNameplate = not (self.bPlayerInCombat and self.db.profile.general.bHideCombatNonTargets)
-	end
-	]]
-	--end
 	if unitOwner:IsThePlayer() then
-		if not unitOwner:IsDead() then --self.db.profile.general.bShowMyNameplate and not unitOwner:IsDead() then
+		if not unitOwner:IsDead() then
 			bShowNameplate = true
 		else
 			bShowNameplate = false
 		end
 	end
 
-	return bShowNameplate-- or tNameplate.bIsTarget
+	return bShowNameplate
 end
 
 function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, eDisposition, tNameplate)
@@ -1459,6 +1389,8 @@ function CandyUI_Nameplates:OnEnteredCombat(unitChecked, bInCombat)
 	if unitChecked == self.unitPlayer then
 		self.bPlayerInCombat = bInCombat
 	end
+	
+	self:RefreshTexts()
 end
 
 function CandyUI_Nameplates:OnUnitGibbed(unitUpdated)
@@ -1579,6 +1511,15 @@ function CandyUI_Nameplates:OnTargetUnitChanged(unitOwner) -- build targeted opt
 	end
 end
 
+function CandyUI_Nameplates:RefreshTexts()
+	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
+		if tNameplate.bShow then
+			self:DrawName(tNameplate)
+			self:DrawGuild(tNameplate)
+			self:DrawLevel(tNameplate)
+		end
+	end
+end
 -----------------------------------------------------------------------------------------------
 -- 								OPTIONS
 -----------------------------------------------------------------------------------------------
@@ -2129,6 +2070,10 @@ function CandyUI_Nameplates:OnNameToggleClick( wndHandler, wndControl, eMouseBut
 	local strUnitLower = string.lower(strUnit)
 	
 	self.db.profile[strUnitLower].bShowName = wndControl:IsChecked()
+	
+	if strUnit == "Player" then
+		self:OnUnitNameChanged(self.unitPlayer)
+	end
 end
 
 function CandyUI_Nameplates:OnNameCombatToggleClick( wndHandler, wndControl, eMouseButton )
@@ -2142,14 +2087,16 @@ function CandyUI_Nameplates:OnGuildToggleClick( wndHandler, wndControl, eMouseBu
 	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
 	local strUnitLower = string.lower(strUnit)
 	
-	self.db.profile[strUnitLower].bShowGuild = wndControl:IsChecked()
+	self.db.profile[strUnitLower].bShowGuildTitle = wndControl:IsChecked()
+	
+	self:RefreshTexts()
 end
 
 function CandyUI_Nameplates:OnGuildCombatToggleClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
 	local strUnitLower = string.lower(strUnit)
 	
-	self.db.profile[strUnitLower].bShowGuildCombat = wndControl:IsChecked()
+	self.db.profile[strUnitLower].bShowGuildTitleCombat = wndControl:IsChecked()
 end
 
 function CandyUI_Nameplates:OnHealthToggleClick( wndHandler, wndControl, eMouseButton )
