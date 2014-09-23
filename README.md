@@ -7,21 +7,21 @@ A Wildstar UI Replacement
 
 ####CandyUI_Options
 **v0.3**
-	* Options update.
+>* Options update.
 	
 ####CandyUI_Resources
 **v0.3**
-	* Options update.
+>* Options update.
 
 ####CandyUI_InterfaceMenu
 **v0.4**
-	* Options update.
+>* Options update.
 
 ####CandyUI_UnitFrames
 **v0.3**
-	* Options update.
+>* Options update.
 
 ####CandyUI_Nameplates
 **v0.4.2**
-	* Options update.
+>* Options update.
 
