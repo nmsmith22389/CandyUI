@@ -5,5 +5,5 @@ move-folders:
     CandyUI/CandyUI_Resources: CandyUI_Resources
     CandyUI/CandyUI_UnitFrames: CandyUI_UnitFrames
 
-ignore: # Files and directories beginning with a dot (such as .git) are automatically ignored, as is the pgkmeta file itself.
+#ignore: # Files and directories beginning with a dot (such as .git) are automatically ignored, as is the pgkmeta file itself.
 
