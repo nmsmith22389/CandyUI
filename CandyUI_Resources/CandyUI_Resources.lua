@@ -90,7 +90,6 @@ function CandyUI_Resources:OnDocLoaded()
 	end
 	
 	Apollo.LoadSprites("Sprites.xml")
-	--Apollo.RegisterEventHandler("CandyUI_ResourcesClicked", "OnOptionsHome", self)
 	
 	self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
 	self.wndOptionsMain = self.OptionsAddon.wndOptions
@@ -108,13 +107,7 @@ function CandyUI_Resources:OnDocLoaded()
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
-	--[[
-	if not candyUI_Cats then
-		candyUI_Cats = {}
-	end
-	table.insert(candyUI_Cats, "Resources")
-	self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
-	]]
+
 	self.bLoaded = true
 	self:CheckIfLoaded()
 	self:SetOptions()
@@ -133,32 +126,6 @@ end
 function CandyUI_Resources:OnCUIOptionsLoaded()
 	CUI_RegisterOptions("Resources", self.wndControls)
 	--Print("Resources saw Options load") --debug
-end
-
-function CandyUI_Resources:OnOptionsHome()
-	self.wndOptionsMain:FindChild("ListControls"):DestroyChildren()
-	for i, v in ipairs(self.wndControls:GetChildren()) do
-		if v:GetName() ~= "Help" then
-			local strCategory = v:FindChild("Title"):GetText()
-			local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsMain:FindChild("ListControls"), self)
-			wndCurr:SetText(strCategory)
-		end
-	end
-	self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
-	
-	self.wndOptionsMain:FindChild("OptionsDialogueControls"):DestroyChildren()
-	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-	self:SetOptions()	
-end
-
-function CandyUI_Resources:OnOptionsHeaderCheck(wndHandler, wndControl, eMouseButton)
-	for i, v in ipairs(self.wndControls:GetChildren()) do
-		if v:FindChild("Title"):GetText() == wndControl:GetText() then
-			v:Show(true)
-		else
-			v:Show(false)
-		end
-	end
 end
 
 function CandyUI_Resources:OnCharacterCreated()
@@ -189,7 +156,8 @@ end
 function CandyUI_Resources:OnCreateEsper()
 	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnEsperUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnEsperEnteredCombat", self)
-
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.esper.tAnchorOffsets))
+	
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "EsperResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
 	
@@ -202,7 +170,7 @@ function CandyUI_Resources:OnCreateEsper()
 	
 	local l, t, r, b = self.wndMain:GetAnchorOffsets()
 	local nHalfWidth = self.db.profile.esper.nWidth / 2
-	self.wndMain:SetAnchorOffsets(nHalfWidth, t, -nHalfWidth, b)
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
 end
 
 function CandyUI_Resources:OnEsperUpdateTimer()
@@ -298,7 +266,7 @@ function CandyUI_Resources:OnCreateSlinger()
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "SpellSlingerResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
-	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.spellslinger.tAnchorOffsets))
 	
 	self.wndSlinger1 = self.wndMain:FindChild("Segment1")
 	self.wndSlinger2 = self.wndMain:FindChild("Segment2")
@@ -316,7 +284,7 @@ function CandyUI_Resources:OnCreateSlinger()
 	
 	local l, t, r, b = self.wndMain:GetAnchorOffsets()
 	local nHalfWidth = self.db.profile.spellslinger.nWidth / 2
-	--self.wndMain:SetAnchorOffsets(nHalfWidth, t, -nHalfWidth, b)
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
 end
 
 function CandyUI_Resources:OnSlingerUpdateTimer()
@@ -443,7 +411,8 @@ end
 function CandyUI_Resources:OnCreateMedic()
 	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnMedicUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnMedicEnteredCombat", self)
-
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.medic.tAnchorOffsets))
+	
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "MedicResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
 	
@@ -459,7 +428,7 @@ function CandyUI_Resources:OnCreateMedic()
 	
 	local l, t, r, b = self.wndMain:GetAnchorOffsets()
 	local nHalfWidth = self.db.profile.medic.nWidth / 2
-	self.wndMain:SetAnchorOffsets(nHalfWidth, t, -nHalfWidth, b)
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
 end
 
 function CandyUI_Resources:OnMedicUpdateTimer()
@@ -545,6 +514,7 @@ function CandyUI_Resources:OnCreateEngineer()
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "EngineerResourceForm", "FixedHudStratum", self)
 	self.wndMain:FindChild("StanceMenuOpenerBtn"):AttachWindow(self.wndMain:FindChild("StanceMenuBG"))
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.engineer.tAnchorOffsets))
 	
 	self.wndPetBar = self.wndMain:FindChild("PetBarContainer")
 	
@@ -565,7 +535,7 @@ function CandyUI_Resources:OnCreateEngineer()
 	
 	local l, t, r, b = self.wndMain:GetAnchorOffsets()
 	local nHalfWidth = self.db.profile.engineer.nWidth / 2
-	self.wndMain:SetAnchorOffsets(nHalfWidth, t, -nHalfWidth, b)
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
 end
 
 function CandyUI_Resources:OnEngineerUpdateTimer()
@@ -659,7 +629,7 @@ function CandyUI_Resources:OnCreateStalker()
 	
 	local l, t, r, b = self.wndMain:GetAnchorOffsets()
 	local nHalfWidth = self.db.profile.stalker.nWidth / 2
-	self.wndMain:SetAnchorOffsets(nHalfWidth, t, -nHalfWidth, b)
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
 end
 
 function CandyUI_Resources:OnStalkerUpdateTimer()
@@ -707,7 +677,12 @@ function CandyUI_Resources:OnCreateWarrior()
 	self.wndMain = Apollo.LoadForm(self.xmlDoc, "WarriorResourceForm", "FixedHudStratum", self)
 	self.wndMain:FindChild("ChargeBarOverdriven:Bar"):SetMax(100)
 	self.wndMain:ToFront()
-
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.warrior.tAnchorOffsets))
+	
+	local l, t, r, b = self.wndMain:GetAnchorOffsets()
+	local nHalfWidth = self.db.profile.warrior.nWidth / 2
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	
 	self.nOverdriveTick = 0
 end
 
@@ -804,6 +779,7 @@ kcuiRDefaults = {
 			bShowText = true,
 			--class
 			crFullColor = "xkcdRed",
+			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 		engineer = {
 			--General
@@ -816,6 +792,7 @@ kcuiRDefaults = {
 			bShowText = true,
 			--class
 			bPetBarUnlocked = false,
+			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 		medic = {
 			--General
@@ -826,6 +803,7 @@ kcuiRDefaults = {
 			crCombatColor = "xkcdBrightOrange",
 			crBarColor = "UI_BtnTextHoloListNormal",
 			bShowText = true,
+			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 		spellslinger = {
 			--General
@@ -841,6 +819,7 @@ kcuiRDefaults = {
 			bIgnite = true,
 			bHealingTorrent = true,
 			crSurgeColor = "xkcdBrightOrange",
+			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 		stalker = {
 			--general
@@ -853,6 +832,7 @@ kcuiRDefaults = {
 			bShowText = true,
 			--class
 			crStealthColor = "ChannelAccountWisper",
+			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 		warrior = {
 			--general
@@ -865,6 +845,7 @@ kcuiRDefaults = {
 			bShowText = true,
 			--class
 			crOverdriveColor = "xkcdBrightOrange",
+			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 	},
 }
@@ -924,7 +905,7 @@ function CandyUI_Resources:SetOptions()
 	self.wndControls:FindChild("StalkerControls"):FindChild("StealthBarColor:Swatch"):SetBGColor(Options.stalker.crStealthColor)
 --"Warrior",
 	--Overdrive
-	self.wndControls:FindChild("WarriorControls"):FindChild("OverdriveBarColor:Swatch"):SetBGColor(Options.esper.crOverdriveColor)
+	self.wndControls:FindChild("WarriorControls"):FindChild("OverdriveBarColor:Swatch"):SetBGColor(Options.warrior.crOverdriveColor)
 end
 
 function CandyUI_Resources:ColorPickerCallback(strColor)
@@ -961,6 +942,10 @@ function CandyUI_Resources:OnWidthChanged( wndHandler, wndControl, strText )
 	end
 	
 	self.db.profile[strUnitLower].nWidth = nValue
+	
+	local l, t, r, b = self.wndMain:GetAnchorOffsets()
+	local nHalfWidth = self.db.profile[strUnitLower].nWidth / 2
+	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
 end
 
 function CandyUI_Resources:OnOpacityChanged( wndHandler, wndControl, fNewValue, fOldValue )
@@ -1100,6 +1085,26 @@ end
 function CandyUI_Resources:OnStanceMenuHide( wndHandler, wndControl )
 	if self.db.profile.engineer.bPetBarUnlocked then
 		self.wndPetBar:SetStyle("AutoFade", true)
+	end
+end
+
+---------------------------------------------------------------------------------------------------
+-- SpellSlingerResourceForm Functions
+---------------------------------------------------------------------------------------------------
+
+function CandyUI_Resources:OnBarMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
+	if wndControl:GetName() == "SpellSlingerResourceForm" then
+		self.db.profile.spellslinger.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+	elseif wndControl:GetName() == "EsperResourceForm" then
+		self.db.profile.esper.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+	elseif wndControl:GetName() == "MedicResourceForm" then
+		self.db.profile.medic.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+	elseif wndControl:GetName() == "EngineerResourceForm" then
+		self.db.profile.engineer.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+	elseif wndControl:GetName() == "StalkerResourceForm" then
+		self.db.profile.stalker.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+	elseif wndControl:GetName() == "WarriorResourceForm" then
+		self.db.profile.warrior.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
 	end
 end
 
