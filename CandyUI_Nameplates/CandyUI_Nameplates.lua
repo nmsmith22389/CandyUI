@@ -231,14 +231,25 @@ function CandyUI_Nameplates:OnDocLoaded()
 		--Apollo.RegisterEventHandler("CandyUI_NameplatesClicked", "OnOptionsHome", self)
 		
 		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-	self.wndOptionsMain = self.OptionsAddon.wndOptions
-	assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
+	if self.OptionsAddon ~= nil then
+		self.bOptionsLoaded = true
+		
+		self.wndOptionsMain = self.OptionsAddon.wndOptions
+		
+		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
+		self.wndControls:Show(false, true)
+		
+		self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
+	else	
+		self.bOptionsLoaded = false
+	end
+	--assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
+	
+	
 	--local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsMain:FindChild("ListControls"), self)
 	--wndCurr:SetText("Unit Frames")
 	
-	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
 	
-	self.wndControls:Show(false, true)
 	
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
@@ -252,8 +263,8 @@ function CandyUI_Nameplates:OnDocLoaded()
 		]]
 	
 	--CandyUI_OptionsLoaded
-	self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
-	if not self.bOptionsSet then
+	
+	if not self.bOptionsSet or not self.bOptionsLoaded then
 		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
 	end
 		
@@ -318,6 +329,16 @@ function CandyUI_Nameplates:OnOptionsHome()
 end
 
 function CandyUI_Nameplates:OnCUIOptionsLoaded()
+	if not self.bOptionsLoaded then
+		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
+		
+		self.wndOptionsMain = self.OptionsAddon.wndOptions
+		
+		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
+		self.wndControls:Show(false, true)
+		
+		self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
+	end
 	CUI_RegisterOptions("Nameplates", self.wndControls)
 	--Print("Resources saw Options load") --debug
 end

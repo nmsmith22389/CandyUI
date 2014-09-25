@@ -75,6 +75,10 @@ function CandyUI_Options:OnDocLoaded()
 		-- e.g. Apollo.RegisterEventHandler("KeyDown", "OnKeyDown", self)
 		Apollo.RegisterSlashCommand("candyui", "OnCandyUI_OptionsOn", self)
 		Apollo.RegisterSlashCommand("cui", "OnCandyUI_OptionsOn", self)
+		
+		Apollo.CreateTimer("ThanksAdd", 10.0, false)
+		Apollo.RegisterTimerHandler("ThanksAdd", "OnThanksAdd", self)
+		Apollo.StartTimer("ThanksAdd")
 
 		-- Do additional Addon initialization here
 		Event_FireGenericEvent("CandyUI_OptionsLoaded")
@@ -103,6 +107,13 @@ function CUI_RegisterOptions(name, wndControls)
 	end
 	return true
 end
+
+function CandyUI_Options:OnThanksAdd()
+	self.wndThanksControls = Apollo.LoadForm(self.xmlDoc, "ThanksOptions", self.wndOptions:FindChild("OptionsDialogueControls"), self)
+	self.wndThanksControls:Show(false, true)
+		
+	CUI_RegisterOptions("Thanks", self.wndThanksControls)
+end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_OptionsForm Functions
 -----------------------------------------------------------------------------------------------
@@ -123,7 +134,7 @@ function CandyUI_Options:OnOptionsHomeClick( wndHandler, wndControl, eMouseButto
 	for name, wndControls in pairs(self.tAddons) do
 		local wndButton = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
 		wndButton:SetText(name)
-		Print(name) --debug
+		--Print(name) --debug
 	end
 	self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
 	--[[
@@ -173,6 +184,8 @@ function CandyUI_Options:OnAddonCatClick( wndHandler, wndControl, eMouseButton )
 		end
 	end
 end
+
+
 ---------------------------------------------------------------------------------------------------
 -- OptionsControlsList Functions
 ---------------------------------------------------------------------------------------------------

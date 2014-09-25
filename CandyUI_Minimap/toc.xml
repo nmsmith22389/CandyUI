@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Neil Smith" APIVersion="9" Name="CandyUI_Minimap" Description="">
+    <Script Name="CandyUI_Minimap.lua"/>
+    <Form Name="CandyUI_Minimap.xml"/>
+    <ReplaceAddon Name="MiniMap"/>
+</Addon>
