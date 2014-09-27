@@ -1,11 +1,9 @@
 package-as: KillerCupcakes
 
-externals:
-
 move-folders:
     # KillerCupcakes/Modules/Fire: KillerCupcakesOnFire
     # KillerCupcakes/Modules/Sky: KillerCupcakesInTheSky
-    #CandyUI/CandyUI_InterfaceMenu: CandyUI_InterfaceMenu
+    CandyUI/CandyUI_InterfaceMenu: CandyUI_InterfaceMenu
     #CandyUI/CandyUI_Nameplates: CandyUI_Nameplates
     #CandyUI/CandyUI_Options: CandyUI_Options
     #CandyUI/CandyUI_Resources: CandyUI_Resources
@@ -14,12 +12,7 @@ move-folders:
 ignore: # Files and directories beginning with a dot (such as .git) are automatically ignored, as is the pgkmeta file itself.
     - Scripts
 
-required-dependencies:
-
-optional-dependencies:
-
 manual-changelog: CHANGELOG.txt
 
 license-output: LICENSE.txt
 
-tools-used:
