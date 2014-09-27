@@ -1,9 +1,7 @@
-package-as: KillerCupcakes
+package-as: CandyUI-@project-version@
 
 move-folders:
-    # KillerCupcakes/Modules/Fire: KillerCupcakesOnFire
-    # KillerCupcakes/Modules/Sky: KillerCupcakesInTheSky
-    CandyUI/CandyUI_InterfaceMenu: CandyUI_InterfaceMenu
+    #CandyUI/CandyUI_InterfaceMenu: CandyUI_InterfaceMenu
     #CandyUI/CandyUI_Nameplates: CandyUI_Nameplates
     #CandyUI/CandyUI_Options: CandyUI_Options
     #CandyUI/CandyUI_Resources: CandyUI_Resources
