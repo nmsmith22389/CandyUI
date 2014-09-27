@@ -254,6 +254,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
+	
 	--[[
 	if not candyUI_Cats then
 		candyUI_Cats = {}
@@ -453,7 +454,7 @@ function CandyUI_Nameplates:UpdateNameplateVisibility(tNameplate)
 	
 	--scale
 	local nScale = wndNameplate:GetScale()
-	if tNameplate.bShow and nScale ~= self.db.profile.general.nScale then
+	if tNameplate.bShow and nScale ~= self.db.profile.general.nScale and not self.db.profile.general.bUsePerspective then
 		wndNameplate:SetScale(self.db.profile.general.nScale)
 	end
 end
@@ -584,7 +585,9 @@ function CandyUI_Nameplates:OnFrame()
 	local fnDrawVulnerable = CandyUI_Nameplates.DrawVulnerable
 	local fnDrawTargeting = CandyUI_Nameplates.DrawTargeting
 	local fnColorNameplate = CandyUI_Nameplates.ColorNameplate
-
+	
+	if self.unitPlayer == nil then return end
+	
 	for idx, tNameplate in pairs(self.arUnit2Nameplate) do
 		if tNameplate.bShow then
 			unitOwner = tNameplate.unitOwner
@@ -592,7 +595,7 @@ function CandyUI_Nameplates:OnFrame()
 			unitWindow = wndNameplate:GetUnit()
 
 			fnDrawHealth(self, tNameplate)
-
+			
 			nCon = fnHelperCalculateConValue(self, unitOwner)
 			tNameplate.wnd.certainDeath:Show(nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead()) -- replace with option --self.db.profile.individual.bShowCertainDeath and nCon == #karConColors and tNameplate.eDisposition ~= Unit.CodeEnumDisposition.Friendly and unitOwner:GetHealth() and unitOwner:ShouldShowNamePlate() and not unitOwner:IsDead())
 			tNameplate.wnd.targetScalingMark:Show(unitOwner:IsScaled())
@@ -602,8 +605,84 @@ function CandyUI_Nameplates:OnFrame()
 			fnDrawVulnerable(self, tNameplate)
 			fnDrawTargeting(self, tNameplate)
 			fnColorNameplate(self, tNameplate)
+			
+			self:SetNameplatePerspective(tNameplate)
 		end
 	end
+end
+
+--Perspective
+function CandyUI_Nameplates:SetNameplatePerspective(tNameplate)
+    if tNameplate == nil or not self.db.profile.general.bUsePerspective then return end
+    
+	
+    --local settings = self.settings
+    --if not settings.perspectiveEnabled and not settings.fadingEnabled then return end   
+	local scaleOffset = 0 
+
+    local unitOwner = tNameplate.unitOwner
+    local wnd = tNameplate.wndNameplate
+	
+	local nMaxCameraDistance = Apollo.GetConsoleVariable("camera.distanceMax") or 32
+	local nFovY = Apollo.GetConsoleVariable("camera.FovY") or 60
+    local sensitivity = 0.005 --Orig: 0.005
+    
+    local fovFactor = 60 / nFovY --self.fovY
+    local focalLength = fovFactor * (-5 + nMaxCameraDistance * 1.5)
+	local nZoom = 0.0 
+	local nDeadZoneDist = 10
+    local zoom = 1 + nZoom * 0.1
+    
+    local distance = self:DistanceToUnit(unitOwner) - nDeadZoneDist
+	
+	local nFrameLeft = -150
+	local nFrameRight = 150
+	local nFrameTop = -93
+	local nFrameBottom = 30
+
+    -- deadzone
+    if distance < 0 then distance = 0 end
+   
+	local scale = math.floor( zoom * ((focalLength + nDeadZoneDist)/ (distance + focalLength + nDeadZoneDist)) / sensitivity) * sensitivity + (scaleOffset or 0)
+     
+	if true and math.abs(wnd:GetScale() - scale) >= sensitivity then  -- 1st(settings.perspectiveEnabled) 2nd()
+        wnd:SetScale(scale)
+        
+        local nameplateWidth = nFrameRight - nFrameLeft
+        local nameplateOffset = nameplateWidth * (1 - scale) * 0.5
+        local nameplateOffsetV = -(nFrameTop) * (1 - scale)
+
+        wnd:SetAnchorOffsets(nFrameLeft + nameplateOffset, nFrameTop + nameplateOffsetV, nFrameRight + nameplateOffset, nFrameBottom + nameplateOffsetV)
+    end 
+    --[[
+	--Fading Option Replace
+    if settings.fadingEnabled and math.abs(wnd:GetOpacity() - scale) >= sensitivity then 
+        wnd:SetOpacity(scale)
+    end 
+	]]
+    -- Debug
+    --if unitOwner == GameLib.GetTargetUnit() then Print(string.format("scale: %f; distance: %f", scale, distance)) end
+end
+
+function CandyUI_Nameplates:DistanceToUnit(unitOwner)
+	local unitPlayer = GameLib.GetPlayerUnit()
+
+	if not unitOwner or not unitPlayer then
+	    return 0
+	end
+
+	tPosTarget = unitOwner:GetPosition()
+	tPosPlayer = unitPlayer:GetPosition()
+
+	if tPosTarget == nil then
+		return 0
+	end
+	
+	local nDeltaX = tPosTarget.x - tPosPlayer.x
+	local nDeltaY = tPosTarget.y - tPosPlayer.y
+	local nDeltaZ = tPosTarget.z - tPosPlayer.z
+
+	return math.sqrt((nDeltaX * nDeltaX) + (nDeltaY * nDeltaY) + (nDeltaZ * nDeltaZ))
 end
 
 function CandyUI_Nameplates:ColorNameplate(tNameplate)
@@ -722,11 +801,11 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 			end
 			
 			-- Resize
-			local wndNameplate = tNameplate.wndNameplate
-			local nLeft, nTop, nRight, nBottom = wndName:GetAnchorOffsets()
-			local nHalfNameWidth = math.ceil(math.max(Apollo.GetTextWidth("Nameplates", strNewName), Apollo.GetTextWidth("CRB_Interface9_BO", strNewGuild)) / 2)
-			nHalfNameWidth = math.max(nHalfNameWidth, self.nHealthWidth / 2)
-			wndName:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
+			--local wndNameplate = tNameplate.wndNameplate
+			--local nLeft, nTop, nRight, nBottom = wndName:GetAnchorOffsets()
+			--local nHalfNameWidth = math.ceil(math.max(Apollo.GetTextWidth("Nameplates", strNewName), Apollo.GetTextWidth("CRB_Interface9_BO", strNewGuild)) / 2)
+			--nHalfNameWidth = math.max(nHalfNameWidth, self.nHealthWidth / 2)
+			--wndName:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
 		end
 	end
 end
@@ -737,6 +816,7 @@ function CandyUI_Nameplates:DrawGuild(tNameplate)
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -795,6 +875,7 @@ function CandyUI_Nameplates:DrawHealth(tNameplate)
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -895,6 +976,7 @@ function CandyUI_Nameplates:DrawCastBar(tNameplate)
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -1097,13 +1179,14 @@ function CandyUI_Nameplates:GetDispString(eDisposition)
 end
 
 function CandyUI_Nameplates:CheckVisibilityOptions(tNameplate)
-	local unitPlayer = self.unitPlayer
+	local unitPlayer = GameLib.GetPlayerUnit()
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strDisp, strDispLower = self:GetDispString(eDisposition)
 	local strUnitType, strUnitTypeLower = self:GetUnitType(unitOwner)
 	local strUnit, strUnitLower
 	
+	if unitPlayer == nil then return false end
 	--if true then return true end
 	--[[
 	local bHiddenUnit = not unitOwner:ShouldShowNamePlate()
@@ -1125,7 +1208,7 @@ function CandyUI_Nameplates:CheckVisibilityOptions(tNameplate)
 		return false
 	end
 	
-	if unitOwner:GetType() == "Harvest" and unitOwner:CanBeHarvestedBy(self.unitPlayer) and self.db.profile.neutral.bShowHarvestNodes then
+	if unitOwner:GetType() == "Harvest" and unitOwner:CanBeHarvestedBy(unitPlayer) and self.db.profile.neutral.bShowHarvestNodes then
 		return true
 	end
 	
@@ -1199,7 +1282,7 @@ end
 
 function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, eDisposition, tNameplate)
 	local wndNameplate = tNameplate.wndNameplate
-	local unitPlayer = self.unitPlayer
+	local unitPlayer = GameLib.GetPlayerUnit()
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
@@ -1574,6 +1657,7 @@ kcuiNPDefaults = {
 			nViewDistance = 100, --Check?
 			bAutoPosition = true,
 			bShowSimple = false,
+			bUsePerspective = false,
 		},
 		player = {
 			bShow = true,
@@ -1802,6 +1886,8 @@ function CandyUI_Nameplates:SetOptions()
 	--HealthThresholdLow
 	generalControls:FindChild("LowHealthThreshold:EditBox"):SetText(Options.general.nHealthThresholdLow)
 	generalControls:FindChild("LowHealthThreshold:SliderBar"):SetValue(Options.general.nHealthThresholdLow)
+	--perspective
+	generalControls:FindChild("UsePerspectiveToggle"):SetCheck(Options.general.bUsePerspective)
 --Player
 	local playerControls = self.wndControls:FindChild("PlayerControls")
 	--Show
@@ -2330,6 +2416,10 @@ end
 
 function CandyUI_Nameplates:OnHideWithSpeechClick( wndHandler, wndControl, eMouseButton )
 	self.db.profile.general.bHideSpeech = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnUsePerspectiveToggleClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.general.bUsePerspective = wndControl:IsChecked()
 end
 
 -----------------------------------------------------------------------------------------------

@@ -823,7 +823,9 @@ function CandyUI_UnitFrames:UpdateClusters(tClusters, wndUnitFrame)
 	end
 	for i, v in ipairs(tClusters) do
 		arClusterWindows[i]:Show(v:GetName() ~= nil)
+		if v:GetName() ~= nil and v:GetHealth() ~= nil then
 		arClusterWindows[i]:FindChild("Name"):SetText(v:GetName())
+		
 		self:SetBarValue(arClusterWindows[i]:FindChild("HealthBar"), v:GetHealth(), 0, v:GetMaxHealth())
 		--self:SetBarValue(arClusterWindows[i]:FindChild("HealthBar"), v:GetHealth(), 0, v:GetHealthMax())
 		--Shield
@@ -845,6 +847,7 @@ function CandyUI_UnitFrames:UpdateClusters(tClusters, wndUnitFrame)
 			local nhl, nht, nhr, nhb = arClusterWindows[i]:FindChild("HealthBar"):GetAnchorOffsets()
 			local nsl, nst, nsr, nsb = arClusterWindows[i]:FindChild("ShieldBar"):GetAnchorOffsets()
 			arClusterWindows[i]:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
+		end
 		end
 	end
 end

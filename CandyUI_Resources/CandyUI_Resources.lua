@@ -156,10 +156,12 @@ end
 function CandyUI_Resources:OnCreateEsper()
 	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnEsperUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnEsperEnteredCombat", self)
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.esper.tAnchorOffsets))
+	
 	
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "EsperResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
+	
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.esper.tAnchorOffsets))
 	
 	self.bPPFull = false
 	
@@ -411,10 +413,11 @@ end
 function CandyUI_Resources:OnCreateMedic()
 	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnMedicUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnMedicEnteredCombat", self)
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.medic.tAnchorOffsets))
+	
 	
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "MedicResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.medic.tAnchorOffsets))
 	
 	self.wndMedic1 = self.wndMain:FindChild("Segment1")
 	self.wndMedic2 = self.wndMain:FindChild("Segment2")
