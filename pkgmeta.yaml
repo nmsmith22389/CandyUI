@@ -5,11 +5,11 @@ externals:
 move-folders:
     # KillerCupcakes/Modules/Fire: KillerCupcakesOnFire
     # KillerCupcakes/Modules/Sky: KillerCupcakesInTheSky
-    CandyUI/CandyUI_InterfaceMenu: CandyUI_InterfaceMenu
-    CandyUI/CandyUI_Nameplates: CandyUI_Nameplates
-    CandyUI/CandyUI_Options: CandyUI_Options
-    CandyUI/CandyUI_Resources: CandyUI_Resources
-    CandyUI/CandyUI_UnitFrames: CandyUI_UnitFrames
+    #CandyUI/CandyUI_InterfaceMenu: CandyUI_InterfaceMenu
+    #CandyUI/CandyUI_Nameplates: CandyUI_Nameplates
+    #CandyUI/CandyUI_Options: CandyUI_Options
+    #CandyUI/CandyUI_Resources: CandyUI_Resources
+    #CandyUI/CandyUI_UnitFrames: CandyUI_UnitFrames
 
 ignore: # Files and directories beginning with a dot (such as .git) are automatically ignored, as is the pgkmeta file itself.
     - Scripts
