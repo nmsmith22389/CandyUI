@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+    <Sprite Name="border2px" Cycle="1">
+        <Frame Texture="CandyBars\Sprites\border2px.png"  x0="0" x1="0" x2="75" x3="75" x4="75" x5="75" y0="0" y1="0" y2="75" y3="75" y4="75" y5="75" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="ffffffff" EndColor="ffffffff"/>
+    </Sprite>
+</Sprites>

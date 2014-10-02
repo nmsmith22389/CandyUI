@@ -317,6 +317,11 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	--wndFrame:FindChild("HealthBarBG"):ToFront(true)
 	--barHealth:ToFront(true)
 	
+	--Font Size
+	barHealth:FindChild("Text"):SetFont(self.db.profile.general.strFontSize)
+	barShield:FindChild("Text"):SetFont(self.db.profile.general.strFontSize)
+	barMana:FindChild("Text"):SetFont(self.db.profile.general.strFontSize)
+		
 	--Absorb
 	local nAbsorbCurr = 0
 	local nAbsorbMax = uUnit:GetAbsorptionMax()
@@ -386,8 +391,9 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	local nShieldMax = uUnit:GetShieldCapacityMax()
 	local nShieldCurr = uUnit:GetShieldCapacity()
 	nShieldPerc = round((nShieldCurr/nShieldMax) * 100)
+	--Print(nShieldCurr)
 	if nShieldMax ~= nil and nShieldMax > 0 then
-		if barShield:IsShown() then
+		if wndFrame:FindChild("ShieldBar"):IsShown() then
 			self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
 			barShield:FindChild("Text"):SetText(nShieldPerc.."%")
 		else
@@ -405,19 +411,20 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 			barShield:FindChild("Text"):SetText(nShieldPerc.."%")
 		end
 	else
-		if not barShield:IsShown() then
-		--	self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
+		--Print(nShieldCurr)
+		if not wndFrame:FindChild("ShieldBar"):IsShown() then
+			--	self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
 		else
-		--barShield:Show(false, true)
-		wndFrame:FindChild("ShieldBar"):Show(false, true)
-		wndFrame:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_RoundedGrey")
-		--barHealth:SetEmptySprite("Sprites:HealthEmpty_RoundedGrey")
-		barHealth:SetFullSprite("Sprites:HealthFull_RoundedGrey")
-		wndFrame:FindChild("HealthBar:AbsorbBar"):SetFullSprite("Sprites:HealthFull_RoundedGrey")
-		local nhl, nht, nhr, nhb = wndFrame:FindChild("HealthBar"):GetAnchorOffsets()
-		local nsl, nst, nsr, nsb = wndFrame:FindChild("ShieldBar"):GetAnchorOffsets()
-		wndFrame:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
-		--barHealth:SetAnchorOffsets(nhl, nht, nsr, nhb)
+			--barShield:Show(false, true)
+			wndFrame:FindChild("ShieldBar"):Show(false, true)
+			wndFrame:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_RoundedGrey")
+			--barHealth:SetEmptySprite("Sprites:HealthEmpty_RoundedGrey")
+			barHealth:SetFullSprite("Sprites:HealthFull_RoundedGrey")
+			wndFrame:FindChild("HealthBar:AbsorbBar"):SetFullSprite("Sprites:HealthFull_RoundedGrey")
+			local nhl, nht, nhr, nhb = wndFrame:FindChild("HealthBar"):GetAnchorOffsets()
+			local nsl, nst, nsr, nsb = wndFrame:FindChild("ShieldBar"):GetAnchorOffsets()
+			wndFrame:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
+			--barHealth:SetAnchorOffsets(nhl, nht, nsr, nhb)
 		end
 	end
 	
@@ -736,7 +743,7 @@ function CandyUI_UnitFrames:UpdateToT(uUnit)
 	local nShieldCurr = uUnit:GetShieldCapacity()
 	nShieldPerc = round((nShieldCurr /nShieldMax ) * 100)
 	if nShieldMax ~= nil and nShieldMax > 0 then
-		if barShield:IsShown() then
+		if wndFrame:FindChild("ShieldBar"):IsShown() then
 			self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
 			barShield:FindChild("Text"):SetText(nShieldPerc.."%")
 		else
@@ -754,7 +761,7 @@ function CandyUI_UnitFrames:UpdateToT(uUnit)
 			barShield:FindChild("Text"):SetText(nShieldPerc.."%")
 		end
 	else
-		if not barShield:IsShown() then
+		if not wndFrame:FindChild("ShieldBar"):IsShown() then
 			--self:SetBarValue(barShield, nShieldCurr, 0, nShieldMax)
 		else
 		--barShield:Show(false, true)
@@ -917,7 +924,7 @@ kcuiUFDefaults = {
 	},
 	profile = {
 		general = {
-			
+			strFontSize = "CRB_InterfaceTiny_BB",
 		},
 		player = {
 			nPortraitStyle = 2,
@@ -1058,6 +1065,12 @@ local tBarTextOptions = {
 	["Hover"] = 2,
 }
 
+local tFontSizeOptions = {
+	["Small"] = "CRB_InterfaceTiny_BB",
+	["Medium"] = "CRB_InterfaceMedium_BO",
+	["Large"] = "CRB_InterfaceLarge_BO",
+}
+
 local tBarTextFormatOptions = {
 	["Min / Max"] = 0,
 	["Min / Max (Short)"] = 1,
@@ -1101,6 +1114,8 @@ function CandyUI_UnitFrames:SetOptions()
 		--Absorb Text
 		controls:FindChild("ShowAbsorbTextToggle"):SetCheck(self.db.profile[strUnitLower]["bAbsorbText"])
 	end
+--General
+	self.wndControls:FindChild("GeneralControls"):FindChild("FontSize:Dropdown"):SetText(GetKey(tFontSizeOptions, self.db.profile.general.strFontSize))
 --Player
 	--Mana Text
 	self.wndControls:FindChild("PlayerControls"):FindChild("ManaText:Dropdown"):SetText(GetKey(tBarTextOptions, self.db.profile.player.nManaText))
@@ -1443,7 +1458,27 @@ function CandyUI_UnitFrames:OnAbsorbBarColorClick( wndHandler, wndControl, eMous
 	self.colorPicker:ToFront()
 end
 
+
 function CandyUI_UnitFrames:OnShowAbsorbTextClick( wndHandler, wndControl, eMouseButton )
+end
+
+--General?
+function CandyUI_UnitFrames:OnFontSizeClick( wndHandler, wndControl, eMouseButton )
+	CreateDropdownMenu(self, wndControl:GetParent(), tFontSizeOptions, "OnFontSizeItemClick")
+	--self.wndControls:FindChild("PlayerControls"):FindChild("ManaBarColor"):Enable(false)
+	wndControl:GetParent():FindChild("DropdownBox"):Show(true)
+end
+
+function CandyUI_UnitFrames:OnFontSizeItemClick(wndHandler, wndControl, eMouseButton)
+	wndControl:GetParent():GetParent():GetParent():FindChild("Dropdown"):SetText(wndControl:GetText())
+	
+	self.db.profile.general.strFontSize = wndControl:GetData()
+	
+	wndControl:GetParent():GetParent():Show(false)
+end
+
+function CandyUI_UnitFrames:OnFontSizeHide( wndHandler, wndControl )
+	--self.wndControls:FindChild("PlayerControls"):FindChild("ManaBarColor"):Enable(true)
 end
 
 -----------------------------------------------------------------------------------------------

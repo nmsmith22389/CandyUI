@@ -231,7 +231,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 		--Apollo.RegisterEventHandler("CandyUI_NameplatesClicked", "OnOptionsHome", self)
 		
 		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-	if self.OptionsAddon ~= nil then
+	if self.OptionsAddon ~= nil and self.OptionsAddon.wndOptions ~= nil then
 		self.bOptionsLoaded = true
 		
 		self.wndOptionsMain = self.OptionsAddon.wndOptions
@@ -240,6 +240,8 @@ function CandyUI_Nameplates:OnDocLoaded()
 		self.wndControls:Show(false, true)
 		
 		self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
+		
+		self:SetOptions()	
 	else	
 		self.bOptionsLoaded = false
 	end
@@ -306,7 +308,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 		self:CreateUnitsFromPreload()
 	end
 	
-	self:SetOptions()	
+	
 end
 
 -----------------------------------------------------------------------------------------------
@@ -341,6 +343,8 @@ function CandyUI_Nameplates:OnCUIOptionsLoaded()
 		self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
 	end
 	CUI_RegisterOptions("Nameplates", self.wndControls)
+	
+	self:SetOptions()	
 	--Print("Resources saw Options load") --debug
 end
 
@@ -381,6 +385,9 @@ function CandyUI_Nameplates:UpdateNameplateRewardInfo(tNameplate)
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
+	
+	if unitPlayer == nil then return end
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -460,6 +467,9 @@ function CandyUI_Nameplates:UpdateNameplateVisibility(tNameplate)
 end
 
 function CandyUI_Nameplates:OnUnitCreated(unitNew)
+	if GameLib.GetPlayerUnit() == nil then return end
+	if self.unitPlayer == nil then return end
+
 	if unitNew == nil
 		or not unitNew:IsValid()
 		--or not unitNew:ShouldShowNamePlate()
@@ -751,6 +761,8 @@ function CandyUI_Nameplates:DrawName(tNameplate)
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
 	
+	--if unitPlayer == nil then return end
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -817,6 +829,8 @@ function CandyUI_Nameplates:DrawGuild(tNameplate)
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
 	
+	--if unitPlayer == nil then return end
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -855,7 +869,7 @@ function CandyUI_Nameplates:DrawGuild(tNameplate)
 		local nLeft, nTop, nRight, nBottom = wndGuild:GetAnchorOffsets()
 		local nHalfNameWidth = math.ceil(math.max(Apollo.GetTextWidth("Nameplates", strNewName), Apollo.GetTextWidth("CRB_Interface9_BO", strNewGuild)) / 2)
 		nHalfNameWidth = math.max(nHalfNameWidth, self.nHealthWidth / 2)
-		wndGuild:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
+		--wndGuild:SetAnchorOffsets(-nHalfNameWidth - 15, nTop, nHalfNameWidth + tNameplate.wnd.nameRewardContainer:ArrangeChildrenHorz(0) + 15, nBottom)
 	end
 
 	wndGuild:Show(bShow and strNewGuild ~= nil and strNewGuild ~= "")
@@ -1063,6 +1077,8 @@ function CandyUI_Nameplates:DrawRewards(tNameplate)
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
+	
+	
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then

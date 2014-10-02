@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Addon Author="Jaslm/Tomber" APIVersion="8" Name="ColorPicker" Description="Pop-Up dialog box for selecting, copying and pasting a color" Version="0.5">
+    <Script Name="ColorPicker.lua"/>
+    <Form Name="ColorPicker.xml"/>
+</Addon>

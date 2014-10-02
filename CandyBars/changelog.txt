@@ -1,0 +1,112 @@
+v1.2.2
+	• Fixed zoning bug.
+	• Hotkeys now constantly update.
+
+v1.2.1
+	• Fixed the two main errors popping up.
+
+v1.2
+	• Added cooldown bars! (Right now only on action bar)
+	• Fixed error on switch world.
+	• Fixed Recall Button not changing.
+	• Fixed Potion Button not starting with the correct potion.
+	• Keybinds now update correctly.
+
+v1.1
+	• New options interface!
+	• Layout Editor added!
+	• HUD hide / show options added.
+	• Consolidated the shortcut and vehicle bars into "Other Bars".
+	• Fixed a recall button error.
+	• Added padding to the utility bars.
+	• Added hide in combat to the action bar. (other bars coming soon)
+	• You can now hide hotkeys.
+
+v1.0.6
+	• Fixed another error from last game patch
+
+v1.0.5
+	• Added Keybind Mode
+	• Fixed error from last patch
+	• Fixed current profile not saving when creating a new options profile.
+
+v1.0.4
+	• WildStar now sees it as the correct api.
+
+v1.0.3
+	• API bump.
+
+v1.0.2
+	• Fixed Lib bugs.
+	• Esc options button now works.
+	• Current profile now saves.
+	• Action Bar properly hides or shows after vehicle bar is hidden.
+	• Fixed error with recall button when switching profiles.
+	• Deleted leftover debugging prints.
+
+v1.0.1
+	• Fixed mount bug.
+	• Fixed secondary bar bug.
+
+v1.0
+	• Complete rewrite
+
+v0.9
+	• *Added borders and options* (Not yet enabled)
+	• All flyouts should now show properly
+
+
+v0.8
+	• Added opacity sliders to the bars
+	• Fixed Options bug having to do with defaults
+	• Moved the Vehicle Bar to it's own group in the options in preparation for additional settings
+	• Added a Size setting for the Innate bar
+	• Fixed Show Innate Bar option unchecking itself
+	• Reduced the size of the defaults button
+	• Added Shortcut Bars to replace ActionBarShortcut
+	• Added an Import/Export feature to transfer or backup settings
+	• Added a greeting on login
+
+v0.7
+	• Added opacity sliders to the bars
+	• Fixed Options bug having to do with defaults
+	• Moved the Vehicle Bar to it's own group in the options in preparation for additional settings
+	• Added a Size setting for the Innate bar
+	• Fixed Show Innate Bar option unchecking itself
+	• Reduced the size of the defaults button
+	• Added Shortcut Bars to replace ActionBarShortcut
+	• Added an Import/Export feature to transfer or backup settings
+	• Added a greeting on login
+	• Fixed Innate Bar sizing crop problem
+
+v0.6.1
+	• Added an options button in the Interface List
+	• Settings should no longer reset when you update to a newer version
+	• Added Default button on options window to reset all options
+	• Added a little about line in the options window
+	• Fixed Innate flyout
+	• Max icon size has been increased to 65
+	• Added a universal Button Padding option
+	• Innate Bar now locks
+	• Using the Vehicle Bar option in a vehicle toggles the bar
+
+v0.6b
+	• Added flyout menus for everything
+	• Fixed Button Lock Bug
+	• Locking bars now removes the borders
+	• Vehicle Bar now added
+	• Vehicle Bar option added
+	• Added "Show Empty Slots" option
+
+v0.5
+	• Cleaned up code
+	• Added 2 utility bars
+	• Added innate bar
+	• New and improved options layout
+	• Added various options
+	• Added a Lock Bars option
+	• Added Tooltips along with an option
+	• Some other minor improvements
+
+v0.4
+	• Fixed bug that caused settings to not save

@@ -707,6 +707,7 @@ function CandyUI_Resources:OnWarriorUpdateTimer(strName, nCnt)
 
 	wndChargeBar:FindChild("Bar"):SetMax(nResourceMax)
 	wndChargeBar:FindChild("Bar"):SetProgress(nResourceCurr)
+	wndChargeBar:FindChild("Bar:Text"):SetText(nResourceCurr.." / "..nResourceMax)
 
 	if bOverdrive and not self.bOverDriveActive then
 		self.bOverDriveActive = true

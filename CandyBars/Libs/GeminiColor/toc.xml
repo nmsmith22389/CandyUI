@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="NASA" APIVersion="8" Name="GeminiColor" Description="An HSV Colorpicker with presets.">
+    <Script Name="GeminiColor.lua"/>
+    <Form Name="GeminiColor.xml"/>
+</Addon>

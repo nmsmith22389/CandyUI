@@ -1,0 +1,13 @@
+----------------------
+ToDo:
++Add "(beta)" to shift ui text
++Make your own DT tutorial
++
+----------------------
+
+v1.1
+-Options now has the correct name.
+-Fixed ln:772 bug that was popping up.
+
+v1.0
+-Initial Release

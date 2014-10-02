@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Neil Smith" APIVersion="9" Name="StarPanel" Description="An information panel that displays many different things.">
+    <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>
+    <Form Name="StarPanel.xml"/>
+    <Script Name="StarPanel.lua"/>
+    <Script Name="Options.lua"/>
+</Addon>
