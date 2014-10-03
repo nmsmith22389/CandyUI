@@ -208,10 +208,10 @@ function CandyUI_Resources:OnEsperUpdateTimer()
 			for idx, wndCurr in pairs({ self.wndEsper1 , self.wndEsper2, self.wndEsper3, self.wndEsper4, self.wndEsper5}) do
 				if bInCombat then
 					wndCurr:SetBGColor(self.db.profile.esper.crCombatColor)
-					wndCurr:FindChild("Full"):SetBarColor(self.db.profile.esper.crCombatColor)
+					wndCurr:FindChild("Full"):SetBGColor(self.db.profile.esper.crCombatColor)
 				else
 					wndCurr:SetBGColor(self.db.profile.esper.crBarColor)
-					wndCurr:FindChild("Full"):SetBarColor(self.db.profile.esper.crBarColor)
+					wndCurr:FindChild("Full"):SetBGColor(self.db.profile.esper.crBarColor)
 				end
 			end
 		end
@@ -249,10 +249,10 @@ function CandyUI_Resources:OnEsperEnteredCombat(unitPlayer, bInCombat)
 		if not self.bPPFull then
 			if bInCombat then
 				wndCurr:SetBGColor(self.db.profile.esper.crCombatColor)
-				wndCurr:FindChild("Full"):SetBarColor(self.db.profile.esper.crCombatColor)
+				wndCurr:FindChild("Full"):SetBGColor(self.db.profile.esper.crCombatColor)
 			else
 				wndCurr:SetBGColor(self.db.profile.esper.crBarColor)
-				wndCurr:FindChild("Full"):SetBarColor(self.db.profile.esper.crBarColor)
+				wndCurr:FindChild("Full"):SetBGColor(self.db.profile.esper.crBarColor)
 			end
 		end
 	end

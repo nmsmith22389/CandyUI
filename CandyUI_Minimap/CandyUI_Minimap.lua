@@ -283,6 +283,7 @@ function CandyUI_Minimap:Init()
 	local strConfigureButtonText = ""
 	local tDependencies = {
 		-- "UnitOrPackageName",
+		"CandyUI_Options"
 	}
     Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
@@ -295,6 +296,7 @@ function CandyUI_Minimap:OnLoad()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_Minimap.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
+	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiMMDefaults)
 end
 
 -----------------------------------------------------------------------------------------------
@@ -357,6 +359,9 @@ function CandyUI_Minimap:OnDocLoaded()
 		Apollo.RegisterEventHandler("UnitPvpFlagsChanged", 					"OnUnitPvpFlagsChanged", self)
 	
 		Apollo.RegisterEventHandler("PlayerLevelChange",					"UpdateHarvestableNodes", self)
+		
+		--Bag Text
+		Apollo.RegisterEventHandler("UpdateInventory",						"OnUpdateInventory", self)
 	
 		Apollo.RegisterTimerHandler("ChallengeFlashIconTimer", 				"OnStopChallengeFlashIcon", self)
 		Apollo.RegisterTimerHandler("OneSecTimer",							"OnOneSecTimer", self)
@@ -364,6 +369,10 @@ function CandyUI_Minimap:OnDocLoaded()
 		Apollo.RegisterTimerHandler("PingTimer",							"OnPingTimer", self)
 		Apollo.CreateTimer("PingTimer", 1, false)
 		Apollo.StopTimer("PingTimer")
+		
+		Apollo.RegisterTimerHandler("ZoomTimer",							"OnZoomTimer", self)
+		Apollo.CreateTimer("ZoomTimer", 1, true)
+		Apollo.StopTimer("ZoomTimer")
 	
 		--Group Events
 		Apollo.RegisterEventHandler("Group_Join", 							"OnGroupJoin", self)					-- ()
@@ -377,6 +386,13 @@ function CandyUI_Minimap:OnDocLoaded()
 		self.wndZoneName 		= self.wndMain:FindChild("MapZoneName")
 		self.wndPvPFlagName 	= self.wndMain:FindChild("MapZonePvPFlag")
 		self.wndRangeLabel 		= self.wndMain:FindChild("RangeToTargetLabel")
+		self.wndBottom			= self.wndMain:FindChild("Bottom")
+		self.CommButton			= self.wndBottom:FindChild("CallButton")
+		--Global for Datachron
+		g_DatachronButton = self.wndBottom:FindChild("DatachronButton")
+		g_CommButton = self.CommButton
+		g_CommPulseBlue = self.wndBottom:FindChild("CommButtonPulse")
+		
 		self:UpdateZoneName(GetCurrentZoneName())
 		--self.wndMinimapButtons 	= self.wndMain:FindChild("ButtonContainer")
 		
@@ -438,7 +454,7 @@ function CandyUI_Minimap:OnDocLoaded()
 		self:ReloadPublicEvents()
 		self:ReloadMissions()
 		self:OnQuestStateChanged()
-	
+		self:OnUpdateInventory()
 		--Replace with own options
 		--[[
 		local tUIElementToType =
@@ -492,8 +508,15 @@ function CandyUI_Minimap:OnDocLoaded()
 		self.colorPicker:Show(false, true)
 	
 		if not self.bOptionsSet or not self.bOptionsLoaded then
-			--Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
 		end
+		
+		self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+		
+		if self.db.profile.general.fSavedZoomLevel then
+			self.wndMiniMap:SetZoomLevel(self.db.profile.general.fSavedZoomLevel)
+		end
+		Apollo.StartTimer("ZoomTimer")
 	end
 end
 
@@ -509,6 +532,18 @@ function CandyUI_Minimap:OnCUIOptionsLoaded()
 		self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
 	end
 	CUI_RegisterOptions("Minimap", self.wndControls)
+end
+
+function CandyUI_Minimap:OnZoomTimer()
+	--self.wndMiniMap:SetZoomLevel(self.db.profile.general.fSavedZoomLevel)
+	local fZoomLevel = self.wndMiniMap:GetZoomLevel()
+	if self.db.profile.general.fSavedZoomLevel ~= fZoomLevel then
+		self.db.profile.general.fSavedZoomLevel = fZoomLevel
+	end
+end
+
+function CandyUI_Minimap:OnUpdateInventory()
+	self.wndBottom:FindChild("BagButton:Text"):SetText(GameLib.GetEmptyInventorySlots())
 end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Minimap Functions
@@ -1273,7 +1308,14 @@ function CandyUI_Minimap:OnBagButtonClick( wndHandler, wndControl, eMouseButton 
 end
 
 function CandyUI_Minimap:OnDatachronButtonCheck( wndHandler, wndControl, eMouseButton )	
-	wndControl:AttachWindow(g_wndDatachron)
+	--wndControl:AttachWindow(g_wndDatachron)
+	local nDCWidth = g_wndDatachron:GetWidth()
+	local nDCHeight = g_wndDatachron:GetHeight()
+	
+	local nMMLeft, nMMTop, nMMRight, nMMBottom = Apollo.GetAddon("CandyUI_Minimap").wndMain:GetAnchorOffsets()
+	
+	g_wndDatachron:SetAnchorOffsets(nMMRight - nDCWidth, nMMBottom + 10, nMMRight, nMMBottom + nDCHeight + 10)
+	
 	g_wndDatachron:Show(true)
 	Event_FireGenericEvent("DatachronRestored")
 
@@ -1281,13 +1323,28 @@ function CandyUI_Minimap:OnDatachronButtonCheck( wndHandler, wndControl, eMouseB
 end
 
 function CandyUI_Minimap:OnDatachronButtonUncheck( wndHandler, wndControl, eMouseButton )
-	wndControl:AttachWindow(g_wndDatachron)
+	--wndControl:AttachWindow(g_wndDatachron)
 	g_wndDatachron:Show(false)
 	Event_FireGenericEvent("DatachronMinimized")
 	g_wndDatachron:FindChild("QueuedCallsContainer"):Show(false)
 
 	Sound.Play(Sound.PlayUI38CloseRemoteWindowDigital)
 end
+
+function CandyUI_Minimap:OnMinimapMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
+	self.db.profile.general.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+end
+
+kcuiMMDefaults = {
+	char = {
+		currentProfile = nil,
+	},
+	profile = {
+		general = {
+			tAnchorOffsets = { -209, 35, -5, 265},
+		},
+	},
+}
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Minimap Instance
 -----------------------------------------------------------------------------------------------

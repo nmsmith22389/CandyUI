@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+	<Sprite Name="PlayerBG_Stretch" Cycle="1">
+        <Frame Texture="CandyUI_UnitFrames\Sprites\PlayerBG.tga" x0="0" x1="12" x2="128" x3="128" x4="244" x5="256" y0="0" y1="12" y2="28" y3="28" y4="45" y5="56" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+	<Sprite Name="ResourceBarBG" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBarBG.tga" x0="0" x1="6" x2="6" x3="6" x4="240" x5="246" y0="0" y1="0" y2="0" y3="15" y4="15" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceBG" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceBG.tga" x0="0" x1="10" x2="10" x3="10" x4="246" x5="256" y0="0" y1="0" y2="0" y3="25" y4="25" y5="25" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="ResourceDot" Cycle="1">
+        <Frame Texture="CandyUI_Resources\Sprites\ResourceDot.tga" x0="0" x1="0" x2="0" x3="0" x4="8" x5="8" y0="0" y1="0" y2="0" y3="0" y4="8" y5="8" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+</Sprites>
