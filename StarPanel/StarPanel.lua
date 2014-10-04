@@ -340,7 +340,7 @@ function StarPanel:InitializeDataTexts(self)
 		["local"] = "Local",
 	}
 	local funcCallFunction = function(strSelection)
-		Print(strSelection)
+		--Print(strSelection)
 	end
 	self:RegisterMenuOption(self, "Time", tName, tCustOps, nil, 4)
 	
@@ -912,7 +912,7 @@ function StarPanel:InitializeDataTexts(self)
 	self:RegisterDefaultOptions(self, "dadass")
 	
 	--Currency
-	if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == nil then
+	if self.db.profile.tDTOptions["Currency"] ~= nil and (self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1) then
 		self.db.profile.tDTOptions["Currency"]["nDisplayMode"] = 3
 	end
 
@@ -1017,7 +1017,7 @@ function StarPanel:InitializeDataTexts(self)
 			local text = ""
 			local userGuild = GuildLib.GetGuilds()[1]
 			if userGuild ~= nil then
-				self.DataTexts.Guild.strLabel = userGuild:GetName()
+				self.DataTexts.Guild.strLabel = userGuild:GetName()..": "
 				text = userGuild:GetOnlineMemberCount().." online"
 			end
 			return text			
@@ -1029,6 +1029,35 @@ function StarPanel:InitializeDataTexts(self)
 
 	self:RegisterDataText(self, "Guild", dt)
 	self:RegisterDefaultOptions(self, "Guild")
+	
+	--WSIM
+	dt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= "WSIM: ",
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= "HUD_BottomBar:spr_HUD_MenuIcons_Social",
+		["nIconSize"]	= 17,
+		["OnUpdate"]	= function()
+			if WSIM_GetNumNewMsg == nil then return "" end
+			local nNew = WSIM_GetNumNewMsg()
+			local text = ""
+			if nNew == 0 then
+				text = "No New Msgs"
+			elseif nNew == 1 then
+				text = nNew.." New Msg"
+			else
+				text = nNew.." New Msgs"
+			end
+			return text			
+		end,
+		["OnClick"]		= function(wndControl)
+			Event_FireGenericEvent("WSIM_ToggleNotificationList", wndControl)
+		end
+	}
+
+	self:RegisterDataText(self, "WildStar Instant Messenger", dt)
+	self:RegisterDefaultOptions(self, "WildStar Instant Messenger")
 	--[[########################################################
 	To Finish:
 	+XP (time to lvl)
@@ -1600,15 +1629,15 @@ function StarPanel:GetTotalWidthTop(self)
 end
 
 function StarPanel:RegisterDataText(self, strName, tData, tCustOptions)
-	Print("----------------------")
-	Print(strName)
+	--Print("----------------------")
+	--Print(strName)
 	if self.DataTexts[strName] then
-		Print("Exists")
+		--Print("Exists")
 		return
 	end
 	
 	if not self.db.profile.tDTOptions[strName] then
-		Print("Options don't exist")
+		--Print("Options don't exist")
 		self.db.profile.tDTOptions[strName] = {
 			["bShownTop"] 	= false,
 			["bShownBot"]	= false,
@@ -1629,7 +1658,7 @@ function StarPanel:RegisterDataText(self, strName, tData, tCustOptions)
 	end
 	
 	if tCustOptions then
-		Print("Customs exist")
+		--Print("Customs exist")
 		for k, v in pairs(tCustOptions) do
 			if self.db.profile.tDTOptions[strName][k] == nil then
 				self.db.profile.tDTOptions[strName][k] = v
@@ -1639,7 +1668,7 @@ function StarPanel:RegisterDataText(self, strName, tData, tCustOptions)
 	
 	self.DataTexts[strName] = tData
 	
-	Print(tostring(self.DataTexts[strName] == tData))
+	--Print(tostring(self.DataTexts[strName] == tData))
 	
 	return self.DataTexts[strName]
 end
@@ -1900,7 +1929,7 @@ function StarPanel:OnMouseUp( wndHandler, wndControl, eMouseButton, nLastRelativ
 	if eMouseButton == 0 and strType == "launcher" then
 		wndControl:GetData().OnClick()
 	elseif eMouseButton == 0 and strType == "dataFeed" and wndControl:GetData().OnClick ~= nil then
-		wndControl:GetData().OnClick()
+		wndControl:GetData().OnClick(wndControl)
 	elseif eMouseButton == 1 then
 
 		local wndCurr = self.DataTextOptionsUI[wndControl:GetName()]

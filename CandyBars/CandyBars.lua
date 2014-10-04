@@ -529,7 +529,7 @@ function CandyBars:InitializeShortcutBar(self)
 end
 
 function CandyBars:ShowShortcutBar(nBar, bIsVisible, nShortcuts)
-    if self.tActionBarsHorz[nBar] == nil then
+    if self.tActionBarsHorz == nil or self.tActionBarsHorz[nBar] == nil then
 		return
 	end
 	--Print("idx = "..nBar.."visible = "..tostring(bIsVisible))

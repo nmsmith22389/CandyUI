@@ -134,10 +134,12 @@ function StarPanel:SetOptions()
 	
 	self.wndAlignmentBotDropdown:SetText(tOptions.botBar.strAlignment)
 	--Shift UI
-	botBarControls:FindChild("ShiftUIToggle"):SetCheck(tOptions.botBar.bShiftUI)
+	botBarControls:FindChild("ShiftUIToggle"):SetCheck(false)--tOptions.botBar.bShiftUI)
+	botBarControls:FindChild("ShiftUIToggle"):Enable(false)
+	
 	if tOptions.botBar.bShiftUI then
-		self.ShiftUIDelay = ApolloTimer.Create(1, false, "ToggleBBShiftUI", self)
-		self.ShiftUIDelay:Start()
+		--self.ShiftUIDelay = ApolloTimer.Create(1, false, "ToggleBBShiftUI", self)
+		--self.ShiftUIDelay:Start()
 	end
 	
 --Data Texts
@@ -307,6 +309,7 @@ end
 
 --Shift UI
 function StarPanel:OnBBShiftUIClick( wndHandler, wndControl, eMouseButton )
+--[[
 	self.db.profile.botBar.bShiftUI = wndControl:IsChecked()
 	local QuestTracker = Apollo.GetAddon("QuestTracker")
 	if wndControl:IsChecked() then
@@ -318,9 +321,11 @@ function StarPanel:OnBBShiftUIClick( wndHandler, wndControl, eMouseButton )
 		local l, t, r, b = QuestTracker.wndMain:GetAnchorOffsets()
 		QuestTracker.wndMain:SetAnchorOffsets(l, t, r, b+20)
 	end
+	]]
 end
 
 function StarPanel:ToggleBBShiftUI()
+--[[
 	local QuestTracker = Apollo.GetAddon("QuestTracker")
 	if QuestTracker then
 		if self.db.profile.botBar.bShiftUI then
@@ -332,6 +337,7 @@ function StarPanel:ToggleBBShiftUI()
 		self.ShiftUIDelay:Stop()
 		self.ShiftUIDelay:Start()
 	end
+	]]
 end
 ---------------------------------------------------
 --				DataTexts

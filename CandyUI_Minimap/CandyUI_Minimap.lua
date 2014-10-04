@@ -388,10 +388,11 @@ function CandyUI_Minimap:OnDocLoaded()
 		self.wndRangeLabel 		= self.wndMain:FindChild("RangeToTargetLabel")
 		self.wndBottom			= self.wndMain:FindChild("Bottom")
 		self.CommButton			= self.wndBottom:FindChild("CallButton")
+		
 		--Global for Datachron
 		g_DatachronButton = self.wndBottom:FindChild("DatachronButton")
-		g_CommButton = self.CommButton
-		g_CommPulseBlue = self.wndBottom:FindChild("CommButtonPulse")
+		--g_CommButton = self.CommButton
+		--g_CommPulseBlue = self.wndBottom:FindChild("CommButtonPulse")
 		
 		self:UpdateZoneName(GetCurrentZoneName())
 		--self.wndMinimapButtons 	= self.wndMain:FindChild("ButtonContainer")
@@ -424,67 +425,40 @@ function CandyUI_Minimap:OnDocLoaded()
 		if self.unitPlayerDisposition ~= nil then
 			self:OnCharacterCreated()
 		end
-
-		if not self.tToggledIcons then
-			self.tToggledIcons =
-			{
-				[self.eObjectTypeHostile] 						= true,
-				[self.eObjectTypeNeutral] 						= true,
-				[self.eObjectTypeGroupMember] 					= true,
-				[self.eObjectTypeQuestReward]					= true,
-				[self.eObjectTypeVendor] 						= true,
-				[self.eObjectTypeBindPointActive] 				= true,
-				[self.eObjectTypeInstancePortal] 				= true,
-				[self.eObjectTypePublicEvent] 					= true,
-				[self.eObjectTypeQuestTarget]					= true, 
-				[GameLib.CodeEnumMapOverlayType.QuestObjective] = true,
-				[GameLib.CodeEnumMapOverlayType.PathObjective] 	= true,
-				[self.eObjectTypeChallenge] 					= true,
-				[self.eObjectTypeMiningNode] 					= true,
-				[self.eObjectTypeRelicHunterNode] 				= true,
-				[self.eObjectTypeSurvivalistNode] 				= true,
-				[self.eObjectTypeFarmingNode] 					= true,
-				[self.eObjectTypeTradeskills] 					= true,
-				[self.eObjectTypeTrainer] 						= true,
-				[self.eObjectTypeFriend] 						= true,
-				[self.eObjectTypeRival] 						= true
-			}
+		
+		if not self.db.profile.tToggledIcons then
+		self.db.profile.tToggledIcons =
+		{
+			[self.eObjectTypeHostile] 						= true,
+			[self.eObjectTypeNeutral] 						= true,
+			[self.eObjectTypeGroupMember] 					= true,
+			[self.eObjectTypeQuestReward]					= true,
+			[self.eObjectTypeVendor] 						= true,
+			[self.eObjectTypeBindPointActive] 				= true,
+			[self.eObjectTypeInstancePortal] 				= true,
+			[self.eObjectTypePublicEvent] 					= true,
+			[self.eObjectTypeQuestTarget]					= true, 
+			[GameLib.CodeEnumMapOverlayType.QuestObjective] = true,
+			[GameLib.CodeEnumMapOverlayType.PathObjective] 	= true,
+			[self.eObjectTypeChallenge] 					= true,
+			[self.eObjectTypeMiningNode] 					= true,
+			[self.eObjectTypeRelicHunterNode] 				= true,
+			[self.eObjectTypeSurvivalistNode] 				= true,
+			[self.eObjectTypeFarmingNode] 					= true,
+			[self.eObjectTypeTradeskills] 					= true,
+			[self.eObjectTypeTrainer] 						= true,
+			[self.eObjectTypeFriend] 						= true,
+			[self.eObjectTypeRival] 						= true
+		}
 		end
 		
 		self:ReloadPublicEvents()
 		self:ReloadMissions()
 		self:OnQuestStateChanged()
 		self:OnUpdateInventory()
-		--Replace with own options
-		--[[
-		local tUIElementToType =
-		{
-		["OptionsBtnQuests"] 			= self.eObjectTypeQuestReward,
-		["OptionsBtnTracked"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
-		["OptionsBtnMissions"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
-		["OptionsBtnChallenges"] 		= self.eObjectTypeChallenge,
-		["OptionsBtnPublicEvents"] 		= self.eObjectTypePublicEvent,
-		["OptionsBtnVendors"] 			= self.eObjectTypeVendor,
-		["OptionsBtnInstancePortals"] 	= self.eObjectTypeInstancePortal,
-		["OptionsBtnBindPoints"] 		= self.eObjectTypeBindPointActive,
-		["OptionsBtnMiningNodes"] 		= self.eObjectTypeMiningNode,
-		["OptionsBtnRelicNodes"] 		= self.eObjectTypeRelicHunterNode,
-		["OptionsBtnSurvivalistNodes"] 	= self.eObjectTypeSurvivalistNode,
-		["OptionsBtnFarmingNodes"] 		= self.eObjectTypeFarmingNode,
-		["OptionsBtnTradeskills"] 		= self.eObjectTypeTradeskills,
-		["OptionsBtnCreaturesN"] 		= self.eObjectTypeNeutral,
-		["OptionsBtnCreaturesH"] 		= self.eObjectTypeHostile,
-			["OptionsBtnTrainer"] 			= self.eObjectTypeTrainer,
-			["OptionsBtnFriends"]			= self.eObjectTypeFriend,
-			["OptionsBtnRivals"] 			= self.eObjectTypeRival
-		}
-		local wndOptionsWindow = self.wndMinimapOptions:FindChild("MapOptionsWindow")
-		for strWindowName, eType in pairs(tUIElementToType) do
-			local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
-			wndOptionsBtn:SetData(eType)
-			wndOptionsBtn:SetCheck(self.tToggledIcons[eType])
-		end
-		]]
+		
+		
+		
 		if g_wndTheMiniMap == nil then
 			g_wndTheMiniMap = self.wndMiniMap
 		end
@@ -493,12 +467,41 @@ function CandyUI_Minimap:OnDocLoaded()
 		if self.OptionsAddon ~= nil then
 			self.bOptionsLoaded = true
 		
-			--self.wndOptionsMain = self.OptionsAddon.wndOptions
+			self.wndOptionsMain = self.OptionsAddon.wndOptions
 		
-			--self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-			--self.wndControls:Show(false, true)
+			self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
+			self.wndControls:Show(false, true)
 			
-			--self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
+			self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
+			
+			local tUIElementToType =
+		{
+			["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
+			["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
+			["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
+			["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
+			["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
+			["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
+			["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
+			["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
+			["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
+			["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
+			["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
+			["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
+			["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
+			["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
+			["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
+			["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
+			["ShowFriendsToggle"]			= self.eObjectTypeFriend,
+			["ShowRivalsToggle"] 			= self.eObjectTypeRival,
+			["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
+		}
+		local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
+		for strWindowName, eType in pairs(tUIElementToType) do
+			local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
+			wndOptionsBtn:SetData(eType)
+			wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
+		end
 		else	
 			self.bOptionsLoaded = false
 		end
@@ -532,6 +535,34 @@ function CandyUI_Minimap:OnCUIOptionsLoaded()
 		self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
 	end
 	CUI_RegisterOptions("Minimap", self.wndControls)
+	
+	local tUIElementToType =
+		{
+			["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
+			["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
+			["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
+			["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
+			["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
+			["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
+			["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
+			["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
+			["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
+			["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
+			["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
+			["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
+			["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
+			["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
+			["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
+			["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
+			["ShowFriendsToggle"]			= self.eObjectTypeFriend,
+			["ShowRivalsToggle"] 			= self.eObjectTypeRival
+		}
+		local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
+		for strWindowName, eType in pairs(tUIElementToType) do
+			local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
+			wndOptionsBtn:SetData(eType)
+			wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
+		end
 end
 
 function CandyUI_Minimap:OnZoomTimer()
@@ -757,7 +788,7 @@ function CandyUI_Minimap:OnFlashChallengeIcon(chalOwner, strDescription, fDurati
 		self.wndMiniMap:RemoveObject(self.tChallengeObjects[chalOwner])
 	end
 
-	if self.tToggledIcons[self.eObjectTypeChallenge] ~= false then
+	if self.db.profile.tToggledIcons[self.eObjectTypeChallenge] ~= false then
 		-- TODO: Need to change the icon to a flashing icon
 		local tInfo =
 		{
@@ -791,7 +822,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function CandyUI_Minimap:OnPlayerPathMissionActivate(pmActivated)
-	if self.tToggledIcons == nil then
+	if self.db.profile.tToggledIcons == nil then
 		return
 	end
 
@@ -805,7 +836,7 @@ function CandyUI_Minimap:OnPlayerPathMissionActivate(pmActivated)
 		crEdge 		= CColor.new(1, 1, 1, 1),
 	}
 
-	self.wndMiniMap:AddPathIndicator(pmActivated, tInfo, {bNeverShowOnEdge = true, bFixedSizeSmall = false}, not self.tToggledIcons[GameLib.CodeEnumMapOverlayType.PathObjective])
+	self.wndMiniMap:AddPathIndicator(pmActivated, tInfo, {bNeverShowOnEdge = true, bFixedSizeSmall = false}, not self.db.profile.tToggledIcons[GameLib.CodeEnumMapOverlayType.PathObjective])
 end
 
 function CandyUI_Minimap:OnPlayerPathMissionDeactivate(pmDeactivated)
@@ -824,7 +855,7 @@ end
 function CandyUI_Minimap:OnPublicEventUpdate(peUpdated)
 	self:OnPublicEventEnd(peUpdated)
 
-	if not peUpdated:IsActive() or self.tToggledIcons == nil then
+	if not peUpdated:IsActive() or self.db.profile.tToggledIcons == nil then
 		return
 	end
 
@@ -837,7 +868,7 @@ function CandyUI_Minimap:OnPublicEventUpdate(peUpdated)
 	}
 
 	for idx, tPos in ipairs(peUpdated:GetLocations()) do
-		self.wndMiniMap:AddObject(self.eObjectTypePublicEvent, tPos, peUpdated:GetName(), tInfo, {bNeverShowOnEdge = peUpdated:ShouldShowOnMiniMapEdge(), bFixedSizeSmall = false}, not self.tToggledIcons[self.eObjectTypePublicEvent], peUpdated)
+		self.wndMiniMap:AddObject(self.eObjectTypePublicEvent, tPos, peUpdated:GetName(), tInfo, {bNeverShowOnEdge = peUpdated:ShouldShowOnMiniMapEdge(), bFixedSizeSmall = false}, not self.db.profile.tToggledIcons[self.eObjectTypePublicEvent], peUpdated)
 	end
 
 	for idx, peoCurr in ipairs(peUpdated:GetObjectives()) do
@@ -871,7 +902,7 @@ function CandyUI_Minimap:OnPublicEventObjectiveUpdate(peoUpdated)
 	bHideOnEdge = (peoUpdated:ShouldShowOnMinimapEdge() ~= true)
 
 	for idx, tPos in ipairs(peoUpdated:GetLocations()) do
-		self.wndMiniMap:AddObject(self.eObjectTypePublicEvent, tPos, peoUpdated:GetShortDescription(), tInfo, {bNeverShowOnEdge = hideOnEdge, bFixedSizeSmall = false}, not self.tToggledIcons[self.eObjectTypePublicEvent], peoUpdated)
+		self.wndMiniMap:AddObject(self.eObjectTypePublicEvent, tPos, peoUpdated:GetShortDescription(), tInfo, {bNeverShowOnEdge = hideOnEdge, bFixedSizeSmall = false}, not self.db.profile.tToggledIcons[self.eObjectTypePublicEvent], peoUpdated)
 	end
 end
 
@@ -911,7 +942,7 @@ end
 function CandyUI_Minimap:OnQuestStateChanged()
 	self.tEpisodeList = QuestLib.GetTrackedEpisodes(self.bQuestTrackerByDistance)
 
-	if self.wndMiniMap == nil or self.tToggledIcons == nil then
+	if self.wndMiniMap == nil or self.db.profile.tToggledIcons == nil then
 		return
 	end
 
@@ -936,8 +967,8 @@ function CandyUI_Minimap:OnQuestStateChanged()
 					crEdge 		= CColor.new(1, 1, 1, 1),
 				}
 				-- This is a C++ call on the MiniMapWindow class
-				self.wndMiniMap:AddQuestIndicator(queCurr, tostring(nCount), tInfo, {bOnlyShowOnEdge = false, bAboveOverlay = true}, not self.tToggledIcons[GameLib.CodeEnumMapOverlayType.QuestObjective])
-			elseif not queCurr:IsActiveQuest() and self.tToggledIcons[self.eObjectTypeQuestReward] then
+				self.wndMiniMap:AddQuestIndicator(queCurr, tostring(nCount), tInfo, {bOnlyShowOnEdge = false, bAboveOverlay = true}, not self.db.profile.tToggledIcons[GameLib.CodeEnumMapOverlayType.QuestObjective])
+			elseif not queCurr:IsActiveQuest() and self.db.profile.tToggledIcons[self.eObjectTypeQuestReward] then
 				local tInfo =
 				{
 					strIcon = "sprMM_QuestTracked",
@@ -946,7 +977,7 @@ function CandyUI_Minimap:OnQuestStateChanged()
 					crEdge = CColor.new(1, 1, 1, 1),
 				}
 				-- This is a C++ call on the MiniMapWindow class
-				self.wndMiniMap:AddQuestIndicator(queCurr, tostring(nCount), tInfo, {bOnlyShowOnEdge = false, bFixedSizeMedium = false, bAboveOverlay = true}, not self.tToggledIcons[GameLib.CodeEnumMapOverlayType.QuestObjective])
+				self.wndMiniMap:AddQuestIndicator(queCurr, tostring(nCount), tInfo, {bOnlyShowOnEdge = false, bFixedSizeMedium = false, bAboveOverlay = true}, not self.db.profile.tToggledIcons[GameLib.CodeEnumMapOverlayType.QuestObjective])
 			end
 		end
 	end
@@ -1077,7 +1108,7 @@ function CandyUI_Minimap:HandleUnitCreated(unitNew)
 			objectType = tMarkerInfo.objectType
 		end
 
-		self.wndMiniMap:AddUnit(unitNew, objectType, tInfo, tMarkerOptions, self.tToggledIcons[objectType] ~= nil and not self.tToggledIcons[objectType])
+		self.wndMiniMap:AddUnit(unitNew, objectType, tInfo, tMarkerOptions, self.db.profile.tToggledIcons[objectType] ~= nil and not self.db.profile.tToggledIcons[objectType])
 		self.tUnitsShown[unitNew:GetId()] = { tInfo = tInfo, unitObject = unitNew }
 	end
 
@@ -1343,8 +1374,64 @@ kcuiMMDefaults = {
 		general = {
 			tAnchorOffsets = { -209, 35, -5, 265},
 		},
+		
 	},
 }
+
+function CandyUI_Minimap:OnFilterOptionCheck(wndHandler, wndControl, eMouseButton)
+	local data = wndControl:GetData()
+	if data == nil then
+		return
+	end
+
+	self.db.profile.tToggledIcons[data] = true
+
+	if data == self.eObjectTypeQuestReward then
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeQuestReward)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeQuestReceiving)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeQuestNew)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeQuestNewSoon)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeQuestTarget)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeQuestKill)
+	elseif data == self.eObjectTypeBindPointActive then
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeBindPointActive)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeBindPointInactive)
+	elseif data == self.eObjectTypeVendor then
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeVendor)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeAuctioneer)
+		self.wndMiniMap:ShowObjectsByType(self.eObjectTypeCommodity)
+	else
+		self.wndMiniMap:ShowObjectsByType(data)
+	end
+end
+
+function CandyUI_Minimap:OnFilterOptionUncheck(wndHandler, wndControl, eMouseButton)
+	local data = wndControl:GetData()
+	if data == nil then
+		return
+	end
+
+	self.db.profile.tToggledIcons[data] = false
+
+	if data == self.eObjectTypeQuestReward then
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeQuestReward)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeQuestReceiving)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeQuestNew)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeQuestNewSoon)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeQuestTarget)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeQuestKill)
+	elseif data == self.eObjectTypeBindPointActive then
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeBindPointActive)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeBindPointInactive)
+	elseif data == self.eObjectTypeVendor then
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeVendor)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeAuctioneer)
+		self.wndMiniMap:HideObjectsByType(self.eObjectTypeCommodity)
+	else
+		self.wndMiniMap:HideObjectsByType(data)
+	end
+end
+
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Minimap Instance
 -----------------------------------------------------------------------------------------------
