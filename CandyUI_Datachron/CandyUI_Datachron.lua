@@ -93,8 +93,8 @@ function CandyUI_Datachron:OnDocLoaded()
 	Apollo.RegisterEventHandler("Communicator_SpamVOEnded", 		"OnCommunicator_SpamVOEnded", self)
 	Apollo.RegisterEventHandler("Communicator_ShowQuestMsg", 		"OnCommunicator_ShowQuestMsg", self)
 
-	--Apollo.RegisterTimerHandler("Datachron_MaxMissedCallTimer",		"Datachron_MaxMissedCallTimer", self)
-	--Apollo.RegisterTimerHandler("NpcBubbleFade", 					"OnNpcBubbleFade", self) -- Comm Display fade after time
+	Apollo.RegisterTimerHandler("Datachron_MaxMissedCallTimer",		"Datachron_MaxMissedCallTimer", self)
+	Apollo.RegisterTimerHandler("NpcBubbleFade", 					"OnNpcBubbleFade", self) -- Comm Display fade after time
 	
 	g_wndDatachron 			= Apollo.LoadForm(self.xmlDoc, "Datachron", "FixedHudStratum", self) -- Do not rename. This is global and used by other forms as a parent.
 	g_wndDatachron:Show(false, true)
@@ -288,7 +288,7 @@ function CandyUI_Datachron:OnNpcBubbleFade()
 	-- NPC bubble fades out
 	Apollo.StopTimer("NpcBubbleFade")
 	self:HideCommDisplay()
-	if self.idSpamMsg ~= 0 then
+	if self.idSpamMsg ~= 0 or self.idSpamMsg ~= nil then
 		CommunicatorLib.QueueNextCall(self.idSpamMsg)
 	end
 	self:ProcessDatachronState()

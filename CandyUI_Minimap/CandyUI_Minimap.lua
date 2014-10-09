@@ -448,7 +448,8 @@ function CandyUI_Minimap:OnDocLoaded()
 			[self.eObjectTypeTradeskills] 					= true,
 			[self.eObjectTypeTrainer] 						= true,
 			[self.eObjectTypeFriend] 						= true,
-			[self.eObjectTypeRival] 						= true
+			[self.eObjectTypeRival] 						= true,
+			[self.eObjectTypeCityDirection]					= true,
 		}
 		end
 		
@@ -473,7 +474,7 @@ function CandyUI_Minimap:OnDocLoaded()
 			self.wndControls:Show(false, true)
 			
 			self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
-			
+			self:SetOptions()
 			local tUIElementToType =
 		{
 			["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
@@ -535,7 +536,7 @@ function CandyUI_Minimap:OnCUIOptionsLoaded()
 		self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
 	end
 	CUI_RegisterOptions("Minimap", self.wndControls)
-	
+	self:SetOptions()
 	local tUIElementToType =
 		{
 			["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
@@ -555,7 +556,8 @@ function CandyUI_Minimap:OnCUIOptionsLoaded()
 			["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
 			["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
 			["ShowFriendsToggle"]			= self.eObjectTypeFriend,
-			["ShowRivalsToggle"] 			= self.eObjectTypeRival
+			["ShowRivalsToggle"] 			= self.eObjectTypeRival,
+			["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
 		}
 		local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
 		for strWindowName, eType in pairs(tUIElementToType) do
@@ -1374,9 +1376,24 @@ kcuiMMDefaults = {
 		general = {
 			tAnchorOffsets = { -209, 35, -5, 265},
 		},
-		
+		buttonControls = {
+			strAddonName = "",
+			strWindowName = "",
+			bUseCustomFunc = false,
+			strCustFunc = "",
+		},
 	},
 }
+
+function CandyUI_Minimap:SetOptions()
+	local Options = self.db.profile
+
+	--Full Color
+	self.wndControls:FindChild("ButtonControls"):FindChild("AddonName:Input"):SetText(Options.buttonControls.strAddonName)	
+	self.wndControls:FindChild("ButtonControls"):FindChild("WindowName:Input"):SetText(Options.buttonControls.strWindowName)	
+	self.wndControls:FindChild("ButtonControls"):FindChild("CustomFuncToggle"):SetCheck(Options.buttonControls.bUseCustomFunc)	
+	self.wndControls:FindChild("ButtonControls"):FindChild("CustomFuncInput"):SetText(Options.buttonControls.strCustFunc)	
+end
 
 function CandyUI_Minimap:OnFilterOptionCheck(wndHandler, wndControl, eMouseButton)
 	local data = wndControl:GetData()
@@ -1430,6 +1447,68 @@ function CandyUI_Minimap:OnFilterOptionUncheck(wndHandler, wndControl, eMouseBut
 	else
 		self.wndMiniMap:HideObjectsByType(data)
 	end
+end
+
+function CandyUI_Minimap:OnCenterButtonClick( wndHandler, wndControl, eMouseButton )
+	if self.db.profile.buttonControls.bUseCustomFunc then
+		--Use the custom function
+		local strFuncText = self.db.profile.buttonControls.strCustFunc
+		local func, strError = loadstring(strFuncText)
+		if func ~= nil then
+			func()
+		end
+	elseif self.db.profile.buttonControls.strWindowName ~= nil or self.db.profile.buttonControls.strWindowName ~= "" then
+		--Use addon and window name
+		local strAddonName = self.db.profile.buttonControls.strAddonName
+		local strWindowName = self.db.profile.buttonControls.strWindowName
+		local uAddon = Apollo.GetAddon(strAddonName)
+		local bIsRunning = Apollo.GetAddonInfo(strAddonName).bRunning --1 = running
+		if (strAddonName ~= nil or strAddonName ~= "") then
+			--Use addon name
+			if bIsRunning == 1 then
+				local wndToggle = uAddon[strWindowName]
+				if wndToggle ~= nil and wndToggle:IsValid() then
+					if wndToggle:IsVisible() then
+						wndToggle:Show(false)
+					else
+						wndToggle:Show(true)
+					end
+				end
+			end
+		else
+			--Window is global
+			if bIsRunning == 1 then
+				local wndToggle = strWindowName
+				if wndToggle ~= nil and wndToggle:IsValid() then
+					if wndToggle:IsVisible() then
+						wndToggle:Show(false)
+					else
+						wndToggle:Show(true)
+					end
+				end
+			end
+		end
+	end
+end
+
+---------------------------------------------------------------------------------------------------
+-- OptionsControlsList Functions
+---------------------------------------------------------------------------------------------------
+
+function CandyUI_Minimap:OnAddonNameChanged( wndHandler, wndControl, strText )
+	self.db.profile.buttonControls.strAddonName = tostring(strText)
+end
+
+function CandyUI_Minimap:OnWindowNameChanged( wndHandler, wndControl, strText )
+	self.db.profile.buttonControls.strWindowName = tostring(strText)
+end
+
+function CandyUI_Minimap:OnCustomFuncChanged( wndHandler, wndControl, strText )
+	self.db.profile.buttonControls.strCustFunc = tostring(strText)
+end
+
+function CandyUI_Minimap:OnUseCustomFuncClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.buttonControls.bUseCustomFunc = wndControl:IsChecked()
 end
 
 -----------------------------------------------------------------------------------------------

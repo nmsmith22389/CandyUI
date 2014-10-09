@@ -1,9 +1,14 @@
-----------------------
-ToDo:
-+Add "(beta)" to shift ui text
-+Make your own DT tutorial
-+
-----------------------
+v1.2.1
+-Fixed currency bug.
+-Added WSIM datatext.
+-Fixed Shift bug.
+-Disabled the "ShiftUI" button until a better solution is figured out.
+
+v1.2
+-Added Guild Other Currency and friends.
+-Currency was renamed to gold.
+-Added onclick events for some data texts.
+-You can now actually create data texts.
 
 v1.1
 -Options now has the correct name.
