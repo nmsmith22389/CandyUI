@@ -424,10 +424,15 @@ function CandyUI_Resources:OnCreateMedic()
 	self.wndMedic3 = self.wndMain:FindChild("Segment3")
 	self.wndMedic4 = self.wndMain:FindChild("Segment4")
 
+	for idx, wndCurr in pairs({ self.wndMedic1, self.wndMedic2, self.wndMedic3, self.wndMedic4 }) do
+		wndCurr:FindChild("Bar"):SetMax(100)
+	end
+		
 	local unitPlayer = GameLib.GetPlayerUnit()
 	if unitPlayer then
 		self:OnMedicEnteredCombat(unitPlayer, self.bCombat)
 	end
+	
 	
 	local l, t, r, b = self.wndMain:GetAnchorOffsets()
 	local nHalfWidth = self.db.profile.medic.nWidth / 2
@@ -453,21 +458,26 @@ function CandyUI_Resources:OnMedicUpdateTimer()
 	for idx = 1, 4 do
 		local strIndex = "wndMedic"..idx
 		local bFull = nResourceCurrent >= idx
+		local bFirstPartial = idx == nResourceCurrent + 1
 		local bShowPartial = bFirstPartial and nPartialCount > 0
 
 		-- Bar
-		local strSpriteToUse = ""
+		--local strSpriteToUse = ""
 		if bFull then
 			self[strIndex]:FindChild("Bar"):SetProgress(100)
-		elseif not bFull and nPartialCount == 2 then
+		elseif bShowPartial and nPartialCount == 2 then
 			self[strIndex]:FindChild("Bar"):SetProgress(66)
-		elseif not bFull and nPartialCount == 1 then
+			--Print(66)
+		elseif bShowPartial and nPartialCount == 1 then
 			self[strIndex]:FindChild("Bar"):SetProgress(33)
+			--Print(33)
 		else
 			self[strIndex]:FindChild("Bar"):SetProgress(0)
 		end
 	end
 	
+	--Print(nPartialCount.."   partial")
+	--Print(unitPlayer:GetResource(1))
 	if self.wndMain:GetOpacity() ~= self.db.profile.medic.nOpacity then
 		self.wndMain:SetOpacity(self.db.profile.medic.nOpacity)
 	end
