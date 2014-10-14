@@ -72,8 +72,8 @@ function CandyUI_Datachron:OnDocLoaded()
 	--Print("x")
 	Apollo.LoadSprites("Sprites.xml")
 	
-	Apollo.RegisterEventHandler("Datachron_FlashIndicators", 		"FlashIndicators", self)
-	Apollo.RegisterEventHandler("Datachron_HideCallPulse", 			"OnDatachron_HideCallPulse", self)
+	--Apollo.RegisterEventHandler("Datachron_FlashIndicators", 		"FlashIndicators", self)
+	--Apollo.RegisterEventHandler("Datachron_HideCallPulse", 			"OnDatachron_HideCallPulse", self)
 
 	Apollo.RegisterEventHandler("ChangeWorld", 						"OnChangeWorld", self) -- From code
 	Apollo.RegisterEventHandler("SetPlayerPath", 					"SetPath", self) -- From code
@@ -288,7 +288,7 @@ function CandyUI_Datachron:OnNpcBubbleFade()
 	-- NPC bubble fades out
 	Apollo.StopTimer("NpcBubbleFade")
 	self:HideCommDisplay()
-	if self.idSpamMsg ~= 0 or self.idSpamMsg ~= nil then
+	if self.idSpamMsg ~= 0 and self.idSpamMsg ~= nil then
 		CommunicatorLib.QueueNextCall(self.idSpamMsg)
 	end
 	self:ProcessDatachronState()

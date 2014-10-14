@@ -9,7 +9,7 @@ require "Window"
 -- StarPanel Module Definition
 -----------------------------------------------------------------------------------------------
 local StarPanel = {} 
- 
+
 --[[
 USEFULL function in _G
 
@@ -149,6 +149,33 @@ local function CopperToDenominations(nCopperIn)
 	
 	return nPlat, nGold, nSilver, nCopper
 end
+
+function StarPanel:FormatBigNumber(nArg)
+	if nArg < 1000 then
+		strResult = tostring(nArg)
+	elseif nArg < 1000000 then
+		if math.floor(nArg%1000/100) == 0 then
+			strResult = String_GetWeaselString(Apollo.GetString("TargetFrame_ShortNumberWhole"), math.floor(nArg / 1000))
+		else
+			strResult = String_GetWeaselString(Apollo.GetString("TargetFrame_ShortNumberFloat"), nArg / 1000)
+		end
+	elseif nArg < 1000000000 then
+		if math.floor(nArg%1000000/100000) == 0 then
+			strResult = String_GetWeaselString(Apollo.GetString("TargetFrame_MillionsNumberWhole"), math.floor(nArg / 1000000))
+		else
+			strResult = String_GetWeaselString(Apollo.GetString("TargetFrame_MillionsNumberFloat"), nArg / 1000000)
+		end
+	elseif nArg < 1000000000000 then
+		if math.floor(nArg%1000000/100000) == 0 then
+			strResult = String_GetWeaselString(Apollo.GetString("TargetFrame_BillionsNumberWhole"), math.floor(nArg / 1000000))
+		else
+			strResult = String_GetWeaselString(Apollo.GetString("TargetFrame_BillionsNumberFloat"), nArg / 1000000)
+		end
+	else
+		strResult = tostring(nArg)
+	end
+	return strResult
+end
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
@@ -206,6 +233,7 @@ function StarPanel:OnDocLoaded()
 		[5] = GameLib.GetPlayerCurrency(5):GetAmount(),
 	}
 	self.nXpSession = GetXp()
+	self.nEpSession = GetElderPoints()
 	
 	self.wndTopDisplay = Apollo.LoadForm(self.xmlDoc, "TopDisplay", nil, self)
 	self.wndBotDisplay = Apollo.LoadForm(self.xmlDoc, "BotDisplay", nil, self)
@@ -732,6 +760,9 @@ function StarPanel:InitializeDataTexts(self)
 			local nRestXpPool		= GetRestXpKillCreaturePool()
 			local nRestXpEnd		= ((nRestXpPool + nXp)  / nXpMax) * 100
 			-- Also do kills to level
+			if nLvl == 50 then
+				return "Max Level"
+			end
 			if not self.nXpSession then
 				self.nXpSession = GetXp()
 			end
@@ -780,7 +811,95 @@ function StarPanel:InitializeDataTexts(self)
 		[5] = "End of Rest XP",
 	}
 	self:RegisterMenuOption(self, "XP", tName, tCustOps, nil, 4)
+	--GetElderPoints = <function 598>,
+--  getfenv = <function 599>,
+ -- GetItemInfo = <function 604>,
+  --GetPeriodicElderPoints = <function 610>,
+	--ELDER
+	dt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= "EP: ",
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= nil, --"IconSprites:Icon_Windows_UI_CRB_LevelUp_NewGeneralFeature",
+		["nIconSize"]	= nil,
+		["OnUpdate"]	= function()
+			local text
+			local nLvl				= GameLib.GetPlayerLevel()
+			local nCurrentEP		= GetElderPoints()
+			local nCurrentToDailyMax = GetPeriodicElderPoints()
+			local nEpNeeded			= nCurrentToDailyMax - nCurrentEP
+			local nEPToAGem			= GameLib.ElderPointsPerGem
+			local nEPDailyMax		= GameLib.ElderPointsDailyMax
+			local nRestedEP 		= GetRestXp() 							-- amount of rested xp
+			local nRestedEPPool		= GetRestXpKillCreaturePool() 		-- amount of rested xp remaining from creature kills
+			local strEpPerc			= string.format("(%.1f%%)", math.min(99.9, nCurrentEP / nEPToAGem * 100))
+			local strEpPercWeekly	= string.format("(%.1f%%)", math.min(99.9, nCurrentToDailyMax / nEPDailyMax * 100))
+			local strMinMax			= string.format("%d/%d", nCurrentEP, nEPToAGem)
+			local strMinMaxWeekly	= string.format("%d/%d", nCurrentToDailyMax, nEPDailyMax)
+			local nRestXp			= GetRestXp()
+			local nRestXpPool		= GetRestXpKillCreaturePool()
+			local nRestXpEnd		= ((nRestXpPool + nCurrentEP)  / nEPToAGem) * 100
+			local nRestXpPercent	= nRestXp / nEpNeeded * 100
+			if not self.nEpSession then
+				self.nEpSession = nCurrentEP
+			end
+			
+			local nDiffEP = nCurrentEP - self.nEpSession 
+			local nDiffTime = (os.time() - self.nTimeSessionStart) / 3600
+			local nEpPerHour = round(nDiffEP / nDiffTime, 1)
+			local type = tonumber(self.db.profile.tDTOptions["EP"]["nDisplayMode"])
+			
+			if type == 1 then
+				if nCurrentEP == nEPDailyMax then
+					text = "Max EP"
+				else
+					text = string.format("%s %s", strMinMax, strEpPerc)
+				end
+			elseif type == 2 then
+				if nCurrentEP == nEPDailyMax then
+					text = "Max EP"
+				else
+					text = string.format("%s %s", strMinMaxWeekly, strEpPercWeekly)
+				end
+			elseif type == 3 then
+				if nEpPerHour ~= 0 then
+					text = StarPanel:FormatBigNumber(nEpPerHour).." EP/h"
+				else
+					text = "n/a"
+				end
+			elseif type == 4 then
+				text = nRestXp.." EP ("..round(nRestXpPercent).."% to gem)"
+			--elseif type == 5 then
+			--	if nXp + nRestXpPool > nXpMax then 
+			--		text = "Rest XP Ends After Level"
+			--	else
+			--		text = "End of Rest XP: "..nRestXpPool.." ("..nRestXpEnd.."% of level)"
+			--	end
+			end
+			
+			return text			
+		end,
+		
+	}
+
+	ops = {
+		["nDisplayMode"] = 1,
+	}
+	self:RegisterDataText(self, "EP", dt, ops)
+	self:RegisterDefaultOptions(self, "EP")
 	
+	local tName = {
+		["nDisplayMode"] = "Display Mode",
+	}
+	local tCustOps = {
+		[1] = "Current",
+		[2] = "Weekly",
+		[3] = "EP/Hour",
+		[4] = "Rest EP",
+		--[5] = "End of Rest EP",
+	}
+	self:RegisterMenuOption(self, "EP", tName, tCustOps, nil, 4)
 	
 	--Durability
 	dt = {
@@ -896,20 +1015,6 @@ function StarPanel:InitializeDataTexts(self)
 	}
 	self:RegisterMenuOption(self, "Bags", tName, tCustOps, nil, 4)
 	
-	--Currency
-	dt = {
-		["type"]		= "launcher",
-		["strLabel"]	= "dadass",
-		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
-		["imgIcon"]		= "CRB_Basekit:kitIcon_Holo_HazardObserver",
-		--["nIconSize"]	= 17,
-		["OnClick"]	= function()
-			self.wndOptions:Invoke()			
-		end
-	}
-
-	self:RegisterDataText(self, "dadass", dt)
-	self:RegisterDefaultOptions(self, "dadass")
 	
 	--Currency
 	if self.db.profile.tDTOptions["Currency"] ~= nil and (self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1) then
@@ -1146,7 +1251,7 @@ function StarPanel:CreateDataTextsTop(self)
 					--wndCurr:SetText(tData.text)
 					wndCurr:SetData(tData) --onUpdate and onClick functions are contained in this
 					
-					width = wndCurr:GetContentSize()+self.db.profile.topBar.nPadding
+					width = math.max(wndCurr:GetContentSize()+self.db.profile.topBar.nPadding, Apollo.GetTextWidth("CRB_InterfaceMedium_O", strLabel..strText)+nIconSize+self.db.profile.topBar.nPadding)
 					local l, t, r, b = wndCurr:GetAnchorOffsets()
 					wndCurr:SetAnchorOffsets(l, t, l+width, b)
 					
