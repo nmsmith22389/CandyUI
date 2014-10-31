@@ -5,4 +5,6 @@
     <Script Name="Libs/GeminiHook/GeminiHook-1.0.lua"/>
     <Script Name="CandyUI_Options.lua"/>
     <Form Name="CandyUI_Options.xml"/>
+	<ReplaceAddon Name="ActionBarFrame"/>
+	<ReplaceAddon Name="ActionBarShortcut"/>
 </Addon>

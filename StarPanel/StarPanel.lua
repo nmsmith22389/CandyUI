@@ -1017,16 +1017,30 @@ function StarPanel:InitializeDataTexts(self)
 	
 	
 	--Currency
-	if self.db.profile.tDTOptions["Currency"] ~= nil and (self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1) then
-		self.db.profile.tDTOptions["Currency"]["nDisplayMode"] = 3
+	if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
+		--self.db.profile.tDTOptions["Currency"] = {}
+		--self.db.profile.tDTOptions["Currency"]["nDisplayMode"] = 3
+		--self.db.profile.tDTOptions["Currency"]["nDisp"] = 1
 	end
 
 	local ddt = {
 		["type"]		= "dataFeed",
-		["strLabel"]	= GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strName..": ",
+		["strLabel"]	= function()
+			if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
+				return GameLib.GetPlayerCurrency(3):GetDenomInfo()[1].strName..": "
+			else
+				return GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strName..": "
+			end
+		end,
 		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
 		["crText"]		= ApolloColor.new("white"),
-		["imgIcon"]		= GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strSprite,
+		["imgIcon"]		= function()
+			if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
+				return GameLib.GetPlayerCurrency(3):GetDenomInfo()[1].strSprite
+			else
+				return GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strSprite
+			end
+		end,
 		["nIconSize"]	= 17,
 		["OnUpdate"]	= function()
 			local type = self.db.profile.tDTOptions["Currency"]["nDisplayMode"]
@@ -1343,12 +1357,20 @@ function StarPanel:CreateDataTextsBot(self)
 					
 					--Append image
 					if tData.imgIcon and tOptions.bShowIcon then
-						xml:AppendImage(tData.imgIcon, nIconSize, nIconSize)
+						if type(tData.imgIcon) == "function" then	
+							xml:AppendImage(tData.imgIcon(), nIconSize, nIconSize)
+						else
+							xml:AppendImage(tData.imgIcon, nIconSize, nIconSize)
+						end
 					end
 										
 					--Append Label
-					if strLabel and tOptions.bShowLabel then	
-						xml:AppendText(strLabel, crLabel, "CRB_InterfaceMedium_O", "Center")
+					if strLabel and tOptions.bShowLabel then
+						if type(strLabel) == "function" then	
+							xml:AppendText(strLabel(), crLabel, "CRB_InterfaceMedium_O", "Center")
+						else
+							xml:AppendText(strLabel, crLabel, "CRB_InterfaceMedium_O", "Center")
+						end
 					end
 					
 					--Append Text

@@ -4,5 +4,6 @@
     <Form Name="CandyUI_Resources.xml"/>
     <ReplaceAddon Name="ClassResources"/>
 	<ReplaceAddon Name="StalkerResource"/>
-	<ReplaceAddon Name="TechWarrior"/>
+	<ReplaceAddon Name="WarriorResource"/>
+	<ReplaceAddon Name="Medic"/>
 </Addon>

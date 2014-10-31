@@ -161,7 +161,7 @@ function CandyUI_Resources:OnCreateEsper()
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "EsperResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
 	
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.esper.tAnchorOffsets))
+	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.esper.tAnchorOffsets))
 	
 	self.bPPFull = false
 	
@@ -170,9 +170,8 @@ function CandyUI_Resources:OnCreateEsper()
 		self:OnEsperEnteredCombat(unitPlayer, unitPlayer:IsInCombat())
 	end
 	
-	local l, t, r, b = self.wndMain:GetAnchorOffsets()
-	local nHalfWidth = self.db.profile.esper.nWidth / 2
-	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	local l, t, r, b = unpack(self.db.profile.esper.tAnchorOffsets)
+	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.esper.nWidth, b)
 end
 
 function CandyUI_Resources:OnEsperUpdateTimer()
@@ -268,7 +267,7 @@ function CandyUI_Resources:OnCreateSlinger()
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "SpellSlingerResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.spellslinger.tAnchorOffsets))
+	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.spellslinger.tAnchorOffsets))
 	
 	self.wndSlinger1 = self.wndMain:FindChild("Segment1")
 	self.wndSlinger2 = self.wndMain:FindChild("Segment2")
@@ -284,9 +283,8 @@ function CandyUI_Resources:OnCreateSlinger()
 		self:OnSlingerEnteredCombat(unitPlayer, unitPlayer:IsInCombat())
 	end
 	
-	local l, t, r, b = self.wndMain:GetAnchorOffsets()
-	local nHalfWidth = self.db.profile.spellslinger.nWidth / 2
-	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	local l, t, r, b = unpack(self.db.profile.spellslinger.tAnchorOffsets)
+	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.spellslinger.nWidth, b)
 end
 
 function CandyUI_Resources:OnSlingerUpdateTimer()
@@ -417,7 +415,7 @@ function CandyUI_Resources:OnCreateMedic()
 	
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "MedicResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.medic.tAnchorOffsets))
+	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.medic.tAnchorOffsets))
 	
 	self.wndMedic1 = self.wndMain:FindChild("Segment1")
 	self.wndMedic2 = self.wndMain:FindChild("Segment2")
@@ -434,9 +432,8 @@ function CandyUI_Resources:OnCreateMedic()
 	end
 	
 	
-	local l, t, r, b = self.wndMain:GetAnchorOffsets()
-	local nHalfWidth = self.db.profile.medic.nWidth / 2
-	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	local l, t, r, b = unpack(self.db.profile.medic.tAnchorOffsets)
+	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.medic.nWidth, b)
 end
 
 function CandyUI_Resources:OnMedicUpdateTimer()
@@ -527,7 +524,7 @@ function CandyUI_Resources:OnCreateEngineer()
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "EngineerResourceForm", "FixedHudStratum", self)
 	self.wndMain:FindChild("StanceMenuOpenerBtn"):AttachWindow(self.wndMain:FindChild("StanceMenuBG"))
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.engineer.tAnchorOffsets))
+	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.engineer.tAnchorOffsets))
 	
 	self.wndPetBar = self.wndMain:FindChild("PetBarContainer")
 	
@@ -546,9 +543,8 @@ function CandyUI_Resources:OnCreateEngineer()
 		self:OnEngineerEnteredCombat(unitPlayer, self.bCombat)
 	end
 	
-	local l, t, r, b = self.wndMain:GetAnchorOffsets()
-	local nHalfWidth = self.db.profile.engineer.nWidth / 2
-	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	local l, t, r, b = unpack(self.db.profile.engineer.tAnchorOffsets)
+	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.engineer.nWidth, b)
 end
 
 function CandyUI_Resources:OnEngineerUpdateTimer()
@@ -632,7 +628,7 @@ function CandyUI_Resources:OnCreateStalker()
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "StalkerResourceForm", "FixedHudStratum", self)
 	self.wndMain:ToFront()
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.stalker.tAnchorOffsets))
+	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.stalker.tAnchorOffsets))
 	
 
 	local unitPlayer = GameLib.GetPlayerUnit()
@@ -640,9 +636,8 @@ function CandyUI_Resources:OnCreateStalker()
 		self:OnStalkerEnteredCombat(unitPlayer, unitPlayer:IsInCombat())
 	end
 	
-	local l, t, r, b = self.wndMain:GetAnchorOffsets()
-	local nHalfWidth = self.db.profile.stalker.nWidth / 2
-	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	local l, t, r, b = unpack(self.db.profile.stalker.tAnchorOffsets)
+	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.stalker.nWidth, b)
 end
 
 function CandyUI_Resources:OnStalkerUpdateTimer()
@@ -690,11 +685,10 @@ function CandyUI_Resources:OnCreateWarrior()
 	self.wndMain = Apollo.LoadForm(self.xmlDoc, "WarriorResourceForm", "FixedHudStratum", self)
 	self.wndMain:FindChild("ChargeBarOverdriven:Bar"):SetMax(100)
 	self.wndMain:ToFront()
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.warrior.tAnchorOffsets))
+	--self.wndMain:SetAnchorOffsets(unpack(self.db.profile.warrior.tAnchorOffsets))
 	
-	local l, t, r, b = self.wndMain:GetAnchorOffsets()
-	local nHalfWidth = self.db.profile.warrior.nWidth / 2
-	self.wndMain:SetAnchorOffsets(-nHalfWidth, t, nHalfWidth, b)
+	local l, t, r, b = unpack(self.db.profile.warrior.tAnchorOffsets)
+	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.warrior.nWidth, b)
 	
 	self.nOverdriveTick = 0
 end
@@ -832,7 +826,7 @@ kcuiRDefaults = {
 			bAssassinate = true,
 			bIgnite = true,
 			bHealingTorrent = true,
-			crSurgeColor = "xkcdBrightOrange",
+			crSurgeColor = "xkcdRed",
 			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 		stalker = {
@@ -858,7 +852,7 @@ kcuiRDefaults = {
 			crBarColor = "UI_BtnTextHoloListNormal",
 			bShowText = true,
 			--class
-			crOverdriveColor = "xkcdBrightOrange",
+			crOverdriveColor = "xkcdRed",
 			tAnchorOffsets = {-250, -13, 250, 12},
 		},
 	},

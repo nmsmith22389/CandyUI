@@ -475,34 +475,33 @@ function CandyUI_Minimap:OnDocLoaded()
 			
 			self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
 			self:SetOptions()
-			local tUIElementToType =
-		{
-			["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
-			["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
-			["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
-			["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
-			["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
-			["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
-			["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
-			["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
-			["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
-			["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
-			["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
-			["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
-			["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
-			["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
-			["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
-			["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
-			["ShowFriendsToggle"]			= self.eObjectTypeFriend,
-			["ShowRivalsToggle"] 			= self.eObjectTypeRival,
-			["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
-		}
-		local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
-		for strWindowName, eType in pairs(tUIElementToType) do
-			local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
-			wndOptionsBtn:SetData(eType)
-			wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
-		end
+			local tUIElementToType = {
+				["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
+				["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
+				["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
+				["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
+				["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
+				["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
+				["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
+				["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
+				["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
+				["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
+				["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
+				["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
+				["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
+				["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
+				["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
+				["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
+				["ShowFriendsToggle"]			= self.eObjectTypeFriend,
+				["ShowRivalsToggle"] 			= self.eObjectTypeRival,
+				["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
+			}
+			local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
+			for strWindowName, eType in pairs(tUIElementToType) do
+				local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
+				wndOptionsBtn:SetData(eType)
+				wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
+			end
 		else	
 			self.bOptionsLoaded = false
 		end
@@ -1342,12 +1341,12 @@ end
 
 function CandyUI_Minimap:OnDatachronButtonCheck( wndHandler, wndControl, eMouseButton )	
 	--wndControl:AttachWindow(g_wndDatachron)
-	local nDCWidth = g_wndDatachron:GetWidth()
-	local nDCHeight = g_wndDatachron:GetHeight()
+	--local nDCWidth = g_wndDatachron:GetWidth()
+	--local nDCHeight = g_wndDatachron:GetHeight()
 	
-	local nMMLeft, nMMTop, nMMRight, nMMBottom = Apollo.GetAddon("CandyUI_Minimap").wndMain:GetAnchorOffsets()
+	--local nMMLeft, nMMTop, nMMRight, nMMBottom = Apollo.GetAddon("CandyUI_Minimap").wndMain:GetAnchorOffsets()
 	
-	g_wndDatachron:SetAnchorOffsets(nMMRight - nDCWidth, nMMBottom + 10, nMMRight, nMMBottom + nDCHeight + 10)
+	--g_wndDatachron:SetAnchorOffsets(nMMRight - nDCWidth, nMMBottom + 10, nMMRight, nMMBottom + nDCHeight + 10)
 	
 	g_wndDatachron:Show(true)
 	Event_FireGenericEvent("DatachronRestored")
@@ -1388,11 +1387,10 @@ kcuiMMDefaults = {
 function CandyUI_Minimap:SetOptions()
 	local Options = self.db.profile
 
-	--Full Color
-	self.wndControls:FindChild("ButtonControls"):FindChild("AddonName:Input"):SetText(Options.buttonControls.strAddonName)	
-	self.wndControls:FindChild("ButtonControls"):FindChild("WindowName:Input"):SetText(Options.buttonControls.strWindowName)	
-	self.wndControls:FindChild("ButtonControls"):FindChild("CustomFuncToggle"):SetCheck(Options.buttonControls.bUseCustomFunc)	
-	self.wndControls:FindChild("ButtonControls"):FindChild("CustomFuncInput"):SetText(Options.buttonControls.strCustFunc)	
+	self.wndControls:FindChild("ButtonControls:AddonName:Input"):SetText(Options.buttonControls.strAddonName)	
+	self.wndControls:FindChild("ButtonControls:WindowName:Input"):SetText(Options.buttonControls.strWindowName)	
+	self.wndControls:FindChild("ButtonControls:CustomFuncToggle"):SetCheck(Options.buttonControls.bUseCustomFunc)	
+	self.wndControls:FindChild("ButtonControls:CustomFuncInput"):SetText(Options.buttonControls.strCustFunc)	
 end
 
 function CandyUI_Minimap:OnFilterOptionCheck(wndHandler, wndControl, eMouseButton)
@@ -1450,19 +1448,19 @@ function CandyUI_Minimap:OnFilterOptionUncheck(wndHandler, wndControl, eMouseBut
 end
 
 function CandyUI_Minimap:OnCenterButtonClick( wndHandler, wndControl, eMouseButton )
-	if self.db.profile.buttonControls.bUseCustomFunc then
+	if self.db.profile.buttonControls.bUseCustomFunc and (self.db.profile.buttonControls.strCustFunc ~= nil or self.db.profile.buttonControls.strCustFunc ~= "") then
 		--Use the custom function
 		local strFuncText = self.db.profile.buttonControls.strCustFunc
 		local func, strError = loadstring(strFuncText)
 		if func ~= nil then
 			func()
 		end
-	elseif self.db.profile.buttonControls.strWindowName ~= nil or self.db.profile.buttonControls.strWindowName ~= "" then
+	elseif (self.db.profile.buttonControls.strWindowName ~= nil or self.db.profile.buttonControls.strWindowName ~= "") then
 		--Use addon and window name
 		local strAddonName = self.db.profile.buttonControls.strAddonName
 		local strWindowName = self.db.profile.buttonControls.strWindowName
 		local uAddon = Apollo.GetAddon(strAddonName)
-		local bIsRunning = Apollo.GetAddonInfo(strAddonName).bRunning --1 = running
+		local bIsRunning = (Apollo.GetAddonInfo(strAddonName) ~= nil and Apollo.GetAddonInfo(strAddonName).bRunning) or 0 --1 = running
 		if (strAddonName ~= nil or strAddonName ~= "") then
 			--Use addon name
 			if bIsRunning == 1 then

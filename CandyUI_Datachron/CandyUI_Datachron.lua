@@ -33,6 +33,8 @@ function CandyUI_Datachron:Init()
 	local strConfigureButtonText = ""
 	local tDependencies = {
 		-- "UnitOrPackageName",
+		"CandyUI_Options",
+		"CandyUI_Minimap",
 	}
     Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
@@ -45,6 +47,7 @@ function CandyUI_Datachron:OnLoad()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_Datachron.xml")
 	self.xmlDoc:RegisterCallback("OnDocReady", self)
+	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiDCDefaults)
 end
 
 -----------------------------------------------------------------------------------------------
@@ -69,7 +72,7 @@ function CandyUI_Datachron:OnDocLoaded()
 	if self.xmlDoc == nil then
 		return
 	end
-	--Print("x")
+	
 	Apollo.LoadSprites("Sprites.xml")
 	
 	--Apollo.RegisterEventHandler("Datachron_FlashIndicators", 		"FlashIndicators", self)
@@ -99,6 +102,7 @@ function CandyUI_Datachron:OnDocLoaded()
 	g_wndDatachron 			= Apollo.LoadForm(self.xmlDoc, "Datachron", "FixedHudStratum", self) -- Do not rename. This is global and used by other forms as a parent.
 	g_wndDatachron:Show(false, true)
 	
+	g_wndDatachron:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
 	
 	--self.wndMinimized 		= Apollo.LoadForm(self.xmlDoc, "MinimizedState", "FixedHudStratum", self)
 	--self.wndZoneNameMin	 	= self.wndMinimized:FindChild("ZoneNameMin")
@@ -125,7 +129,7 @@ function CandyUI_Datachron:OnDocLoaded()
 
 	self:SetPath()
 
-	if self.bMaximized then
+	if self.db.profile.general.bMaximized then
 		self:OnRestoreDatachron()
 	else
 		self:OnMinimizeDatachron()
@@ -199,6 +203,7 @@ function CandyUI_Datachron:OnGenericEvent_RestoreDatachron()
 end
 
 function CandyUI_Datachron:OnMinimizeDatachron()
+	self.db.profile.general.bMaximized = false
 	--self.wndMinimized:FindChild("DisableCommBtnMin"):SetCheck(false)
 	g_DatachronButton:SetCheck(false)
 	--self.wndMinimized:FindChild("DisableCommBtnMin"):SetTooltip(Apollo.GetString("Datachron_Maximize"))
@@ -211,6 +216,7 @@ function CandyUI_Datachron:OnMinimizeDatachron()
 end
 
 function CandyUI_Datachron:OnRestoreDatachron()
+	self.db.profile.general.bMaximized = true
 	--self.wndMinimized:FindChild("DisableCommBtnMin"):SetCheck(true)
 	--self.wndMinimized:FindChild("DisableCommBtnMin"):SetTooltip(Apollo.GetString("CRB_Datachron_MinimizeBtn_Desc"))
 	g_DatachronButton:SetCheck(true)
@@ -678,6 +684,26 @@ function CandyUI_Datachron:Datachron_MaxMissedCallTimer()
 	end
 end
 
+
+---------------------------------------------------------------------------------------------------
+-- Datachron Functions
+---------------------------------------------------------------------------------------------------
+
+function CandyUI_Datachron:OnDatachronMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
+	self.db.profile.general.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+end
+
+kcuiDCDefaults = {
+	char = {
+		currentProfile = nil,
+	},
+	profile = {
+		general = {
+			tAnchorOffsets = { -315, -213, -5, -5},
+			bMaximized = false
+		},
+	},
+}
 
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Datachron Instance

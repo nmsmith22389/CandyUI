@@ -280,14 +280,14 @@ end
 function StarPanel:OnBBOpacityChanged( wndHandler, wndControl, fNewValue, fOldValue )
 	local val = round(fNewValue, 1)
 	self.db.profile.botBar.nOpacity = val
-	self.wndControls:FindChild("BotBarControls"):FindChild("OpacityBar"):FindChild("EditBox"):SetText(val)
+	self.wndControls:FindChild("BottomBarControls"):FindChild("OpacityBar"):FindChild("EditBox"):SetText(val)
 	self.wndBotDisplay:SetOpacity(val)
 end
 --padding
 function StarPanel:OnBBPaddingChanged( wndHandler, wndControl, fNewValue, fOldValue )
 	local val = round(fNewValue)
 	self.db.profile.botBar.nPadding = val
-	self.wndControls:FindChild("BotBarControls"):FindChild("PaddingBar"):FindChild("EditBox"):SetText(val)
+	self.wndControls:FindChild("BottomBarControls"):FindChild("PaddingBar"):FindChild("EditBox"):SetText(val)
 	self:RefreshBotDisplay(self)
 end
 --Alignment
@@ -346,9 +346,18 @@ function StarPanel:OnViewDataTextsClick( wndHandler, wndControl, eMouseButton )
 	--Apollo.LoadForm(self.xmlDoc, "DataTextOptionItem", self.wndDataTexts:FindChild("OptionsDialogueControls"), self)
 	self.wndDataTexts:FindChild("OptionsDialogueControls"):DestroyChildren()
 	for strName, tData in pairs(self.DataTexts) do
+		--Print(strName)
 		local wndCurr = Apollo.LoadForm(self.xmlDoc, "DataTextOptionItem", self.wndDataTexts:FindChild("OptionsDialogueControls"), self)
-		local bShownTop = self.db.profile.tDTOptions[strName]["bShownTop"]
-		local bShownBot = self.db.profile.tDTOptions[strName]["bShownBot"]
+		local bShownTop-- = self.db.profile.tDTOptions[strName]["bShownTop"]
+		local bShownBot-- = self.db.profile.tDTOptions[strName]["bShownBot"]
+		
+		if self.db.profile.tDTOptions[strName] ~= nil then
+			bShownTop = self.db.profile.tDTOptions[strName]["bShownTop"]
+			bShownBot = self.db.profile.tDTOptions[strName]["bShownBot"]
+		else
+			bShownTop = false
+			bShownBot = false
+		end
 		
 		wndCurr:SetName(strName)
 		wndCurr:FindChild("Name"):SetText(strName)

@@ -53,7 +53,7 @@ function CandyUI_Dash:OnLoad()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_Dash.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
-	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiRDefaults)
+	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiDashDefaults)
 end
 
 -----------------------------------------------------------------------------------------------
