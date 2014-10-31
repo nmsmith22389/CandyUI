@@ -1,5 +1,5 @@
 CandyUI
-=======
+======
 
 A Wildstar UI Replacement
 
@@ -20,6 +20,7 @@ A Wildstar UI Replacement
 ####CandyUI_Resources####
 **v0.3.5**
 >• Now properly disables medic and warrior stock resources.
+
 >• Horizontal position now saves properly.
 
 ####CandyUI_Minimap####
@@ -29,7 +30,9 @@ A Wildstar UI Replacement
 ####StarPanel####
 **v1.2.3**
 >• Fixed Currency nil error on startup.
+
 >• Fixed Bottom Bar options error.
+
 
 
 
