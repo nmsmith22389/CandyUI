@@ -73,7 +73,7 @@ function CandyUI_Datachron:OnDocLoaded()
 		return
 	end
 	
-	if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+	if self.db.char.currentProfile ~= nil and self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
 		self.db:SetProfile(self.db.char.currentProfile)
 	end
 	
