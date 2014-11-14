@@ -209,9 +209,11 @@ end
 function CandyUI_Nameplates:OnDocLoaded()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
 	
-		if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+		if self.db.char.currentProfile == nil and self.db:GetCurrentProfile() ~= nil then
+			self.db.char.currentProfile = self.db:GetCurrentProfile()
+		elseif self.db.char.currentProfile ~= nil and self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
 			self.db:SetProfile(self.db.char.currentProfile)
-		end
+		end	
 	
 		Apollo.LoadSprites("Sprites.xml")
 		

@@ -172,6 +172,9 @@ function CandyUI_Options:OnDocLoaded()
 			self.wndCurrentProfileDropdown:SetText(self.db.char.currentProfile)
 			_cui.strCurrentProfile = self.db.char.currentProfile
 		else
+			if self.db.char.currentProfile == nil and self.db:GetCurrentProfile() ~= nil then
+				self.db.char.currentProfile = self.db:GetCurrentProfile()
+			end	
 			self.db:SetProfile(self.db.char.currentProfile)
 			self.wndCurrentProfileDropdown:SetText(self.db.char.currentProfile)
 			_cui.strCurrentProfile = self.db.char.currentProfile
