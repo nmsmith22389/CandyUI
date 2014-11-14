@@ -73,6 +73,10 @@ function CandyUI_Datachron:OnDocLoaded()
 		return
 	end
 	
+	if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+		self.db:SetProfile(self.db.char.currentProfile)
+	end
+	
 	Apollo.LoadSprites("Sprites.xml")
 	
 	--Apollo.RegisterEventHandler("Datachron_FlashIndicators", 		"FlashIndicators", self)
@@ -705,6 +709,9 @@ kcuiDCDefaults = {
 	},
 }
 
+function CandyUI_Datachron:SetOptions()
+	g_wndDatachron:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Datachron Instance
 -----------------------------------------------------------------------------------------------

@@ -304,7 +304,11 @@ end
 -----------------------------------------------------------------------------------------------
 function CandyUI_Minimap:OnDocLoaded()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
-		
+	
+		if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+			self.db:SetProfile(self.db.char.currentProfile)
+		end
+			
 		Apollo.LoadSprites("Sprites.xml")
 		
 		Apollo.RegisterEventHandler("WindowManagementReady", 				"OnWindowManagementReady", self)
@@ -382,6 +386,12 @@ function CandyUI_Minimap:OnDocLoaded()
 		Apollo.RegisterEventHandler("Group_Left", 							"OnGroupLeft", self)					-- ( reason )
 		
 		self.wndMain 			= Apollo.LoadForm(self.xmlDoc , "Minimap", "FixedHudStratum", self)
+		--Size
+			--local l, t, r, b = self.wndMain:GetAnchorOffsets()
+			--self.wndMain:SetAnchorOffsets(r-(nValue+20), t, r, t-(self.db.profile.general.nSize+46))
+		--Opacity
+			self.wndMain:SetOpacity(self.db.profile.general.nOpacity)
+		
 		self.wndMiniMap 		= self.wndMain:FindChild("MapContent")
 		self.wndZoneName 		= self.wndMain:FindChild("MapZoneName")
 		self.wndPvPFlagName 	= self.wndMain:FindChild("MapZonePvPFlag")
@@ -409,8 +419,6 @@ function CandyUI_Minimap:OnDocLoaded()
 		self.tPingObjects 				= {}
 		self.arResourceNodes			= {}
 
-	
-
 		self.tGroupMembers 			= {}
 		self.tGroupMemberObjects 	= {}
 		if not self.tQueuedUnits then
@@ -426,91 +434,27 @@ function CandyUI_Minimap:OnDocLoaded()
 			self:OnCharacterCreated()
 		end
 		
-		if not self.db.profile.tToggledIcons then
-		self.db.profile.tToggledIcons =
-		{
-			[self.eObjectTypeHostile] 						= true,
-			[self.eObjectTypeNeutral] 						= true,
-			[self.eObjectTypeGroupMember] 					= true,
-			[self.eObjectTypeQuestReward]					= true,
-			[self.eObjectTypeVendor] 						= true,
-			[self.eObjectTypeBindPointActive] 				= true,
-			[self.eObjectTypeInstancePortal] 				= true,
-			[self.eObjectTypePublicEvent] 					= true,
-			[self.eObjectTypeQuestTarget]					= true, 
-			[GameLib.CodeEnumMapOverlayType.QuestObjective] = true,
-			[GameLib.CodeEnumMapOverlayType.PathObjective] 	= true,
-			[self.eObjectTypeChallenge] 					= true,
-			[self.eObjectTypeMiningNode] 					= true,
-			[self.eObjectTypeRelicHunterNode] 				= true,
-			[self.eObjectTypeSurvivalistNode] 				= true,
-			[self.eObjectTypeFarmingNode] 					= true,
-			[self.eObjectTypeTradeskills] 					= true,
-			[self.eObjectTypeTrainer] 						= true,
-			[self.eObjectTypeFriend] 						= true,
-			[self.eObjectTypeRival] 						= true,
-			[self.eObjectTypeCityDirection]					= true,
-		}
-		end
-		
 		self:ReloadPublicEvents()
 		self:ReloadMissions()
 		self:OnQuestStateChanged()
 		self:OnUpdateInventory()
 		
 		
-		
 		if g_wndTheMiniMap == nil then
 			g_wndTheMiniMap = self.wndMiniMap
-		end
-		
-		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-		if self.OptionsAddon ~= nil then
-			self.bOptionsLoaded = true
-		
-			self.wndOptionsMain = self.OptionsAddon.wndOptions
-		
-			self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-			self.wndControls:Show(false, true)
-			
-			self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
-			self:SetOptions()
-			local tUIElementToType = {
-				["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
-				["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
-				["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
-				["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
-				["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
-				["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
-				["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
-				["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
-				["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
-				["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
-				["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
-				["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
-				["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
-				["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
-				["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
-				["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
-				["ShowFriendsToggle"]			= self.eObjectTypeFriend,
-				["ShowRivalsToggle"] 			= self.eObjectTypeRival,
-				["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
-			}
-			local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
-			for strWindowName, eType in pairs(tUIElementToType) do
-				local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
-				wndOptionsBtn:SetData(eType)
-				wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
-			end
-		else	
-			self.bOptionsLoaded = false
 		end
 	
 		GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   		self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 		self.colorPicker:Show(false, true)
-	
-		if not self.bOptionsSet or not self.bOptionsLoaded then
+		
+		--Check for Options addon
+		local bOptionsLoaded = _cui.bOptionsLoaded
+		if bOptionsLoaded then
+			--Load Options
+			self:OnCUIOptionsLoaded()
+		else
+			--Schedule for later
 			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
 		end
 		
@@ -519,51 +463,17 @@ function CandyUI_Minimap:OnDocLoaded()
 		if self.db.profile.general.fSavedZoomLevel then
 			self.wndMiniMap:SetZoomLevel(self.db.profile.general.fSavedZoomLevel)
 		end
+		
 		Apollo.StartTimer("ZoomTimer")
 	end
 end
 
 function CandyUI_Minimap:OnCUIOptionsLoaded()
-	if not self.bOptionsLoaded then
-		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-		
-		self.wndOptionsMain = self.OptionsAddon.wndOptions
-		
-		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-		self.wndControls:Show(false, true)
-		
-		self.bOptionsSet = CUI_RegisterOptions("Minimap", self.wndControls)
-	end
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("Minimap", self.wndControls)
 	self:SetOptions()
-	local tUIElementToType =
-		{
-			["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
-			["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
-			["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
-			["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
-			["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
-			["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
-			["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
-			["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
-			["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
-			["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
-			["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
-			["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
-			["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
-			["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
-			["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
-			["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
-			["ShowFriendsToggle"]			= self.eObjectTypeFriend,
-			["ShowRivalsToggle"] 			= self.eObjectTypeRival,
-			["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
-		}
-		local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
-		for strWindowName, eType in pairs(tUIElementToType) do
-			local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
-			wndOptionsBtn:SetData(eType)
-			wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
-		end
 end
 
 function CandyUI_Minimap:OnZoomTimer()
@@ -1374,6 +1284,9 @@ kcuiMMDefaults = {
 	profile = {
 		general = {
 			tAnchorOffsets = { -209, 35, -5, 265},
+			nSize = 184,
+			nOpacity = 1.0,
+			
 		},
 		buttonControls = {
 			strAddonName = "",
@@ -1381,12 +1294,82 @@ kcuiMMDefaults = {
 			bUseCustomFunc = false,
 			strCustFunc = "",
 		},
+		--tToggledIcons = {
+		--	
+		--},
 	},
 }
 
+
 function CandyUI_Minimap:SetOptions()
 	local Options = self.db.profile
+	
+	if self.db.profile.tToggledIcons == nil or self.db.profile.tToggledIcons == {} then
+			self.db.profile.tToggledIcons = {
+				[self.eObjectTypeHostile] 						= true,
+				[self.eObjectTypeNeutral] 						= true,
+				[self.eObjectTypeGroupMember] 					= true,
+				[self.eObjectTypeQuestReward]					= true,
+				[self.eObjectTypeVendor] 						= true,
+				[self.eObjectTypeBindPointActive] 				= true,
+				[self.eObjectTypeInstancePortal] 				= true,
+				[self.eObjectTypePublicEvent] 					= true,
+				[self.eObjectTypeQuestTarget]					= true, 
+				[GameLib.CodeEnumMapOverlayType.QuestObjective] = true,
+				[GameLib.CodeEnumMapOverlayType.PathObjective] 	= true,
+				[self.eObjectTypeChallenge] 					= true,
+				[self.eObjectTypeMiningNode] 					= true,
+				[self.eObjectTypeRelicHunterNode] 				= true,
+				[self.eObjectTypeSurvivalistNode] 				= true,
+				[self.eObjectTypeFarmingNode] 					= true,
+				[self.eObjectTypeTradeskills] 					= true,
+				[self.eObjectTypeTrainer] 						= true,
+				[self.eObjectTypeFriend] 						= true,
+				[self.eObjectTypeRival] 						= true,
+				[self.eObjectTypeCityDirection]					= true,
+			}
+		end
+		
+	local tUIElementToType = {
+				["ShowQuestNPCsToggle"] 			= self.eObjectTypeQuestReward,
+				["ShowTrackedQuestsToggle"] 			= GameLib.CodeEnumMapOverlayType.QuestObjective,
+				["ShowMissionsToggle"] 			= GameLib.CodeEnumMapOverlayType.PathObjective,
+				["ShowChallengesToggle"] 		= self.eObjectTypeChallenge,
+				["ShowPublicEventsToggle"] 		= self.eObjectTypePublicEvent,
+				["ShowVendorsToggle"] 			= self.eObjectTypeVendor,
+				["ShowInstancePortalsToggle"] 	= self.eObjectTypeInstancePortal,
+				["ShowBindPointsToggle"] 		= self.eObjectTypeBindPointActive,
+				["ShowMiningNodesToggle"] 		= self.eObjectTypeMiningNode,
+				["ShowRelicNodesToggle"] 		= self.eObjectTypeRelicHunterNode,
+				["ShowSurvivalistNodesToggle"] 	= self.eObjectTypeSurvivalistNode,
+				["ShowFarmingNodesToggle"] 		= self.eObjectTypeFarmingNode,
+				["ShowTradeskillsToggle"] 		= self.eObjectTypeTradeskills,
+				["ShowNeutralNPCsToggle"] 		= self.eObjectTypeNeutral,
+				["ShowHostileNPCsToggle"] 		= self.eObjectTypeHostile,
+				["ShowTrainersToggle"] 			= self.eObjectTypeTrainer,
+				["ShowFriendsToggle"]			= self.eObjectTypeFriend,
+				["ShowRivalsToggle"] 			= self.eObjectTypeRival,
+				["ShowCityGuardToggle"]			= self.eObjectTypeCityDirection,
+			}
+			
+	local wndOptionsWindow = self.wndControls:FindChild("ViewControls")
+	for strWindowName, eType in pairs(tUIElementToType) do
+		local wndOptionsBtn = wndOptionsWindow:FindChild(strWindowName)
+		wndOptionsBtn:SetData(eType)
+		wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
+	end
+	
+	--Position
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+	
+	--General
+	self.wndControls:FindChild("GeneralControls:Size:SliderBar"):SetValue(Options.general.nSize)
+	self.wndControls:FindChild("GeneralControls:Size:EditBox"):SetText(Options.general.nSize)
 
+	self.wndControls:FindChild("GeneralControls:Opacity:SliderBar"):SetValue(Options.general.nOpacity)
+	self.wndControls:FindChild("GeneralControls:Opacity:EditBox"):SetText(Options.general.nOpacity)
+	
+	--Center Button
 	self.wndControls:FindChild("ButtonControls:AddonName:Input"):SetText(Options.buttonControls.strAddonName)	
 	self.wndControls:FindChild("ButtonControls:WindowName:Input"):SetText(Options.buttonControls.strWindowName)	
 	self.wndControls:FindChild("ButtonControls:CustomFuncToggle"):SetCheck(Options.buttonControls.bUseCustomFunc)	
@@ -1507,6 +1490,30 @@ end
 
 function CandyUI_Minimap:OnUseCustomFuncClick( wndHandler, wndControl, eMouseButton )
 	self.db.profile.buttonControls.bUseCustomFunc = wndControl:IsChecked()
+end
+
+function CandyUI_Minimap:OnSizeChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local nBufferY = 46
+	local nBufferX = 20
+	local nValue = round(fNewValue)
+	
+	self.db.profile.general.nSize = nValue
+	wndControl:GetParent():FindChild("EditBox"):SetText(nValue)
+	
+	local l, t, r, b = self.wndMain:GetAnchorOffsets()
+	self.wndMain:SetAnchorOffsets(r-(nValue+nBufferX), t, r, t-(nValue+nBufferY))
+	self.db.profile.general.tAnchorOffsets = {r-(nValue+nBufferX), t, r, t-(nValue+nBufferY)}
+end
+
+function CandyUI_Minimap:OnOpacityChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local nValue = round(fNewValue, 1)
+	wndControl:GetParent():FindChild("EditBox"):SetText(nValue)
+	self.db.profile.general.nOpacity = nValue
+	
+	self.wndMain:SetOpacity(nValue)
+end
+
+function CandyUI_Minimap:OnRotateMapClick( wndHandler, wndControl, eMouseButton )
 end
 
 -----------------------------------------------------------------------------------------------

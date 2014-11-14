@@ -79,6 +79,10 @@ function CandyUI_InterfaceMenu:OnDocLoaded()
 		return
 	end
 	
+	if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+		self.db:SetProfile(self.db.char.currentProfile)
+	end
+	
 	Apollo.LoadSprites("Sprites.xml")
 	
 	Apollo.RegisterEventHandler("InterfaceMenuList_NewAddOn", 			"OnNewAddonListed", self)

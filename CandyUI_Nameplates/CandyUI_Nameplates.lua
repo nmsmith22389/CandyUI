@@ -208,8 +208,11 @@ end
 -----------------------------------------------------------------------------------------------
 function CandyUI_Nameplates:OnDocLoaded()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
-	    self.wndMain = Apollo.LoadForm(self.xmlDoc, "CandyUI_NameplatesForm", nil, self)
-		
+	
+		if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+			self.db:SetProfile(self.db.char.currentProfile)
+		end
+	
 		Apollo.LoadSprites("Sprites.xml")
 		
 		Apollo.RegisterEventHandler("UnitCreated", 					"OnUnitCreated", self)
@@ -228,48 +231,20 @@ function CandyUI_Nameplates:OnDocLoaded()
 		Apollo.RegisterEventHandler("UnitMemberOfGuildChange", 		"OnUnitMemberOfGuildChange", self)
 		Apollo.RegisterEventHandler("GuildChange", 					"OnGuildChange", self)
 		Apollo.RegisterEventHandler("UnitGibbed",					"OnUnitGibbed", self)
-		--Apollo.RegisterEventHandler("CandyUI_NameplatesClicked", "OnOptionsHome", self)
-		
-		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-	if self.OptionsAddon ~= nil and self.OptionsAddon.wndOptions ~= nil then
-		self.bOptionsLoaded = true
-		
-		self.wndOptionsMain = self.OptionsAddon.wndOptions
-		
-		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-		self.wndControls:Show(false, true)
-		
-		self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
-		
-		self:SetOptions()	
-	else	
-		self.bOptionsLoaded = false
-	end
-	--assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
-	
-	
-	--local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsMain:FindChild("ListControls"), self)
-	--wndCurr:SetText("Unit Frames")
-	
-	
+
+	--Check for Options addon
+		local bOptionsLoaded = _cui.bOptionsLoaded
+		if bOptionsLoaded then
+			--Load Options
+			self:OnCUIOptionsLoaded()
+		else
+			--Schedule for later
+			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+		end	
 	
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
-	
-	--[[
-	if not candyUI_Cats then
-		candyUI_Cats = {}
-	end
-	table.insert(candyUI_Cats, "Nameplates")
-	self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
-		]]
-	
-	--CandyUI_OptionsLoaded
-	
-	if not self.bOptionsSet or not self.bOptionsLoaded then
-		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
-	end
 		
 	local tRewardUpdateEvents = {
 		"QuestObjectiveUpdated", "QuestStateChanged", "ChallengeAbandon", "ChallengeLeftArea",
@@ -306,9 +281,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 		wndTemp:Destroy()
 	
 		self:CreateUnitsFromPreload()
-	end
-	
-	
+	end		
 end
 
 -----------------------------------------------------------------------------------------------
@@ -332,20 +305,11 @@ function CandyUI_Nameplates:OnOptionsHome()
 end
 
 function CandyUI_Nameplates:OnCUIOptionsLoaded()
-	if not self.bOptionsLoaded then
-		self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-		
-		self.wndOptionsMain = self.OptionsAddon.wndOptions
-		
-		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-		self.wndControls:Show(false, true)
-		
-		self.bOptionsSet = CUI_RegisterOptions("Nameplates", self.wndControls)
-	end
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("Nameplates", self.wndControls)
-	
-	self:SetOptions()	
-	--Print("Resources saw Options load") --debug
+	self:SetOptions()
 end
 
 function CandyUI_Nameplates:OnOptionsHeaderCheck(wndHandler, wndControl, eMouseButton)

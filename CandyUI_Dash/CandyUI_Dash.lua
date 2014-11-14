@@ -64,6 +64,10 @@ function CandyUI_Dash:OnDocLoaded()
 		return
 	end
 	
+	if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+		self.db:SetProfile(self.db.char.currentProfile)
+	end
+	
 	Apollo.LoadSprites("Sprites.xml")
 	
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 					"OnEnteredCombat", self)
@@ -234,6 +238,10 @@ kcuiDashDefaults = {
 		},
 	},
 }
+
+function CandyUI_Dash:SetOptions()
+	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Dash Instance
 -----------------------------------------------------------------------------------------------

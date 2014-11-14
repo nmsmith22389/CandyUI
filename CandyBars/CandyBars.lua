@@ -69,6 +69,10 @@ local CandyBars = {}
  
 local VERSION = 1.05
 
+--Global CUI var
+if _cui == nil then
+	_cui = {}
+end
 
 local KeybindingState =
 {
@@ -167,6 +171,13 @@ function CandyBars:OnDocLoaded()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
 		
 		--Vars
+		
+		--CUI load status
+		if _cui.tAddonLoadStatus == nil then
+			_cui.tAddonLoadStatus = {}
+		end
+		_cui.tAddonLoadStatus["CandyBars"] = true
+		
 		--self.bKeybindMode = false
 		CandyBars_Debug = self.db.char.debug
 		
@@ -225,7 +236,7 @@ function CandyBars:OnDocLoaded()
 		self.unitPlayer = GameLib.GetPlayerUnit()
 		
 		self.wndOptionsNew = Apollo.LoadForm(self.xmlDoc, "OptionsDialogueNew", nil, self)
-		self.wndOptionsNew:Show(false)
+		self.wndOptionsNew:Show(false, true)
 		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsNew:FindChild("OptionsDialogueControls"), self)
 		--self.wndControls:Show(false)
 		for i, v in ipairs(self.wndControls:GetChildren()) do
@@ -264,6 +275,13 @@ function CandyBars:OnDocLoaded()
 		self.wndKeybindInfo = self.wndKeybindModeAlert:FindChild("BindingInfo")
 		
 		--self.wndColorDropdownBox:FindChild("ScrollList"):ArrangeChildrenVert()
+		
+		--CUI Options
+		if _cui.bOptionsLoaded == true then
+			self:RegisterCUIOptions()
+		else
+			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "RegisterCUIOptions", self)
+		end
 		
 		Apollo.RegisterEventHandler("ShowActionBarShortcut", "ShowShortcutBar", self)
 		
@@ -313,6 +331,13 @@ function CandyBars:OnDocLoaded()
 		self.timerLoad = ApolloTimer.Create(0.25, true, "LoadWhenReady" , self)
 		self.timerLoad:Start()
 	end
+end
+
+function CandyBars:RegisterCUIOptions()
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	local wndControls = Apollo.LoadForm(self.xmlDoc, "CBOptions", wndOptionsControls, self)
+	CUI_RegisterOptions("CandyBars", wndControls, true)
 end
 
 function CandyBars:CheckFunctions()
@@ -2080,6 +2105,13 @@ function CandyBars:ExitKeybindMode( wndHandler, wndControl, eMouseButton )
 
 end
 
+function CandyBars:OnCBOptionsButtonClick( wndHandler, wndControl, eMouseButton )
+	--=========================================
+	--					FOR CUI
+	--=========================================
+	Apollo.ParseInput("/cb")
+	Event_FireGenericEvent("CandyUI_CloseOptions")
+end
 
 ---------------------------------------------------------------------------------------------------
 -- OptionsControls Functions

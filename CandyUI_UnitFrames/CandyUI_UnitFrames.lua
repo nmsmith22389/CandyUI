@@ -73,7 +73,11 @@ end
 -- CandyUI_UnitFrames OnDocLoaded
 -----------------------------------------------------------------------------------------------
 function CandyUI_UnitFrames:OnDocLoaded()
-		
+
+	if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+		self.db:SetProfile(self.db.char.currentProfile)
+	end	
+
 	Apollo.LoadSprites("Sprites.xml")
 
 	self.wndPlayerUF = Apollo.LoadForm(self.xmlDoc, "PlayerUF", nil, self)
@@ -93,36 +97,13 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	self.wndFocusUF:Show(false, true)
 	self.wndFocusUF:FindChild("Glow"):Show(true, true)
 	
-	self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-	self.wndOptionsMain = self.OptionsAddon.wndOptions
-	assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
-	--local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsMain:FindChild("ListControls"), self)
-	--wndCurr:SetText("Unit Frames")
-	
-	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-	
-	self.wndControls:Show(false, true)
-	--[[
-	if not candyUI_Cats then
-		candyUI_Cats = {}
-	end
-	table.insert(candyUI_Cats, "UnitFrames")
-	]]
-		--self.wndControls:Show(false)
-		--[[
-		for i, v in ipairs(self.wndControls:GetChildren()) do
-			if v:GetName() ~= "Help" then
-			local strCategory = v:FindChild("Title"):GetText()
-			local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsNew:FindChild("ListControls"), self)
-			wndCurr:SetText(strCategory)
-			end
-		end
-		]]
-		--self.wndOptionsMain:FindChild("ListControls"):ArrangeChildrenVert()
-	
-	--CandyUI_OptionsLoaded
-	self.bOptionsSet = CUI_RegisterOptions("UnitFrames", self.wndControls)
-	if not self.bOptionsSet then
+	--Check for Options addon
+	local bOptionsLoaded = _cui.bOptionsLoaded
+	if bOptionsLoaded then
+		--Load Options
+		self:OnCUIOptionsLoaded()
+	else
+		--Schedule for later
 		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
 	end
 		
@@ -137,22 +118,26 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
 	Apollo.RegisterEventHandler("AlternateTargetUnitChanged", "OnAlternateTargetUnitChanged", self)
 	
-	self.wndPlayerUF:SetAnchorOffsets(unpack(self.db.profile.player.tAnchorOffsets))
-	self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
-	self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
-	self.wndToTUF:SetAnchorOffsets(unpack(self.db.profile.tot.tAnchorOffsets))	
+	--self.wndPlayerUF:SetAnchorOffsets(unpack(self.db.profile.player.tAnchorOffsets))
+	--self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
+	--self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
+	--self.wndToTUF:SetAnchorOffsets(unpack(self.db.profile.tot.tAnchorOffsets))	
 	
 	if GameLib.GetPlayerUnit() and GameLib.GetPlayerUnit():GetTarget() then
 		self:OnTargetUnitChanged(GameLib.GetPlayerUnit():GetTarget())
 	end
 	
-	self:SetOptions()	
-	self:SetLooks()
+	--self:SetOptions()	
+	--self:SetLooks()
 end
 
 function CandyUI_UnitFrames:OnCUIOptionsLoaded()
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("UnitFrames", self.wndControls)
-	--Print("Resources saw Options load") --debug
+	self:SetOptions()	
+	self:SetLooks()
 end
 
 function CandyUI_UnitFrames:OnOptionsHome()
@@ -182,11 +167,11 @@ function CandyUI_UnitFrames:OnOptionsHeaderCheck(wndHandler, wndControl, eMouseB
 end
 
 function CandyUI_UnitFrames:OnTargetUnitChanged(unitTarget)
-	if unitTarget ~= nil and unitTarget:GetMaxHealth() ~= nil then
+	if unitTarget ~= nil and unitTarget:GetMaxHealth() ~= nil and unitTarget:GetMaxHealth() > 0 then
 		self.wndTargetUF:Show(true)
 		--self.arTargetClusters = self:GetClusters(unitTarget)
 		self:UpdateUnitFrame(self.wndTargetUF, unitTarget)
-		if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil and self.db.profile.tot.bShow then
+		if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil and unitTarget:GetTarget():GetMaxHealth() > 0 and self.db.profile.tot.bShow then
 			self.wndToTUF:Show(true)
 			self:UpdateToT(unitTarget:GetTarget())
 		else
@@ -201,10 +186,9 @@ function CandyUI_UnitFrames:OnTargetUnitChanged(unitTarget)
 end
 
 function CandyUI_UnitFrames:OnAlternateTargetUnitChanged(unitTarget)
-	if unitTarget ~= nil and unitTarget:GetMaxHealth() ~= nil then
+	if unitTarget ~= nil and unitTarget:GetMaxHealth() ~= nil and unitTarget:GetMaxHealth() > 0 then
 		self.wndFocusUF:Show(true)
 		self:UpdateUnitFrame(self.wndFocusUF, unitTarget)
-		
 	else
 		self.wndFocusUF:Show(false)
 	end
@@ -242,12 +226,12 @@ function CandyUI_UnitFrames:OnCharacterLoaded()
 		self:UpdateUnitFrame(self.wndPlayerUF, unitPlayer)
 		self:UpdateClusters(self.arPlayerClusters, self.wndPlayerUF)
 		self.wndPlayerUF:SetData(unitPlayer)
-		if unitTarget ~= nil and unitTarget:GetMaxHealth() ~= nil then
+		if unitTarget ~= nil and unitTarget:GetMaxHealth() ~= nil and unitTarget:GetMaxHealth() > 0 then
 			self.arTargetClusters = self:GetClusters(unitTarget)
 			self:UpdateClusters(self.arTargetClusters, self.wndTargetUF)
 			self:UpdateUnitFrame(self.wndTargetUF, unitTarget)
 			self.wndTargetUF:SetData(unitTarget)
-			if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil then
+			if unitTarget:GetTarget() ~= nil and unitTarget:GetTarget():GetMaxHealth() ~= nil and unitTarget:GetTarget():GetMaxHealth() > 0 then
 				--self.wndToTUF:Show(true)
 				self.wndToTUF:SetData(unitTarget:GetTarget())
 				self:UpdateToT(unitTarget:GetTarget())
@@ -286,9 +270,7 @@ function CandyUI_UnitFrames:HelperFormatBigNumber(nArg)
 end
 
 function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
-
 	if uUnit == nil then
-		
 		return
 	end
 	
@@ -829,32 +811,34 @@ function CandyUI_UnitFrames:UpdateClusters(tClusters, wndUnitFrame)
 		return
 	end
 	for i, v in ipairs(tClusters) do
-		arClusterWindows[i]:Show(v:GetName() ~= nil)
-		if v:GetName() ~= nil and v:GetHealth() ~= nil then
-		arClusterWindows[i]:FindChild("Name"):SetText(v:GetName())
-		
-		self:SetBarValue(arClusterWindows[i]:FindChild("HealthBar"), v:GetHealth(), 0, v:GetMaxHealth())
-		--self:SetBarValue(arClusterWindows[i]:FindChild("HealthBar"), v:GetHealth(), 0, v:GetHealthMax())
-		--Shield
-		local nShieldMax = v:GetShieldCapacityMax()
-		local nShieldCurr = v:GetShieldCapacity()
-		
-		if nShieldMax ~= nil and nShieldMax > 0 then
-			if arClusterWindows[i]:FindChild("ShieldBar"):IsShown() then
-				self:SetBarValue(arClusterWindows[i]:FindChild("ShieldBar"), nShieldCurr, 0, nShieldMax)
-			else
-				arClusterWindows[i]:FindChild("ShieldBar"):Show(true, true)
-				local nsl, nst, nsr, nsb = arClusterWindows[i]:FindChild("ShieldBar"):GetAnchorOffsets()
-				local nhl, nht, nhr, nhb = arClusterWindows[i]:FindChild("HealthBar"):GetAnchorOffsets()
-				arClusterWindows[i]:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsl, nhb)
-				self:SetBarValue(arClusterWindows[i]:FindChild("ShieldBar"), nShieldCurr, 0, nShieldMax)
+		if arClusterWindows ~= nil and arClusterWindows[i] ~= nil then
+			arClusterWindows[i]:Show(v:GetName() ~= nil)
+			if v:GetName() ~= nil and v:GetHealth() ~= nil then
+				arClusterWindows[i]:FindChild("Name"):SetText(v:GetName())
+				
+				self:SetBarValue(arClusterWindows[i]:FindChild("HealthBar"), v:GetHealth(), 0, v:GetMaxHealth())
+				--self:SetBarValue(arClusterWindows[i]:FindChild("HealthBar"), v:GetHealth(), 0, v:GetHealthMax())
+				--Shield
+				local nShieldMax = v:GetShieldCapacityMax()
+				local nShieldCurr = v:GetShieldCapacity()
+				
+				if nShieldMax ~= nil and nShieldMax > 0 then
+					if arClusterWindows[i]:FindChild("ShieldBar"):IsShown() then
+						self:SetBarValue(arClusterWindows[i]:FindChild("ShieldBar"), nShieldCurr, 0, nShieldMax)
+					else
+						arClusterWindows[i]:FindChild("ShieldBar"):Show(true, true)
+						local nsl, nst, nsr, nsb = arClusterWindows[i]:FindChild("ShieldBar"):GetAnchorOffsets()
+						local nhl, nht, nhr, nhb = arClusterWindows[i]:FindChild("HealthBar"):GetAnchorOffsets()
+						arClusterWindows[i]:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsl, nhb)
+						self:SetBarValue(arClusterWindows[i]:FindChild("ShieldBar"), nShieldCurr, 0, nShieldMax)
+					end
+				else
+					arClusterWindows[i]:FindChild("ShieldBar"):Show(false, true)
+					local nhl, nht, nhr, nhb = arClusterWindows[i]:FindChild("HealthBar"):GetAnchorOffsets()
+					local nsl, nst, nsr, nsb = arClusterWindows[i]:FindChild("ShieldBar"):GetAnchorOffsets()
+					arClusterWindows[i]:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
+				end
 			end
-		else
-			arClusterWindows[i]:FindChild("ShieldBar"):Show(false, true)
-			local nhl, nht, nhr, nhb = arClusterWindows[i]:FindChild("HealthBar"):GetAnchorOffsets()
-			local nsl, nst, nsr, nsb = arClusterWindows[i]:FindChild("ShieldBar"):GetAnchorOffsets()
-			arClusterWindows[i]:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
-		end
 		end
 	end
 end
@@ -1082,6 +1066,14 @@ local tBarTextFormatOptions = {
 --			Set Options
 --===============================
 function CandyUI_UnitFrames:SetOptions()
+
+	--Positions
+	self.wndPlayerUF:SetAnchorOffsets(unpack(self.db.profile.player.tAnchorOffsets))
+	self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
+	self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
+	self.wndToTUF:SetAnchorOffsets(unpack(self.db.profile.tot.tAnchorOffsets))
+	
+	--Unit Options
 	for _, strUnit in ipairs({"Player", "Target", "Focus"}) do
 		local strUnitLower = string.lower(strUnit)
 		

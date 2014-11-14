@@ -89,18 +89,19 @@ function CandyUI_Resources:OnDocLoaded()
 		return
 	end
 	
+	if self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
+		self.db:SetProfile(self.db.char.currentProfile)
+	end
+	
 	Apollo.LoadSprites("Sprites.xml")
 	
-	self.OptionsAddon = Apollo.GetAddon("CandyUI_Options")
-	self.wndOptionsMain = self.OptionsAddon.wndOptions
-	assert(self.wndOptionsMain ~= nil, "\n\n\nOptions Not Loaded\n\n")
-	--self.wndOptionsMain:FindChild("OptionsDialogueControls")
-	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsMain:FindChild("OptionsDialogueControls"), self)
-	
-	self.wndControls:Show(false, true)
-	--CandyUI_OptionsLoaded
-	self.bOptionsSet = CUI_RegisterOptions("Resources", self.wndControls)
-	if not self.bOptionsSet then
+	--Check for Options addon
+	local bOptionsLoaded = _cui.bOptionsLoaded
+	if bOptionsLoaded then
+		--Load Options
+		self:OnCUIOptionsLoaded()
+	else
+		--Schedule for later
 		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
 	end
 	
@@ -108,24 +109,24 @@ function CandyUI_Resources:OnDocLoaded()
   	self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 	self.colorPicker:Show(false, true)
 
-	self.bLoaded = true
 	self:CheckIfLoaded()
-	self:SetOptions()
+	--self:SetOptions()
 end
 
 function CandyUI_Resources:CheckIfLoaded()
-	if self.bLoaded then
-		if GameLib.GetPlayerUnit() then
-			self:OnCharacterCreated()
-		else
-			Apollo.RegisterEventHandler("CharacterCreated", "OnCharacterCreated", self)
-		end
+	if GameLib.GetPlayerUnit() then
+		self:OnCharacterCreated()
+	else
+		Apollo.RegisterEventHandler("CharacterCreated", "OnCharacterCreated", self)
 	end
 end
 
 function CandyUI_Resources:OnCUIOptionsLoaded()
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("Resources", self.wndControls)
-	--Print("Resources saw Options load") --debug
+	self:SetOptions()
 end
 
 function CandyUI_Resources:OnCharacterCreated()

@@ -19,10 +19,72 @@ local CandyUI_Options = {}
 -- Constants
 -----------------------------------------------------------------------------------------------
 -- e.g. local kiExampleVariableMax = 999
- 
+
+local karCUIModules = {
+	"CandyUI_Dash",
+	"CandyUI_Datachron",
+	"CandyUI_InterfaceMenu",
+	"CandyUI_Minimap",
+	"CandyUI_Nameplates",
+	"CandyUI_Options",
+	"CandyUI_Resources",
+	"CandyUI_UnitFrames",
+	"CandyBars",
+	"StarPanel",
+}
+
+--======================================================
+--				CUI global bar inspect
+--------------------------------------------------------
+--[[
+
+_cui
+	bOptionsLoaded				--Whether the options addon is loaded
+	tAddonLoadStatus			--A table of which addons are loaded (children are boolean)
+	
+
+]]
+--======================================================
+
+--Global CUI var
+if _cui == nil then
+	_cui = {}
+end
+
+_cui.bOptionsLoaded = false
+
 -----------------------------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------------------------
+local function IsAddonLoaded(strAddon)
+	--(Apollo.GetAddonInfo(strAddonName) ~= nil and Apollo.GetAddonInfo(strAddonName).bRunning) or 0
+	local tAddonInfo = Apollo.GetAddonInfo(strAddon)
+	if tAddonInfo ~= nil and tAddonInfo.bRunning == 1 then
+		return true
+	else
+		return false
+	end
+end
+
+local function pairsByKeys(t, f)
+	local a = {}
+	for n in pairs(t) do
+		table.insert(a, n)
+	end
+	table.sort(a, f)
+	local i = 0
+	local iterator = function()
+		i = i + 1
+		if a[i] == nil then
+			return nil
+		else
+			return a[i], t[a[i]]
+		end
+	end
+	return iterator
+end
+
+
 function CandyUI_Options:new(o)
     o = o or {}
     setmetatable(o, self)
@@ -50,7 +112,7 @@ function CandyUI_Options:OnLoad()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI_Options.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
-	
+	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiODefaults)
 	
 end
 
@@ -64,6 +126,9 @@ function CandyUI_Options:OnDocLoaded()
 		self.wndOptions = Apollo.LoadForm(self.xmlDoc, "OptionsDialogue", nil, self)
 		self.wndOptions:Show(false, true)
 		
+		self.wndConfirmAlert = Apollo.LoadForm(self.xmlDoc, "ConfirmAlert", nil, self)
+		self.wndConfirmAlert:Show(false, true)
+		
 		if not candyUI_Cats then
 			candyUI_Cats = {}
 		end
@@ -76,11 +141,57 @@ function CandyUI_Options:OnDocLoaded()
 		Apollo.RegisterSlashCommand("candyui", "OnCandyUI_OptionsOn", self)
 		Apollo.RegisterSlashCommand("cui", "OnCandyUI_OptionsOn", self)
 		
-		Apollo.CreateTimer("ThanksAdd", 10.0, false)
-		Apollo.RegisterTimerHandler("ThanksAdd", "OnThanksAdd", self)
-		Apollo.StartTimer("ThanksAdd")
+		--Apollo.CreateTimer("ThanksAdd", 10.0, false)
+		--Apollo.RegisterTimerHandler("ThanksAdd", "OnRegisterOptionsDelay", self)
+		--Apollo.StartTimer("ThanksAdd")
+		
+		--Trying to add other options without the above delay
+		self:OnRegisterOptionsDelay()
+		
+		self.wndWelcome = Apollo.LoadForm(self.xmlDoc, "WelcomeForm", "FixedHudStratum", self)
+		if self.db.char.bFirstRun then
+			self.wndWelcome:Show(true, false)
+			local cuiModulesTimer = ApolloTimer.Create(5, true, "OnModulesTimer", self) 
+			self:OnModulesTimer()
+		else
+			self.wndWelcome:Show(false, true)
+		end
+		
+		Apollo.RegisterEventHandler("CandyUI_OpenOptions", "OnCandyUI_OptionsOn", self)
+		Apollo.RegisterEventHandler("CandyUI_CloseOptions", "OnCandyUI_OptionsOff", self)
+		
+		--Profiles
+		local wndProfileControls = Apollo.LoadForm(self.xmlDoc, "ProfileOptions", self.wndOptions:FindChild("OptionsDialogueControls"), self)
+		CUI_RegisterOptions("Profile", wndProfileControls, true)
+		--current
+		--self.wndOptions:FindChild("OptionsDialogueControls"):FindChild("ProfileControls")
+		self.wndCurrentProfileDropdown = self.tAddons["Profile"]:FindChild("Profile:Current:CurrentDropdown")
+		self.wndCurrentProfileDropdownBox = self.tAddons["Profile"]:FindChild("Profile:Current:DropdownBox")
+		
+		if self.db.char.currentProfile == self.db:GetCurrentProfile() then
+			self.wndCurrentProfileDropdown:SetText(self.db.char.currentProfile)
+			_cui.strCurrentProfile = self.db.char.currentProfile
+		else
+			self.db:SetProfile(self.db.char.currentProfile)
+			self.wndCurrentProfileDropdown:SetText(self.db.char.currentProfile)
+			_cui.strCurrentProfile = self.db.char.currentProfile
+		end
+		
 
+		
+		
+		--delete
+		self.wndDeleteProfileDropdown = self.tAddons["Profile"]:FindChild("Profile:Delete:DeleteDropdown")
+		self.wndDeleteProfileDropdownBox = self.tAddons["Profile"]:FindChild("Profile:Delete:DropdownBox")
+		--copy
+		self.wndCopyProfileDropdown = self.tAddons["Profile"]:FindChild("Profile:Copy:CopyDropdown")
+		self.wndCopyProfileDropdownBox = self.tAddons["Profile"]:FindChild("Profile:Copy:DropdownBox")
+		
+		self.tAddons["Profile"]:FindChild("SPSync"):Enable(false)
+		self.tAddons["Profile"]:FindChild("CBSync"):Enable(false)
+	
 		-- Do additional Addon initialization here
+		_cui.bOptionsLoaded = true
 		Event_FireGenericEvent("CandyUI_OptionsLoaded")
 	end
 end
@@ -94,25 +205,61 @@ end
 function CandyUI_Options:OnCandyUI_OptionsOn()
 	self.wndOptions:Invoke() -- show the window
 	self:OnOptionsHomeClick()
+	
+	local bAllProfilesSame = self:CheckCurrentProfiles()
+	
+	if not bAllProfilesSame then
+		--self:SetCurrentProfiles(_cui.strCurrentProfile)
+	end
 end
 
-function CUI_RegisterOptions(name, wndControls)
+function CandyUI_Options:OnCandyUI_OptionsOff()
+	self.wndOptions:Show(false)
+end
+
+function CUI_RegisterOptions(name, wndControls, bSingleTier)
 	if Apollo.GetAddon("CandyUI_Options").tAddons[name] ~= nil then
 		return false
 	end
-	Apollo.GetAddon("CandyUI_Options").tAddons[name] = wndControls
+	--Apollo.GetAddon("CandyUI_Options").tAddons[name] = wndControls
+	local tData = {}
+	tData.bSingleTier = bSingleTier
+	
+	wndControls:SetData(tData)
 	wndControls:Show(false, true)
+	
 	for _, wndCurr in pairs(wndControls:GetChildren()) do
 		wndCurr:Show(false, true)
 	end
+	
+	Apollo.GetAddon("CandyUI_Options").tAddons[name] = wndControls
+	
 	return true
 end
 
+function CandyUI_Options:OnRegisterOptionsDelay()
+	--Delay so these appear last on list?
+	--**********SWITCH TO SORTED LIST***********
+	self:OnThanksAdd()
+	self:OnModulesAdd()
+end
+
 function CandyUI_Options:OnThanksAdd()
-	self.wndThanksControls = Apollo.LoadForm(self.xmlDoc, "ThanksOptions", self.wndOptions:FindChild("OptionsDialogueControls"), self)
-	self.wndThanksControls:Show(false, true)
+	--This function adds a thanks section to the /cui options.
+	----------------------------------------------------------
+	local wndThanksControls = Apollo.LoadForm(self.xmlDoc, "ThanksOptions", self.wndOptions:FindChild("OptionsDialogueControls"), self)
+	--wndThanksControls:Show(false, true)
 		
-	CUI_RegisterOptions("Thanks", self.wndThanksControls)
+	CUI_RegisterOptions("Thanks", wndThanksControls)
+end
+
+function CandyUI_Options:OnModulesAdd()
+	--This function adds a module list to the /cui options.
+	-------------------------------------------------------
+	local wndModulesControls = Apollo.LoadForm(self.xmlDoc, "ModulesOptions", self.wndOptions:FindChild("OptionsDialogueControls"), self)
+	--wndModulesControls:Show(false, true)
+		
+	CUI_RegisterOptions("Modules", wndModulesControls, true)
 end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_OptionsForm Functions
@@ -131,7 +278,7 @@ end
 function CandyUI_Options:OnOptionsHomeClick( wndHandler, wndControl, eMouseButton )
 	self:HideAllOptions()
 	self.wndOptions:FindChild("ListControls"):DestroyChildren()
-	for name, wndControls in pairs(self.tAddons) do
+	for name, wndControls in pairsByKeys(self.tAddons) do
 		local wndButton = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
 		wndButton:SetText(name)
 		--Print(name) --debug
@@ -157,25 +304,60 @@ end
 -- OptionsListItem Functions
 ---------------------------------------------------------------------------------------------------
 
-function CandyUI_Options:OnOptionsCatClick( wndHandler, wndControl, eMouseButton )
+function CandyUI_Options:OnOptionsCatClick( wndHandler, wndControl, eMouseButton )	
+	--Get addon name
 	local strAddon = wndControl:GetText()
-	self.wndOptions:FindChild("ListControls"):DestroyChildren()
-	self.tAddons[strAddon]:Show(true)
-	for _, wndCurr in pairs(self.tAddons[strAddon]:GetChildren()) do
-		local wndButton = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
-		wndButton:RemoveEventHandler("ButtonUp")
-		wndButton:AddEventHandler("ButtonUp", "OnAddonCatClick")
-		wndButton:SetText(wndCurr:FindChild("Title"):GetText())
-		wndButton:SetData(strAddon)
+	--Get other arguments (stored as window data)
+	local tData = self.tAddons[strAddon]:GetData()
+	--Check if its a single tiered option
+	local bSingleTier = tData.bSingleTier
+	if bSingleTier then
+	--If single tiered
+	------------------
+		--Hide all options
+		self:HideAllOptions()
+		--Show options page
+		self.tAddons[strAddon]:Show(true)
+		for _, wndCurr in pairs(self.tAddons[strAddon]:GetChildren()) do
+			wndCurr:Show(true)
+		end
+	else
+	--If multi tiered
+	-----------------
+		--Hide all options
+		self:HideAllOptions()
+		--Destroy Nav List children (buttons)
+		self.wndOptions:FindChild("ListControls"):DestroyChildren()
+		--Show addon options
+		self.tAddons[strAddon]:Show(true)
+		--Get children
+		local arChildren = self.tAddons[strAddon]:GetChildren()
+		--New table to sort by name
+		local tChildrenList = {}
+		for _, wndCurr in pairs(arChildren) do
+			local strName = wndCurr:FindChild("Title"):GetText()
+			tChildrenList[strName] = wndCurr
+		end
+		--Add buttons
+		for strName, wndCurr in pairsByKeys(tChildrenList) do
+			--Load button window
+			local wndButton = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptions:FindChild("ListControls"), self)
+			--Change OnClick function
+			wndButton:RemoveEventHandler("ButtonUp")
+			wndButton:AddEventHandler("ButtonUp", "OnAddonCatClick")
+			--Set Properties
+			wndButton:SetText(strName)
+			wndButton:SetData(strAddon)
+		end
+		--Arrange Vertical
+		self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
 	end
-	self.wndOptions:FindChild("ListControls"):ArrangeChildrenVert()
-	--Print(wndControl:GetText())
-	--local event = "CandyUI_"..wndControl:GetText().."Clicked"
-	--Event_FireGenericEvent(event)
 end
 
 function CandyUI_Options:OnAddonCatClick( wndHandler, wndControl, eMouseButton )
+	--Get Addon name
 	local strAddon = wndControl:GetData()
+	--Show the correct window, hide the rest.
 	for _, wndCurr in pairs(self.tAddons[strAddon]:GetChildren()) do
 		if wndCurr:FindChild("Title"):GetText() == wndControl:GetText() then
 			wndCurr:Show(true)
@@ -185,10 +367,262 @@ function CandyUI_Options:OnAddonCatClick( wndHandler, wndControl, eMouseButton )
 	end
 end
 
+function CandyUI_Options:OnModulesTimer()
+	if self.wndWelcome ~= nil and self.wndWelcome:IsShown() then
+		local wndScrollList = self.wndWelcome:FindChild("ModuleList:ScrollList")
+		self:PopulateModulesList(wndScrollList)
+	end
+end
+
+function CandyUI_Options:PopulateModulesList(wndScrollList)
+	if wndScrollList == nil then
+		return
+	end
+	
+	wndScrollList:DestroyChildren()
+	for i, strName in ipairs(karCUIModules) do
+		local wndModule = Apollo.LoadForm(self.xmlDoc, "ModuleListItem", wndScrollList, self)
+		wndModule:FindChild("Name"):SetText(strName)
+		local bLoaded = IsAddonLoaded(strName)
+		wndModule:FindChild("IconNo"):Show(not bLoaded, true)
+		wndModule:FindChild("IconYes"):Show(bLoaded, true)
+	end
+	wndScrollList:ArrangeChildrenVert()
+end
+
+kcuiODefaults = {
+	char = {
+		currentProfile = nil,
+		bFirstRun = true,
+		bSyncCandyBars = false,
+		bSyncStarPanel = false,
+	},
+	profile = {
+	},
 
 ---------------------------------------------------------------------------------------------------
--- OptionsControlsList Functions
+-- WelcomeForm Functions
 ---------------------------------------------------------------------------------------------------
+}
+function CandyUI_Options:OnWelcomeClose( wndHandler, wndControl, eMouseButton )
+	self.wndWelcome:Show(false)
+	self.db.char.bFirstRun = false
+end
+
+---------------------------------------------------------------------------------------------------
+-- ModulesOptions Functions
+---------------------------------------------------------------------------------------------------
+
+function CandyUI_Options:OnModulesListShown( wndHandler, wndControl )
+	local wndScrollList = wndControl:FindChild("ModulesList:ScrollList")
+	self:PopulateModulesList(wndScrollList)
+end
+
+---------------------------------------------------
+--				Profiles
+---------------------------------------------------
+
+function CandyUI_Options:OnNewProfileReturn( wndHandler, wndControl, strText )
+	if strText == "" then return end
+	--self.db:SetProfile(strText)
+	--self.db.char.currentProfile = strText
+	_cui.strCurrentProfile = strText
+	self.wndCurrentProfileDropdown:SetText(strText)
+	wndControl:SetText("")
+	--SetOptions
+	self:SetCurrentProfiles(strText)
+end
+
+function CandyUI_Options:SetCurrentProfiles(strProfile)
+	Print("Setting profile to "..strProfile.."...")
+	for i, strAddonName in ipairs(karCUIModules) do
+		local bLoaded = IsAddonLoaded(strAddonName)
+		local addon = Apollo.GetAddon(strAddonName)
+		
+		if (strAddonName == "CandyBars" and not self.db.char.bSyncCandyBars) or (strAddonName == "StarPanel" and not self.db.char.bSyncStarPanel) then
+			bLoaded = false
+		end
+		
+		if bLoaded and addon.db ~= nil then
+			
+			addon.db:SetProfile(strProfile)
+			addon.db.char.currentProfile = strProfile --wndControl:GetText()
+			
+			Print(strAddonName.." profile set.")
+			
+			if addon.SetOptions ~= nil then
+				addon:SetOptions()
+				
+				Print(strAddonName.." options set.")
+			else
+				Print(strAddonName.." options NOT set.")
+			end
+		else
+			Print(strAddonName.." profile NOT set.")
+		end
+		
+	end
+end
+
+function CandyUI_Options:CopyProfiles(strProfile)
+	Print("Copying "..strProfile.."...")
+	for i, strAddonName in ipairs(karCUIModules) do
+		local bLoaded = IsAddonLoaded(strAddonName)
+		local addon = Apollo.GetAddon(strAddonName)
+		
+		if (strAddonName == "CandyBars" and not self.db.char.bSyncCandyBars) or (strAddonName == "StarPanel" and not self.db.char.bSyncStarPanel) then
+			bLoaded = false
+		end
+		
+		if bLoaded and addon.db ~= nil then
+			addon.db:CopyProfile(strProfile, true)
+			
+			if addon.SetOptions ~= nil then
+				addon:SetOptions()
+			end
+		end
+	end
+end
+
+function CandyUI_Options:DeleteProfiles(strProfile)
+	Print("Deleting "..strProfile.."...")
+	for i, strAddonName in ipairs(karCUIModules) do
+		local bLoaded = IsAddonLoaded(strAddonName)
+		local addon = Apollo.GetAddon(strAddonName)
+		
+		if (strAddonName == "CandyBars" and not self.db.char.bSyncCandyBars) or (strAddonName == "StarPanel" and not self.db.char.bSyncStarPanel) then
+			bLoaded = false
+		end
+		
+		if bLoaded and addon.db ~= nil then
+			
+			addon.db:DeleteProfile(strProfile, true)
+			
+			Print(strAddonName.." deleted.")
+		else
+			Print(strAddonName.." NOT deleted.")
+		end
+		
+	end
+end
+
+function CandyUI_Options:CheckCurrentProfiles()
+	local strCurrent = _cui.strCurrentProfile
+	
+	for i, strAddonName in ipairs(karCUIModules) do
+		local bLoaded = IsAddonLoaded(strAddonName)
+		local addon = Apollo.GetAddon(strAddonName)
+		
+		if (strAddonName == "CandyBars" and not self.db.char.bSyncCandyBars) or (strAddonName == "StarPanel" and not self.db.char.bSyncStarPanel) then
+			bLoaded = false
+		end
+		
+		if bLoaded and addon.db ~= nil then
+			local strAddonCurrent = addon.db:GetCurrentProfile()
+			
+			if strAddonCurrent ~= strCurrent then
+				return false
+			end
+		end
+	end
+	
+	return true
+end
+
+function CandyUI_Options:OnDeleteProfileDropdownClick( wndHandler, wndControl, eMouseButton )
+	self.wndDeleteProfileDropdownBox:FindChild("ScrollList"):DestroyChildren()	
+	
+	for name, value in pairs(self.db:GetProfiles()) do
+		if value ~= self.db:GetCurrentProfile() then
+			local currButton = Apollo.LoadForm(self.xmlDoc, "DropdownItem", self.wndDeleteProfileDropdownBox:FindChild("ScrollList"), self)
+			
+			currButton:SetText(value)
+		
+			--currButton:RemoveEventHandler("ButtonUp")
+			currButton:AddEventHandler("ButtonUp", "OnDeleteProfileItemClick")
+		end
+	end
+		
+	self.wndDeleteProfileDropdownBox:FindChild("ScrollList"):ArrangeChildrenVert()
+	
+	self.wndDeleteProfileDropdownBox:Show(true)
+end
+
+function CandyUI_Options:OnDeleteProfileItemClick( wndHandler, wndControl, eMouseButton )
+	self.wndDeleteProfileDropdownBox:Show(false)
+	self.wndConfirmAlert:FindChild("NoticeText"):SetText("Are you sure you want to delete "..wndControl:GetText().."?")
+	self.wndConfirmAlert:SetData(wndControl:GetText())
+	self.wndConfirmAlert:Show(true)
+	self.wndConfirmAlert:ToFront()
+end
+
+function CandyUI_Options:OnConfirmYes(wndHandler, wndControl, eMouseButton)
+	local strProfile = self.wndConfirmAlert:GetData()
+	self:DeleteProfiles(strProfile)
+	wndControl:GetParent():Show(false)
+end
+
+function CandyUI_Options:OnConfirmNo(wndHandler, wndControl, eMouseButton)
+	wndControl:GetParent():Show(false)
+end
+
+function CandyUI_Options:OnCurrentProfileDropdownClick( wndHandler, wndControl, eMouseButton )
+	self.wndCurrentProfileDropdownBox:FindChild("ScrollList"):DestroyChildren()	
+	---Print(999)
+	for name, value in pairs(self.db:GetProfiles()) do
+		if value ~= self.db:GetCurrentProfile() then
+			local currButton = Apollo.LoadForm(self.xmlDoc, "DropdownItem", self.wndCurrentProfileDropdownBox:FindChild("ScrollList"), self)
+			currButton:SetText(value)
+			currButton:AddEventHandler("ButtonUp", "OnCurrentProfileItemClick")
+		end
+	end
+	
+	self.wndCurrentProfileDropdownBox:FindChild("ScrollList"):ArrangeChildrenVert()
+	self.wndCopyProfileDropdown:Enable(false)
+	--self.tAddons["Profile"]:FindChild("SPSync"):Enable(false)
+	self.wndCurrentProfileDropdownBox:Show(true)
+end
+
+function CandyUI_Options:OnCurrentProfileItemClick( wndHandler, wndControl, eMouseButton )
+	self.wndCurrentProfileDropdown:SetText(wndControl:GetText())
+	
+	_cui.strCurrentProfile = wndControl:GetText()
+
+	self:SetCurrentProfiles(wndControl:GetText())
+	
+	self.wndCurrentProfileDropdownBox:Show(false)
+end
+
+function CandyUI_Options:OnCurrentDropHide( wndHandler, wndControl )
+	self.wndCopyProfileDropdown:Enable(true)
+	--self.tAddons["Profile"]:FindChild("SPSync"):Enable(true)
+end
+
+function CandyUI_Options:OnCopyFromDropdownClick( wndHandler, wndControl, eMouseButton )
+	self.wndCopyProfileDropdownBox:FindChild("ScrollList"):DestroyChildren()	
+	
+	for name, value in pairs(self.db:GetProfiles()) do
+		if value ~= self.db:GetCurrentProfile() then
+			local currButton = Apollo.LoadForm(self.xmlDoc, "DropdownItem", self.wndCopyProfileDropdownBox:FindChild("ScrollList"), self)
+			currButton:SetText(value)
+			currButton:AddEventHandler("ButtonUp", "OnCopyProfileItemClick")
+		end
+	end
+		
+	self.wndCopyProfileDropdownBox:FindChild("ScrollList"):ArrangeChildrenVert()
+	
+	self.wndCopyProfileDropdownBox:Show(true)
+end
+
+function CandyUI_Options:OnCopyProfileItemClick( wndHandler, wndControl, eMouseButton )
+	self.wndCopyProfileDropdown:SetText(wndControl:GetText())
+	
+	--self.db:CopyProfile(wndControl:GetText(), true)
+	self:CopyProfiles(wndControl:GetText())
+	
+	self.wndCopyProfileDropdownBox:Show(false)
+end
+
 
 
 -----------------------------------------------------------------------------------------------

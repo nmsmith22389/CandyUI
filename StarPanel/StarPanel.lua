@@ -45,6 +45,10 @@ jessica's code
 eNrj/cDAwMTAwMACxIxAvByIOYCYC8pnYkDIM0NpFqgYOxBzQ9WC2AJQtiQQuwExKxD/r2cHkyAzO6I4wWyQHq8QXiBZd4YfSH42FACLCwPJ6SvEgeSGIwCjrw+H
 ]]
 
+--Global CUI var
+if _cui == nil then
+	_cui = {}
+end
 
 -------------------
 --   Sort Table
@@ -219,6 +223,12 @@ end
 -----------------------------------------------------------------------------------------------
 function StarPanel:OnDocLoaded()
     --Vars
+	--CUI load status
+		if _cui.tAddonLoadStatus == nil then
+			_cui.tAddonLoadStatus = {}
+		end
+		_cui.tAddonLoadStatus["StarPanel"] = true
+		
 	self.DataTexts = {}
 	self.DataTextOptionsUI = {}
 	self.tDataTextsTop = {}
@@ -253,7 +263,14 @@ function StarPanel:OnDocLoaded()
 	--self.db:ResetProfile()
 	--set curr profile
 	
-	local QuestTracker = Apollo.GetAddon("QuestTracker")
+	--CUI Options
+		if _cui.bOptionsLoaded == true then
+			self:RegisterCUIOptions()
+		else
+			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "RegisterCUIOptions", self)
+		end
+	
+	local QuestTracker = nil -- Apollo.GetAddon("QuestTracker")
 	if QuestTracker then
 		local nQuestTrackerLeft, nQuestTrackerTop, nQuestTrackerTop, nQuestTrackerBottom = QuestTracker.wndMain:GetAnchorOffsets()
 		self.nQuestTrackerBottom = nQuestTrackerBottom - 20
@@ -266,6 +283,13 @@ function StarPanel:OnDocLoaded()
 	end
 	self:SetOptions()
 	StarPanel:InitializeDataTexts(self)
+end
+
+function StarPanel:RegisterCUIOptions()
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	local wndControls = Apollo.LoadForm(self.xmlDoc, "SPOptions", wndOptionsControls, self)
+	CUI_RegisterOptions("StarPanel", wndControls, true)
 end
 
 function StarPanel:InitializeDataTexts(self)
@@ -2253,6 +2277,14 @@ end
 		onTooltip = <func>	--A function that generates a tooltip
 ]]
 -----------------------------------------------------------------------------------------------
+
+function StarPanel:OnSPOptionsButtonClick( wndHandler, wndControl, eMouseButton )
+	--=========================================
+	--					FOR CUI
+	--=========================================
+	Apollo.ParseInput("/sp")
+	Event_FireGenericEvent("CandyUI_CloseOptions")
+end
 
 ---------------------------------------------------------------------------------------------------
 -- OptionsControls Functions

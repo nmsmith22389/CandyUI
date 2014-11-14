@@ -3,8 +3,11 @@
     <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
     <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>
     <Script Name="Libs/GeminiHook/GeminiHook-1.0.lua"/>
+	<Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
     <Script Name="CandyUI_Options.lua"/>
     <Form Name="CandyUI_Options.xml"/>
 	<ReplaceAddon Name="ActionBarFrame"/>
 	<ReplaceAddon Name="ActionBarShortcut"/>
+	<ReplaceAddon Name="RecallFrame"/>
+	<ReplaceAddon Name="XPBar"/>
 </Addon>
