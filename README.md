@@ -5,34 +5,85 @@ A Wildstar UI Replacement
 
 ###Last Update
 
-####CandyUI_Options####
-**v0.3.3**
->• Now disables the stock action bar (to hide UI).
+CandyUI_Resources
 
-####CandyUI_Dash####
-**v0.2.1**
->• Fixed anchor error on startup.
+v0.3.6
 
-####CandyUI_Datachron####
-**v0.2**
->• Now movable.
+	• Optimized loading process.
 
-####CandyUI_Resources####
-**v0.3.5**
->• Now properly disables medic and warrior stock resources.
 
->• Horizontal position now saves properly.
+CandyUI_Minimap
 
-####CandyUI_Minimap####
-**v0.3**
->• Fixed error when no center button funcs.
+v0.3.1
 
-####StarPanel####
-**v1.2.3**
->• Fixed Currency nil error on startup.
+	• Fixed error on profile switch.
+	
+	• Optimized loading process.
+	
+	• Fixed general options.
+	
 
->• Fixed Bottom Bar options error.
+CandyUI_Options
 
+v0.4
+
+	• Welcome screen added and appears only on first run.
+	
+	• Modules list added.
+	
+	• Thanks page updated.
+	
+	• CB and SP option shortcuts added to CUI options.
+	
+	• CUI global variable added.
+	
+	• Added single tiered options support.
+	
+	• Options are now sorted alphabetically.
+	
+	• Now disables RecallFrame.
+	
+	• Now disables XPBar. (to hide UI)
+	
+	• Profile system added.
+	
+
+
+CandyUI_UnitFrames
+
+v0.3.4
+
+	• Fixed error when max health = 0.
+	
+	• Fixed cluster bug. (ln832)
+	
+	• Optimized loading process.
+	
+
+
+CandyUI_Nameplates
+
+v0.4.5
+
+	• Optimized loading process.
+	
+
+
+CandyBars
+
+v1.2.5
+
+	• Added CUI options support
+	
+
+
+StarPanel
+
+v1.2.4
+
+-Added CUI options support.
+
+-Fixed QT bug.
 
 
 
