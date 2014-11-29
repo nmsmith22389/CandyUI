@@ -64,6 +64,16 @@ function CandyUI_Dash:OnDocLoaded()
 		return
 	end
 	
+	--Check for Options addon
+	local bOptionsLoaded = _cui.bOptionsLoaded
+	if bOptionsLoaded then
+		--Load Options
+		self:OnCUIOptionsLoaded()
+	else
+		--Schedule for later
+		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+	end
+	
 	if self.db.char.currentProfile == nil and self.db:GetCurrentProfile() ~= nil then
 		self.db.char.currentProfile = self.db:GetCurrentProfile()
 	elseif self.db.char.currentProfile ~= nil and self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
@@ -91,10 +101,19 @@ function CandyUI_Dash:OnDocLoaded()
 	-- For flashes
 	self.nLastEnduranceValue = 0
 
-	self.xmlDoc = nil
+	--self.xmlDoc = nil
 	self:OnFrameUpdate()
 	
 	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+end
+
+function CandyUI_Dash:OnCUIOptionsLoaded()
+	--Load Options
+	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
+	CUI_RegisterOptions("Dash", self.wndControls)
+	self:SetOptions()	
+	--self:SetLooks()
 end
 
 function CandyUI_Dash:OnFrameUpdate()
@@ -118,6 +137,13 @@ function CandyUI_Dash:OnFrameUpdate()
 		Apollo.StopTimer("EnduranceDisplayTimer")
 		Apollo.StartTimer("EnduranceDisplayTimer")
 		self.bEnduranceFadeTimer = true
+	end
+	
+	--HIDE WHEN FULL
+	--Think about replacing with Endurance Display Timer
+	--Also add a 
+	if self.db.profile.general.bHideWhenFull and nEvadeCurr == nEvadeMax then
+		self.wndMain:Show(false)
 	end
 	
 	--hide evade UI while in a vehicle.
@@ -237,13 +263,20 @@ kcuiDashDefaults = {
 	profile = {
 		general = {
 			tAnchorOffsets = { 0, 0, 60, 60},
+			bHideWhenFull = false,
 		},
 	},
 }
 
 function CandyUI_Dash:SetOptions()
 	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+	self.wndControls:FindChild("GeneralControls:HideWhenFullToggle"):SetCheck(self.db.profile.general.bHideWhenFull)
 end
+
+function CandyUI_Dash:OnHideWhenFullClick( wndHandler, wndControl, eMouseButton )
+	self.db.profile.general.bHideWhenFull = wndControl:IsChecked()
+end
+
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Dash Instance
 -----------------------------------------------------------------------------------------------

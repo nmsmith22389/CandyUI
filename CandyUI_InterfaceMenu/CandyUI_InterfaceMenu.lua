@@ -110,6 +110,8 @@ function CandyUI_InterfaceMenu:OnDocLoaded()
 
 	Apollo.CreateTimer("QueueRedrawTimer", 0.3, false)
 	
+	Apollo.RegisterSlashCommand("redrawbuttonlist", "OnRedrawButtonListCommand", self)
+	
 	self.tMenuData = {
 		[Apollo.GetString("InterfaceMenu_SystemMenu")] = { "", "", "Icon_Windows32_UI_CRB_InterfaceMenu_EscMenu" },
 	}
@@ -172,7 +174,13 @@ function CandyUI_InterfaceMenu:OnUpdateTimer()
 	self.wndMain:FindChild("Time"):SetText("") --bShowTime and string.format("%02d:%02d", tostring(tTime.nHour), tostring(tTime.nMinute)) or "")
 end
 
+function CandyUI_InterfaceMenu:OnRedrawButtonListCommand()
+	self:ButtonListRedraw()
+end
+
 function CandyUI_InterfaceMenu:OnNewAddonListed(strKey, tParams)
+	strKey = string.gsub(strKey, ":", "|") -- ":'s don't work for window names, sorry!"
+
 	self.tMenuData[strKey] = tParams
 	
 	self:FullListRedraw()

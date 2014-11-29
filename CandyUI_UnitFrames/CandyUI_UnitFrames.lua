@@ -926,6 +926,7 @@ kcuiUFDefaults = {
 			crManaBar = "fffe7b00",
 			bAbsorbText = true,
 			crAbsorbBar = "xkcdAmber",
+			nAbsorbOpacity = 1,
 			nOpacity = 1,
 			nBGOpacity = 1,
 			tAnchorOffsets = {0,-324,256,-268}
@@ -944,6 +945,7 @@ kcuiUFDefaults = {
 			crManaBar = "fffe7b00",
 			bAbsorbText = true,
 			crAbsorbBar = "xkcdAmber",
+			nAbsorbOpacity = 1,
 			nOpacity = 1,
 			nBGOpacity = 1,
 			tAnchorOffsets = {-256,-324,0,-268}
@@ -962,6 +964,7 @@ kcuiUFDefaults = {
 			crManaBar = "fffe7b00",
 			bAbsorbText = true,
 			crAbsorbBar = "xkcdAmber",
+			nAbsorbOpacity = 1,
 			nOpacity = 1,
 			nBGOpacity = 1,
 			bGlow = true,
@@ -976,6 +979,7 @@ kcuiUFDefaults = {
 			crShieldBar = "ff00bff3",
 			bAbsorbText = true,
 			crAbsorbBar = "xkcdAmber",
+			nAbsorbOpacity = 1,
 			nOpacity = 1,
 			nBGOpacity = 1,
 			tAnchorOffsets = {-261,-293,-111,-268}
@@ -1055,6 +1059,7 @@ local tFontSizeOptions = {
 	["Small"] = "CRB_InterfaceTiny_BB",
 	["Medium"] = "CRB_InterfaceMedium_BO",
 	["Large"] = "CRB_InterfaceLarge_BO",
+	["Huge"] = "CRB_Interface14_BO",
 }
 
 local tBarTextFormatOptions = {
@@ -1107,6 +1112,9 @@ function CandyUI_UnitFrames:SetOptions()
 		controls:FindChild("AbsorbBarColor:Swatch"):SetBGColor(self.db.profile[strUnitLower]["crAbsorbBar"])
 		--Absorb Text
 		controls:FindChild("ShowAbsorbTextToggle"):SetCheck(self.db.profile[strUnitLower]["bAbsorbText"])
+		--Absorb Opacity
+		controls:FindChild("AbsorbOpacity:SliderBar"):SetValue(self.db.profile[strUnitLower]["nAbsorbOpacity"])
+		controls:FindChild("AbsorbOpacity:EditBox"):SetText(self.db.profile[strUnitLower]["nAbsorbOpacity"])
 	end
 --General
 	self.wndControls:FindChild("GeneralControls"):FindChild("FontSize:Dropdown"):SetText(GetKey(tFontSizeOptions, self.db.profile.general.strFontSize))
@@ -1146,6 +1154,7 @@ function CandyUI_UnitFrames:SetLooks()
 	self.wndPlayerUF:FindChild("ManaBar"):SetBGColor(self.db.profile.player.crManaBar)
 	
 	self.wndPlayerUF:FindChild("HealthBar:AbsorbBar"):SetBarColor(self.db.profile.player.crAbsorbBar)
+	self.wndPlayerUF:FindChild("HealthBar:AbsorbBar"):SetOpacity(self.db.profile.player.nAbsorbOpacity)
 	--self.wndPlayerUF:FindChild("HealthBar:AbsorbBar"):SetOpacity(0.5)
 	--Opacity
 	self.wndPlayerUF:SetOpacity(self.db.profile.player.nOpacity)
@@ -1160,6 +1169,7 @@ function CandyUI_UnitFrames:SetLooks()
 	self.wndTargetUF:FindChild("ManaBar"):SetBGColor(self.db.profile.target.crManaBar)
 	
 	self.wndTargetUF:FindChild("HealthBar:AbsorbBar"):SetBarColor(self.db.profile.target.crAbsorbBar)
+	self.wndTargetUF:FindChild("HealthBar:AbsorbBar"):SetOpacity(self.db.profile.target.nAbsorbOpacity)
 	--Opacity
 	self.wndTargetUF:SetOpacity(self.db.profile.target.nOpacity)
 	self.wndTargetUF:FindChild("BG"):SetOpacity(self.db.profile.target.nBGOpacity)
@@ -1171,8 +1181,8 @@ function CandyUI_UnitFrames:SetLooks()
 	self.wndFocusUF:FindChild("ShieldBar"):SetBGColor(self.db.profile.focus.crShieldBar)
 	self.wndFocusUF:FindChild("ManaBar"):FindChild("Bar"):SetBarColor(self.db.profile.focus.crManaBar)
 	self.wndFocusUF:FindChild("ManaBar"):SetBGColor(self.db.profile.focus.crManaBar)
-	
 	self.wndFocusUF:FindChild("HealthBar:AbsorbBar"):SetBarColor(self.db.profile.focus.crAbsorbBar)
+	self.wndFocusUF:FindChild("HealthBar:AbsorbBar"):SetOpacity(self.db.profile.focus.nAbsorbOpacity)
 	--Opacity
 	self.wndFocusUF:SetOpacity(self.db.profile.focus.nOpacity)
 	self.wndFocusUF:FindChild("BG"):SetOpacity(self.db.profile.focus.nBGOpacity)
@@ -1183,6 +1193,7 @@ function CandyUI_UnitFrames:SetLooks()
 	self.wndToTUF:FindChild("ShieldBar"):FindChild("Bar"):SetBarColor(self.db.profile.tot.crShieldBar)
 	self.wndToTUF:FindChild("ShieldBar"):SetBGColor(self.db.profile.tot.crShieldBar)
 	self.wndToTUF:FindChild("HealthBar:AbsorbBar"):SetBarColor(self.db.profile.tot.crAbsorbBar)
+	self.wndToTUF:FindChild("HealthBar:AbsorbBar"):SetOpacity(self.db.profile.tot.nAbsorbOpacity)
 	--Opacity
 	self.wndToTUF:SetOpacity(self.db.profile.tot.nOpacity)
 	self.wndToTUF:FindChild("BG"):SetOpacity(self.db.profile.tot.nBGOpacity)
@@ -1454,6 +1465,17 @@ end
 
 
 function CandyUI_UnitFrames:OnShowAbsorbTextClick( wndHandler, wndControl, eMouseButton )
+end
+
+function CandyUI_UnitFrames:OnAbsorbOpacityChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	if strUnit == "Target of Target" then strUnit = "ToT" end
+	local value = round(fNewValue, 1)
+	wndControl:GetParent():FindChild("EditBox"):SetText(value)
+	self.db.profile[string.lower(strUnit)]["nAbsorbOpacity"] = value
+	if self["wnd"..strUnit.."UF"]:FindChild("HealthBar:AbsorbBar"):IsValid() then
+		self["wnd"..strUnit.."UF"]:FindChild("HealthBar:AbsorbBar"):SetOpacity(value)
+	end
 end
 
 --General?

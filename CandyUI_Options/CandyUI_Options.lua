@@ -303,6 +303,11 @@ function CandyUI_Options:OnCloseButtonClick( wndHandler, wndControl, eMouseButto
 	self.wndOptions:Close()
 end
 
+function CandyUI_Options:OnDefaultClick( wndHandler, wndControl, eMouseButton )
+	--add default code here
+	Print("Sorry! The default function has not been written yet.")
+end
+
 ---------------------------------------------------------------------------------------------------
 -- OptionsListItem Functions
 ---------------------------------------------------------------------------------------------------
@@ -504,6 +509,28 @@ function CandyUI_Options:DeleteProfiles(strProfile)
 			Print(strAddonName.." deleted.")
 		else
 			Print(strAddonName.." NOT deleted.")
+		end
+		
+	end
+end
+
+function CandyUI_Options:DefaultProfiles(strProfile)
+	Print("Setting "..strProfile.." to default...")
+	for i, strAddonName in ipairs(karCUIModules) do
+		local bLoaded = IsAddonLoaded(strAddonName)
+		local addon = Apollo.GetAddon(strAddonName)
+		
+		if (strAddonName == "CandyBars" and not self.db.char.bSyncCandyBars) or (strAddonName == "StarPanel" and not self.db.char.bSyncStarPanel) then
+			bLoaded = false
+		end
+		
+		if bLoaded and addon.db ~= nil then
+			
+			addon.db:ResetProfile()
+			
+			Print(strAddonName.." set to default.")
+		else
+			Print(strAddonName.." NOT set to default.")
 		end
 		
 	end

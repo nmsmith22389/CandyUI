@@ -155,6 +155,8 @@ function CandyUI_Datachron:SetPath()
 	local ePathType = PlayerPathLib:GetPlayerPathType()
 	if self.wndPathContainerTopLevel then
 		self.wndPathContainerTopLevel:Show(ePathType == PlayerPathLib.PlayerPathType_Scientist)
+		local l, t, r, b = 0, 0, 290, 198
+		self.wndPathContainerTopLevel:SetAnchorOffsets(l, t, r, b)
 	end
 
 	-- TODO REFACTOR

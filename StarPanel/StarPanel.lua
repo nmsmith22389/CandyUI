@@ -965,8 +965,12 @@ function StarPanel:InitializeDataTexts(self)
 			return text			
 		end,
 		["OnTooltip"] = function()
+			local unitPlayer = GameLib.GetPlayerUnit()
+			if unitPlayer == nil then
+				return
+			end
 			local xml = XmlDoc.new()
-			local aEquippedItems = GameLib.GetPlayerUnit():GetEquippedItems()
+			local aEquippedItems = unitPlayer:GetEquippedItems()
 			xml:AddLine("Durability", "UI_TextHoloTitle", "CRB_InterfaceLarge_O", "Left")
 			xml:AddLine(" ", "UI_TextHoloTitle", "CRB_InterfaceMedium", "Left")
 			for i, item in pairs(aEquippedItems) do
@@ -1137,6 +1141,12 @@ function StarPanel:InitializeDataTexts(self)
 					nFriendsOn = nFriendsOn + 1
 				end
 			end
+			for k, v in pairs(FriendshipLib.GetAccountList()) do
+				if v.fLastOnline == 0 then
+					nFriendsOn = nFriendsOn + 1
+				end
+			end
+			
 			text = nFriendsOn.." online"
 			return text			
 		end,
@@ -1158,10 +1168,19 @@ function StarPanel:InitializeDataTexts(self)
 		["nIconSize"]	= 22,
 		["OnUpdate"]	= function()
 			local text = ""
-			local userGuild = GuildLib.GetGuilds()[1]
+			local userGuild
+			for i, guild in pairs(GuildLib.GetGuilds()) do
+				local type = guild:GetType()
+				-- can i just do guild:GetType() ?
+				if type == GuildLib.GuildType_Guild then
+					userGuild = guild
+				end
+			end
 			if userGuild ~= nil then
 				self.DataTexts.Guild.strLabel = userGuild:GetName()..": "
 				text = userGuild:GetOnlineMemberCount().." online"
+			else	
+				text = "No Guild"
 			end
 			return text			
 		end,

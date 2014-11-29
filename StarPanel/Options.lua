@@ -107,7 +107,7 @@ function StarPanel:SetOptions()
 	self.wndBotDisplay:SetStyle("AutoFade", tOptions.botBar.bAutoHide)
 	--auto hide bg
 	botBarControls:FindChild("AutoHideBGToggle"):SetCheck(tOptions.botBar.bAutoHideBG)
-	self.wndBotDisplay:SetStyle("AutoFade", tOptions.botBar.bAutoHideBG)
+	self.wndBotDisplay:SetStyle("AutoFadeBG", tOptions.botBar.bAutoHideBG)
 	--y-offset
 	botBarControls:FindChild("YOffset"):FindChild("Input"):SetText(tOptions.botBar.nYOffset)
 	self:SetYOffsetBot(tOptions.botBar.nYOffset)
