@@ -75,12 +75,12 @@ if _cui == nil then
 end
 
 local KeybindingState = {
-	Idle 										= 0,
-  AcceptingInput 					= 1,
-  SelectingSet 						= 2,
-  ConfirmUnbindDuplicate	= 3,
-  SelectCopySet 					= 4,
-	AcceptingModfierInput 	= 5,
+	Idle = 0,
+  AcceptingInput = 1,
+  SelectingSet = 2,
+  ConfirmUnbindDuplicate = 3,
+  SelectCopySet = 4,
+	AcceptingModfierInput = 5,
 }
 
 local ktCDPixie = {
