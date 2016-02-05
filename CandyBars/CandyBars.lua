@@ -74,13 +74,12 @@ if _cui == nil then
 	_cui = {}
 end
 
-local KeybindingState =
-{
-    Idle 					= 0,
-    AcceptingInput 			= 1,
-    SelectingSet 			= 2,
-    ConfirmUnbindDuplicate 	= 3,
-    SelectCopySet 			= 4,
+local KeybindingState = {
+	Idle 										= 0,
+  AcceptingInput 					= 1,
+  SelectingSet 						= 2,
+  ConfirmUnbindDuplicate	= 3,
+  SelectCopySet 					= 4,
 	AcceptingModfierInput 	= 5,
 }
 
@@ -89,10 +88,10 @@ local ktCDPixie = {
   strFont = "CRB_Interface10",
   bLine = false,
   strSprite = "AbilitiesSprites:spr_StatBlueVertProg",
-  cr = {a=0.7,r=1,g=1,b=1},
+  cr = { a=0.7, r=1, g=1, b=1 },
   loc = {
-    fPoints = {0,1,1,1},
-    nOffsets = {0,0,0,0}
+    fPoints = { 0, 1, 1, 1 },
+    nOffsets = { 0, 0, 0, 0 }
   },
   flagsText = {
     DT_CENTER = true,
@@ -103,9 +102,9 @@ local ktCDPixie = {
 --   ROUND
 --%%%%%%%%%%%
 local function round(num, idp)
-    local mult = 10^(idp or 0)
-    if num >= 0 then return math.floor(num * mult + 0.5) / mult
-    else return math.ceil(num * mult - 0.5) / mult end
+	local mult = 10^(idp or 0)
+  if num >= 0 then return math.floor(num * mult + 0.5) / mult
+	else return math.ceil(num * mult - 0.5) / mult end
 end
 --%%%%%%%%%%%
 --   Debug
@@ -119,16 +118,14 @@ end
 -- Initialization
 -----------------------------------------------------------------------------------------------
 function CandyBars:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self 
+	o = o or {}
+  setmetatable(o, self)
+  self.__index = self
 
-    -- initialize variables here
+  -- initialize variables here
 	self.actionButtons = {}
 
-
-
-    return o
+  return o
 end
 
 function CandyBars:Init()
@@ -137,7 +134,8 @@ function CandyBars:Init()
 	local tDependencies = {
 		-- "UnitOrPackageName",
 	}
-    Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
+
+	Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
  
 -----------------------------------------------------------------------------------------------
@@ -169,9 +167,6 @@ end
 -----------------------------------------------------------------------------------------------
 function CandyBars:OnDocLoaded()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
-		
-		--Vars
-		
 		--CUI load status
 		if _cui.tAddonLoadStatus == nil then
 			_cui.tAddonLoadStatus = {}
@@ -185,46 +180,46 @@ function CandyBars:OnDocLoaded()
 		
 		--Initialize Bar Objects
 		self.wndMain = Apollo.LoadForm(self.xmlDoc, "ActionBarForm", nil, self)
-			--Name
-			self.wndMain:SetName("actionBarAnchor")
-			--Save Anchor Event
-			self.wndMain:AddEventHandler("WindowMove", "OnBarMoved", self)
+		--Name
+		self.wndMain:SetName("actionBarAnchor")
+		--Save Anchor Event
+		self.wndMain:AddEventHandler("WindowMove", "OnBarMoved", self)
 			
 		self.wndInnate = Apollo.LoadForm(self.xmlDoc, "ActionBarForm", nil, self)
-			--Name
-			self.wndInnate:SetName("innateBarAnchor")
-			--Save Anchor Event
-			self.wndInnate:AddEventHandler("WindowMove", "OnBarMoved")
+		--Name
+		self.wndInnate:SetName("innateBarAnchor")
+		--Save Anchor Event
+		self.wndInnate:AddEventHandler("WindowMove", "OnBarMoved")
 		
 		self.wndSecondary = Apollo.LoadForm(self.xmlDoc, "SecondaryBarForm", nil, self)
-			--Name
-			self.wndSecondary:SetName("secondaryBarAnchor")
-			--Save Anchor Event
-			self.wndSecondary:AddEventHandler("WindowMove", "OnBarMoved")
-			
+		--Name
+		self.wndSecondary:SetName("secondaryBarAnchor")
+		--Save Anchor Event
+		self.wndSecondary:AddEventHandler("WindowMove", "OnBarMoved")
+
 		self.wndSecondarySplit = Apollo.LoadForm(self.xmlDoc, "SecondaryBarForm", nil, self)
-			--Name
-			self.wndSecondarySplit:SetName("secondaryBarSplitAnchor")
-			--Save Anchor Event
-			self.wndSecondarySplit:AddEventHandler("WindowMove", "OnBarMoved")
+		--Name
+		self.wndSecondarySplit:SetName("secondaryBarSplitAnchor")
+		--Save Anchor Event
+		self.wndSecondarySplit:AddEventHandler("WindowMove", "OnBarMoved")
 		
 		self.wndUtility1 = Apollo.LoadForm(self.xmlDoc, "UtilityBarForm", nil, self)
-			--Name
-			self.wndUtility1:SetName("utility1BarAnchor")
-			--Save Anchor Event
-			self.wndUtility1:AddEventHandler("WindowMove", "OnBarMoved")
+		--Name
+		self.wndUtility1:SetName("utility1BarAnchor")
+		--Save Anchor Event
+		self.wndUtility1:AddEventHandler("WindowMove", "OnBarMoved")
 		
 		self.wndUtility2 = Apollo.LoadForm(self.xmlDoc, "UtilityBarForm", nil, self)
-			--Name
-			self.wndUtility2:SetName("utility2BarAnchor")
-			--Save Anchor Event
-			self.wndUtility2:AddEventHandler("WindowMove", "OnBarMoved")
+		--Name
+		self.wndUtility2:SetName("utility2BarAnchor")
+		--Save Anchor Event
+		self.wndUtility2:AddEventHandler("WindowMove", "OnBarMoved")
 		
 		self.wndVehicleBar = Apollo.LoadForm(self.xmlDoc, "VehicleBarFrame", nil, self)
-			--Name
-			self.wndVehicleBar:SetName("vehicleBarAnchor")
-			--Save Anchor Event
-			self.wndVehicleBar:AddEventHandler("WindowMove", "OnBarMoved")
+		--Name
+		self.wndVehicleBar:SetName("vehicleBarAnchor")
+		--Save Anchor Event
+		self.wndVehicleBar:AddEventHandler("WindowMove", "OnBarMoved")
 		
 		--OnShowActionBarShortcut
 		Apollo.RegisterEventHandler("ShowActionBarShortcut", "ShowVehicleBar", self)
@@ -234,18 +229,19 @@ function CandyBars:OnDocLoaded()
 		Apollo.RegisterEventHandler("CandyBarsInterfaceMenuClick", "OnCandyBarsInterfaceMenuClick", self)
  
 		self.unitPlayer = GameLib.GetPlayerUnit()
-		
 		self.wndOptionsNew = Apollo.LoadForm(self.xmlDoc, "OptionsDialogueNew", nil, self)
 		self.wndOptionsNew:Show(false, true)
 		self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", self.wndOptionsNew:FindChild("OptionsDialogueControls"), self)
-		--self.wndControls:Show(false)
+
 		for i, v in ipairs(self.wndControls:GetChildren()) do
 			if v:GetName() ~= "Help" then
-			local strCategory = v:FindChild("Title"):GetText()
-			local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsNew:FindChild("ListControls"), self)
-			wndCurr:SetText(strCategory)
+				local strCategory = v:FindChild("Title"):GetText()
+				local wndCurr = Apollo.LoadForm(self.xmlDoc, "OptionsListItem", self.wndOptionsNew:FindChild("ListControls"), self)
+
+				wndCurr:SetText(strCategory)
 			end
 		end
+
 		self.wndOptionsNew:FindChild("ListControls"):ArrangeChildrenVert()
 
 		--[[
@@ -261,7 +257,7 @@ function CandyBars:OnDocLoaded()
 		]]
 		--Color Picker
 		GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
-  		self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
+		self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
 		self.colorPicker:Show(false)
 		
 		--self.wndColorDropdown = self.wndControls:FindChild("BorderControls"):FindChild("Color"):FindChild("ColorDropdown")
@@ -337,6 +333,7 @@ function CandyBars:RegisterCUIOptions()
 	--Load Options
 	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
 	local wndControls = Apollo.LoadForm(self.xmlDoc, "CBOptions", wndOptionsControls, self)
+
 	CUI_RegisterOptions("CandyBars", wndControls, true)
 end
 
@@ -346,11 +343,13 @@ function CandyBars:CheckFunctions()
 		AbilityBook.GetAbilitiesList,
 		GameLib.GetPlayerUnit,
 	}
+
 	for _, func in ipairs(arFunctionToCheck) do
 		if func() == nil then
 			return false
 		end
 	end
+
 	return true
 end
 
