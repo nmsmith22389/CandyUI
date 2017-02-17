@@ -4,7 +4,9 @@
 -----------------------------------------------------------------------------------------------
  
 require "Window"
+-- Needed until Carbine copies this to their WelcomeWindowLib
 require "LiveEventsLib"
+require "LiveEvent"
 require "DialogSys"
 require "Quest"
 require "QuestLib"
