@@ -897,32 +897,28 @@ function CandyUI_Nameplates:DrawHealth(tNameplate)
 	end
 	
 	local wndHealthUpdate
+
 	if bHasShield then
 		wndHealthUpdate = wndHealth
 		wndHealthText = wndHealth:FindChild("Label")
-		
-		--wndHealth:Show(true, true)
+
 		wndHealthBG:Show(true, true)
-		--wndShield:Show(true, true)
 		wndShieldBG:Show(true, true)
-		--wndHealthNoShield:Show(false, true)
 		wndHealthNoShieldBG:Show(false, true)
 		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColor)
 	else
 		wndHealthUpdate = wndHealthNoShield
 		wndHealthText = wndHealthNoShield:FindChild("Label")
 
-		--wndHealth:Show(false, true)
 		wndHealthBG:Show(false, true)
-		--wndShield:Show(false, true)
 		wndShieldBG:Show(false, true)
-		--wndHealthNoShield:Show(true, true)
 		wndHealthNoShieldBG:Show(true, true)
 		wndHealthNoShieldBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColor)
 	end
 	
 	self:SetBarValue(wndHealthUpdate, 0, unitOwner:GetHealth(), unitOwner:GetMaxHealth())
 	wndHealthUpdate:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColor)
+
 	if bHasShield then
 		self:SetBarValue(wndShield, 0, unitOwner:GetShieldCapacity(), unitOwner:GetShieldCapacityMax())
 		wndShield:SetBarColor(self.db.profile[strUnitTypeLower].crShieldBarColor)
@@ -1268,6 +1264,7 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 	local unitOwner = tNameplate.unitOwner
 	local eDisposition = tNameplate.eDisposition
 	local strUnitType
+
 	if unitOwner == unitPlayer then
 		strUnitType = "Player"
 	elseif unitOwner == unitPlayer:GetTarget() then
@@ -1281,24 +1278,17 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 	elseif eDisposition == Unit.CodeEnumDisposition.Unknown then
 		strUnitType = "Other"
 	end
+
 	local strUnitTypeLower = string.lower(strUnitType)
-	
 	local wndHealth = wndHealthUpdate
 	local wndHealthBG = wndHealthUpdate:GetParent()
-	--local wndHealthNoShield = tNameplate.wnd.healthNoShield
-	--local wndHealthNoShieldBG = tNameplate.wnd.healthNoShieldBG
 	local wndShield = tNameplate.wnd.shield
 	local wndShieldBG = tNameplate.wnd.shieldBG
 	local wndAbsorb = wndHealthUpdate:GetParent():FindChild("AbsorbBar")
-	--local wndAbsorbNoShield = tNameplate.wnd.absorbNoShield
 	local wndBars = tNameplate.wnd.bars
-	------------------------------------------------------------
-	
 	local nVulnerabilityTime = unitOwner:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability)
 
 	if unitOwner:GetType() == "Simple" or unitOwner:GetHealth() == nil then
-		--tNameplate.wnd.healthMaxHealth:SetAnchorOffsets(self.nFrameLeft, self.nFrameTop, self.nFrameRight, self.nFrameBottom)
-		--tNameplate.wnd.healthHealthLabel:SetText("")
 		wndBars:Show(false)
 		return
 	end
@@ -1310,10 +1300,10 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 	local nShieldMax 	= unitOwner:GetShieldCapacityMax()
 	local nAbsorbCurr 	= 0
 	local nAbsorbMax 	= unitOwner:GetAbsorptionMax()
+
 	if nAbsorbMax > 0 then
 		nAbsorbCurr = unitOwner:GetAbsorptionValue() -- Since it doesn't clear when the buff drops off
 	end
-	--local nTotalMax = nHealthMax + nShieldMax + nAbsorbMax
 
 	if unitOwner:IsDead() then
 		nHealthCurr = 0
@@ -1340,15 +1330,17 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 	local strShieldCurr = self:HelperFormatBigNumber(nShieldCurr)
 
 	local strText = nHealthMax == nHealthCurr and strHealthMax or String_GetWeaselString(Apollo.GetString("TargetFrame_HealthText"), strHealthCurr, strHealthMax)
+
 	if nShieldMax > 0 and nShieldCurr > 0 then
 		strText = String_GetWeaselString(Apollo.GetString("TargetFrame_HealthShieldText"), strText, strShieldCurr)
 	end
+
 	if self.db.profile[strUnitTypeLower].bShowHealthText then
 		wndHealthUpdate:FindChild("Label"):SetText(strText)
 	else
 		wndHealthUpdate:FindChild("Label"):SetText("")
 	end
-	
+
 	--[[
 	--%%%%%%%%%%%%%SAVE THIS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	--Maybe could use this idea of switching sprites, or better yet, colors depending on stuff like health, vuln, cast, poison etc 
