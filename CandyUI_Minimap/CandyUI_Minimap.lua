@@ -4,6 +4,7 @@
 -----------------------------------------------------------------------------------------------
  
 require "Window"
+require "LiveEventsLib"
 require "DialogSys"
 require "Quest"
 require "QuestLib"
