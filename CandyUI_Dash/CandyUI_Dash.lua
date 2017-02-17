@@ -269,8 +269,10 @@ kcuiDashDefaults = {
 }
 
 function CandyUI_Dash:SetOptions()
-	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
-	self.wndControls:FindChild("GeneralControls:HideWhenFullToggle"):SetCheck(self.db.profile.general.bHideWhenFull)
+	if self.wndMain then
+		self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
+		self.wndControls:FindChild("GeneralControls:HideWhenFullToggle"):SetCheck(self.db.profile.general.bHideWhenFull)
+	end
 end
 
 function CandyUI_Dash:OnHideWhenFullClick( wndHandler, wndControl, eMouseButton )

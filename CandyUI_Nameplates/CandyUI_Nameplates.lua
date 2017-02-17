@@ -717,6 +717,7 @@ function CandyUI_Nameplates:ColorNameplate(tNameplate)
 
 	tNameplate.wnd.level:SetTextColor(crLevelColorToUse)
 	tNameplate.wnd.wndName:SetTextColor(crColorToUse)
+	Print("Setting TextColor to "..crLevelColorToUse)
 	tNameplate.wnd.wndGuild:SetTextColor(crColorToUse)
 end
 

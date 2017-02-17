@@ -1266,8 +1266,9 @@ function StarPanel:CreateDataTextsTop(self)
 		for name, tData in pairs(self.DataTexts) do
 			local tOptions = self.db.profile.tDTOptions[name]
 			if i == tOptions.nPos.top then
-			local wndCurr
-			local width = 0
+				local wndCurr
+				local width = 0
+
 				if tData.type == "dataFeed" and tOptions.bShownTop then
 					wndCurr = Apollo.LoadForm(self.xmlDoc, "DataFeedItem", self.wndTopDisplay:FindChild("Container"), self)
 					
@@ -1288,8 +1289,10 @@ function StarPanel:CreateDataTextsTop(self)
 					end
 										
 					--Append Label
-					if strLabel and tOptions.bShowLabel then	
-						xml:AppendText(strLabel, crLabel, "CRB_InterfaceMedium_O", "Center")
+					if strLabel and tOptions.bShowLabel then
+						if type(strLabel) == "string" then
+							xml:AppendText(strLabel, crLabel, "CRB_InterfaceMedium_O", "Center")
+						end
 					end
 					
 					--Append Text
@@ -1307,12 +1310,14 @@ function StarPanel:CreateDataTextsTop(self)
 					wndCurr:SetName(name)
 					--wndCurr:SetText(tData.text)
 					wndCurr:SetData(tData) --onUpdate and onClick functions are contained in this
+
+					if strLabel and type(strLabel) == "string" then
+						width = math.max(wndCurr:GetContentSize()+self.db.profile.topBar.nPadding, Apollo.GetTextWidth("CRB_InterfaceMedium_O", strLabel..strText)+nIconSize+self.db.profile.topBar.nPadding)
+						local l, t, r, b = wndCurr:GetAnchorOffsets()
+						wndCurr:SetAnchorOffsets(l, t, l+width, b)
 					
-					width = math.max(wndCurr:GetContentSize()+self.db.profile.topBar.nPadding, Apollo.GetTextWidth("CRB_InterfaceMedium_O", strLabel..strText)+nIconSize+self.db.profile.topBar.nPadding)
-					local l, t, r, b = wndCurr:GetAnchorOffsets()
-					wndCurr:SetAnchorOffsets(l, t, l+width, b)
-					
-					self.tDataTextsTop[tOptions.nPos.top] = wndCurr
+						self.tDataTextsTop[tOptions.nPos.top] = wndCurr
+					end
 				elseif tOptions.bShownTop then
 					--is launcher type
 					

@@ -2,4 +2,5 @@
 <Addon Author="Neil Smith" APIVersion="14" Name="CandyUI_Dash" Description="">
     <Script Name="CandyUI_Dash.lua"/>
     <Form Name="CandyUI_Dash.xml"/>
+    <ReplaceAddon Name="SprintMeter"/>
 </Addon>
