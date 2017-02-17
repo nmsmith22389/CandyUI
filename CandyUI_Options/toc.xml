@@ -6,7 +6,6 @@
 	<Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
     <Script Name="CandyUI_Options.lua"/>
     <Form Name="CandyUI_Options.xml"/>
-	<ReplaceAddon Name="ActionBarFrame"/>
 	<ReplaceAddon Name="ActionBarShortcut"/>
 	<ReplaceAddon Name="RecallFrame"/>
 	<ReplaceAddon Name="XPBar"/>
