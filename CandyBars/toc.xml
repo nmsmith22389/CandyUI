@@ -5,4 +5,6 @@
     <Form Name="CandyBars.xml"/>
     <Script Name="CandyBars.lua"/>
     <Script Name="Options.lua"/>
+    <ReplaceAddon Name="ActionBarFrame"/>
+    <ReplaceAddon Name="PathFrame"/>
 </Addon>

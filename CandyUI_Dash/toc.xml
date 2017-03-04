@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="Neil Smith" APIVersion="14" Name="CandyUI_Dash" Description="">
+<Addon Author="Neil Smith" APIVersion="14" Name="CandyUI_Dash" Description="" Version="0.5">
     <Script Name="CandyUI_Dash.lua"/>
     <Form Name="CandyUI_Dash.xml"/>
+    <ReplaceAddon Name="SprintMeter"/>
 </Addon>
