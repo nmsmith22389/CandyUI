@@ -287,7 +287,7 @@ function CandyBars:OnDocLoaded()
     --AbilityWindowHasBeenToggled
     Apollo.RegisterEventHandler("ToggleBlockBarsVisibility", "OnSpecChanged", self)
     --ActionBarLoaded
-    Apollo.RegisterEventHandler("VarChange_FrameCount", "OnFrame", self)
+    Apollo.RegisterEventHandler("NextFrame", "OnFrame", self)
     Apollo.RegisterEventHandler("ChangeWorld", "OnSpecChanged", self)
     --KeyBindingUpdated
     --Apollo.RegisterEventHandler("KeyBindingUpdated", "OnKeyBindingUpdated", self)
