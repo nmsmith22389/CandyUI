@@ -157,7 +157,7 @@ end
 -----------------------------------------------------------------------------------------------
 
 function CandyUI_Resources:OnCreateEsper()
-	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnEsperUpdateTimer", self)
+	Apollo.RegisterEventHandler("NextFrame", 		"OnEsperUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnEsperEnteredCombat", self)
 	
 	
@@ -265,7 +265,7 @@ end
 -----------------------------------------------------------------------------------------------
 
 function CandyUI_Resources:OnCreateSlinger()
-	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnSlingerUpdateTimer", self)
+	Apollo.RegisterEventHandler("NextFrame", 		"OnSlingerUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnSlingerEnteredCombat", self)
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "SpellSlingerResourceForm", "FixedHudStratum", self)
@@ -412,7 +412,7 @@ end
 -----------------------------------------------------------------------------------------------
 
 function CandyUI_Resources:OnCreateMedic()
-	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnMedicUpdateTimer", self)
+	Apollo.RegisterEventHandler("NextFrame", 		"OnMedicUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnMedicEnteredCombat", self)
 	
 	
@@ -521,7 +521,8 @@ end
 -----------------------------------------------------------------------------------------------
 
 function CandyUI_Resources:OnCreateEngineer()
-	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnEngineerUpdateTimer", self)
+	Apollo.RegisterEventHandler("NextFrame", 		"OnEngineerUpdateTimer", self)
+
 	Apollo.RegisterEventHandler("ShowActionBarShortcut", 		"OnShowActionBarShortcut", self)
 	Apollo.RegisterTimerHandler("EngineerOutOfCombatFade", 		"OnEngineerOutOfCombatFade", self)
 
@@ -576,6 +577,10 @@ function CandyUI_Resources:OnEngineerUpdateTimer()
 		self.wndMain:SetOpacity(self.db.profile.engineer.nOpacity)
 	end
 	
+	if unitPlayer then
+		self:OnEngineerEnteredCombat(unitPlayer, bInCombat)
+	end
+	
 	--self:HelperToggleVisibiltyPreferences(self.wndMain, unitPlayer)
 end
 
@@ -585,8 +590,14 @@ function CandyUI_Resources:OnEngineerEnteredCombat(unitPlayer, bInCombat)
 	end
 	
 	if bInCombat then
-		self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crCombatColor)
-		self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crCombatColor)
+		local unitPlayer = GameLib.GetPlayerUnit()
+		if unitPlayer:GetResource(1)<= 75 and  unitPlayer:GetResource(1)>= 25 then
+			self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crInZone)
+			self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crInZone)
+		else
+			self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crCombatColor)
+			self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crCombatColor)
+		end
 	else
 		self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crBarColor)
 		self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crBarColor)
@@ -626,7 +637,7 @@ end
 -----------------------------------------------------------------------------------------------
 
 function CandyUI_Resources:OnCreateStalker()
-	Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnStalkerUpdateTimer", self)
+	Apollo.RegisterEventHandler("NextFrame", 		"OnStalkerUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnStalkerEnteredCombat", self)
 
     self.wndMain = Apollo.LoadForm(self.xmlDoc, "StalkerResourceForm", "FixedHudStratum", self)
@@ -682,7 +693,7 @@ function CandyUI_Resources:OnCreateWarrior()
 	
 	Apollo.RegisterTimerHandler("WarriorResource_ChargeBarOverdriveTick", "OnWarriorResource_ChargeBarOverdriveTick", self)
 	Apollo.RegisterTimerHandler("WarriorResource_ChargeBarOverdriveDone", "OnWarriorResource_ChargeBarOverdriveDone", self)
-	Apollo.RegisterEventHandler("VarChange_FrameCount", "OnWarriorUpdateTimer", self)
+	Apollo.RegisterEventHandler("NextFrame", "OnWarriorUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnWarriorEnteredCombat", self)
 
 	self.wndMain = Apollo.LoadForm(self.xmlDoc, "WarriorResourceForm", "FixedHudStratum", self)
@@ -785,7 +796,7 @@ kcuiRDefaults = {
 			bOutCombat = true,
 			nWidth = 500,
 			nOpacity = 1,
-			crCombatColor = "xkcdBrightOrange",
+			crCombatColor = "xkcdLime",
 			crBarColor = "UI_BtnTextHoloListNormal",
 			bShowText = true,
 			--class
@@ -798,6 +809,7 @@ kcuiRDefaults = {
 			bOutCombat = true,
 			nWidth = 500,
 			nOpacity = 1,
+			crInZone = "xkcdBrightYellow",
 			crCombatColor = "xkcdBrightOrange",
 			crBarColor = "UI_BtnTextHoloListNormal",
 			bShowText = true,
@@ -911,6 +923,7 @@ function CandyUI_Resources:SetOptions()
 	self.wndControls:FindChild("SpellSlingerControls"):FindChild("ShowHTToggle"):SetCheck(Options.spellslinger.bHealingTorrent)
 --"Medic",
 --"Engineer",
+	self.wndControls:FindChild("EngineerControls"):FindChild("InZone:Swatch"):SetBGColor(Options.engineer.crInZone)
 --"Stalker",
 	--Stealth
 	self.wndControls:FindChild("StalkerControls"):FindChild("StealthBarColor:Swatch"):SetBGColor(Options.stalker.crStealthColor)
@@ -941,6 +954,9 @@ function CandyUI_Resources:ColorPickerCallback(strColor)
 		elseif self.strColorPickerTargetControl == "EsperFull" then
 			self.db.profile.esper.crFullColor = strColor
 			self.wndControls:FindChild(strUnit.."Controls"):FindChild("FullColor"):FindChild("Swatch"):SetBGColor(strColor)
+		elseif self.strColorPickerTargetControl == "InZone" then
+			self.db.profile.engineer.crInZone = strColor
+			self.wndControls:FindChild(strUnit.."Controls"):FindChild("InZone"):FindChild("Swatch"):SetBGColor(strColor)
 		end
 end
 
@@ -995,6 +1011,17 @@ function CandyUI_Resources:OnCombatBarColorClick( wndHandler, wndControl, eMouse
 	--Open Color Picker
 	self.strColorPickerTargetUnit = strUnit
 	self.strColorPickerTargetControl = "CombatBar"
+	self.colorPicker:Show(true)
+	self.colorPicker:ToFront()
+end
+
+--Engineer 
+function CandyUI_Resources:OnInZoneClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
+	--Open Color Picker
+	SendVarToRover("testing var: tItem", "test")
+	self.strColorPickerTargetUnit = strUnit
+	self.strColorPickerTargetControl = "InZone"
 	self.colorPicker:Show(true)
 	self.colorPicker:ToFront()
 end
