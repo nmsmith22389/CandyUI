@@ -337,6 +337,8 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	if nShowHealthText == 1 and barHealth:FindChild("Text"):GetOpacity() < 1 then
 		barHealth:FindChild("Text"):SetOpacity(1)
 	end
+	
+	
 	local strHealthText = ""
 	if nHealthFormat == 0 then
 		--Min / Max
@@ -624,6 +626,12 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 		wndFrame:FindChild("Glow"):Show(self.db.profile.focus.bGlow, true)
 	end
 	
+	-- CastBar
+	if wndFrame:GetName() == "TargetUF" then
+		self:UpdateCastBar(wndFrame)
+	end
+	self:UpdateSelfCastBar(self.wndPlayerUF)
+	
 	--[[
 	-RewardInfo
 	nCompleted
@@ -635,6 +643,58 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	splObjective -- not always there
 	idChallenge --only for challenges
 	]]
+end
+
+function CandyUI_UnitFrames:UpdateSelfCastBar(wndFrame)
+	SendVarToRover("testing var: tItem", "test")
+	local iUnit = GameLib.GetPlayerUnit()
+	SendVarToRover("testing var: tItem2", iUnit:ShouldShowCastBar())
+	if iUnit:ShouldShowCastBar() then
+		wndFrame:FindChild("CastBarPlayer"):FindChild("CastBarFull"):SetMax(iUnit:GetCastDuration())
+		wndFrame:FindChild("CastBarPlayer"):FindChild("CastBarFull"):SetProgress(iUnit:GetCastElapsed())
+	else
+		wndFrame:FindChild("CastBarPlayer"):FindChild("CastBarFull"):SetProgress(0)
+	end
+	
+	local nVulnerable = iUnit:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability) or 0
+	
+	if nVulnerable > 0 then
+	
+		wndFrame:FindChild("CastBarPlayer"):FindChild("Moo"):SetProgress(iUnit:GetCastDuration())
+		wndFrame:FindChild("CastBarPlayer"):FindChild("Moo"):SetProgress(nVulnerable)
+		wndFrame:FindChild("HealthBar"):FindChild("Bar"):SetBarColor("magenta")
+		
+	
+	else
+		wndFrame:FindChild("CastBarPlayer"):FindChild("Moo"):SetProgress(0)
+	end
+end
+
+
+function CandyUI_UnitFrames:UpdateCastBar(wndFrame)
+	local tUnit = GameLib.GetTargetUnit()
+	local iUnit = GameLib.GetPlayerUnit()
+	SendVarToRover("testing var: tItem", wndFrame:GetName())
+	if tUnit ~= nil then
+			if tUnit:ShouldShowCastBar() then
+				wndFrame:FindChild("CastBar"):FindChild("CastBarFull"):SetMax(tUnit:GetCastDuration())
+				wndFrame:FindChild("CastBar"):FindChild("CastBarFull"):SetProgress(tUnit:GetCastElapsed())
+			else
+				wndFrame:FindChild("CastBar"):FindChild("CastBarFull"):SetProgress(0)
+			end
+			local nVulnerable = tUnit:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability) or 0
+			if nVulnerable > 0 then
+				SendVarToRover("testing var: tItem", tUnit:GetCastDuration())
+				wndFrame:FindChild("CastBar"):FindChild("Moo"):SetProgress(tUnit:GetCastDuration())
+				wndFrame:FindChild("CastBar"):FindChild("Moo"):SetProgress(nVulnerable)
+				wndFrame:FindChild("HealthBar"):FindChild("Bar"):SetBarColor("magenta")
+
+	
+			else
+				wndFrame:FindChild("CastBar"):FindChild("Moo"):SetProgress(0)
+			end
+	end
+
 end
 
 function CandyUI_UnitFrames:UpdateToT(uUnit)
