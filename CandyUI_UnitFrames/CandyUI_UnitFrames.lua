@@ -115,7 +115,7 @@ function CandyUI_UnitFrames:OnDocLoaded()
 	self.colorPicker:Show(false, true)
 	
 	--Apollo.RegisterEventHandler("CandyUI_UnitFramesClicked", "OnOptionsHome", self)
-	Apollo.RegisterEventHandler("VarChange_FrameCount", "OnCharacterLoaded", self)
+	Apollo.RegisterEventHandler("NextFrame", "OnCharacterLoaded", self)
 	Apollo.RegisterEventHandler("CharacterCreated", "OnCharacterLoaded", self)
 	Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
 	Apollo.RegisterEventHandler("AlternateTargetUnitChanged", "OnAlternateTargetUnitChanged", self)
