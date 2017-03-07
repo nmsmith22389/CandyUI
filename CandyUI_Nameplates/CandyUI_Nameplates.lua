@@ -219,7 +219,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 		
 		Apollo.RegisterEventHandler("UnitCreated", 					"OnUnitCreated", self)
 		Apollo.RegisterEventHandler("UnitDestroyed", 				"OnUnitDestroyed", self)
-		Apollo.RegisterEventHandler("VarChange_FrameCount", 		"OnFrame", self)
+		Apollo.RegisterEventHandler("NextFrame", 		"OnFrame", self)
 	
 		Apollo.RegisterEventHandler("UnitTextBubbleCreate", 		"OnUnitTextBubbleToggled", self)
 		Apollo.RegisterEventHandler("UnitTextBubblesDestroyed", 	"OnUnitTextBubbleToggled", self)
