@@ -316,8 +316,11 @@ function CandyUI_Minimap:OnDocLoaded()
 			
 		Apollo.LoadSprites("Sprites.xml")
 		
+		--Watch
+		self.timer = ApolloTimer.Create(30, true, "OnTimer", self)
+		
+		
 		Apollo.RegisterEventHandler("WindowManagementReady", 				"OnWindowManagementReady", self)
-	
 		Apollo.RegisterEventHandler("CharacterCreated", 					"OnCharacterCreated", self)
 		Apollo.RegisterEventHandler("OptionsUpdated_QuestTracker", 			"OnOptionsUpdated", self)
 		Apollo.RegisterEventHandler("VarChange_ZoneName", 					"OnChangeZoneName", self)
@@ -391,6 +394,15 @@ function CandyUI_Minimap:OnDocLoaded()
 		Apollo.RegisterEventHandler("Group_Left", 							"OnGroupLeft", self)					-- ( reason )
 		
 		self.wndMain 			= Apollo.LoadForm(self.xmlDoc , "Minimap", "FixedHudStratum", self)
+		self.wndWatch			= Apollo.LoadForm(self.xmlDoc , "Watch", nil, self)
+		
+		--Updated the moment you log in
+		if self.db.profile.general.tHideWatch then
+			self.wndWatch:Show(false,false)
+		else
+			self.wndWatch:Show(true,true)
+			self.wndWatch:FindChild("Time"):SetText(GameLib.GetLocalTime()["nHour"]..":"..GameLib.GetLocalTime()["nMinute"])
+		end
 		--Size
 			--local l, t, r, b = self.wndMain:GetAnchorOffsets()
 			--self.wndMain:SetAnchorOffsets(r-(nValue+20), t, r, t-(self.db.profile.general.nSize+46))
@@ -470,6 +482,14 @@ function CandyUI_Minimap:OnDocLoaded()
 		end
 		
 		Apollo.StartTimer("ZoomTimer")
+	end
+end
+
+function CandyUI_Minimap:OnTimer()
+	if (self.db.profile.general.tHideWatch) then
+	else
+		local time = GameLib.GetLocalTime()
+		self.wndWatch:FindChild("Time"):SetText(time["nHour"]..":"..time["nMinute"])
 	end
 end
 
@@ -1278,6 +1298,10 @@ function CandyUI_Minimap:OnDatachronButtonUncheck( wndHandler, wndControl, eMous
 	Sound.Play(Sound.PlayUI38CloseRemoteWindowDigital)
 end
 
+function CandyUI_Minimap:OnWatchMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
+	self.db.profile.general.tWatchOffsets = {wndControl:GetAnchorOffsets()}
+end
+
 function CandyUI_Minimap:OnMinimapMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
 	self.db.profile.general.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
 end
@@ -1288,6 +1312,8 @@ kcuiMMDefaults = {
 	},
 	profile = {
 		general = {
+			tWatchOffsets = { -250, 35, -5, 265},
+			tHideWatch = false,
 			tAnchorOffsets = { -209, 35, -5, 265},
 			nSize = 184,
 			nOpacity = 1.0,
@@ -1364,7 +1390,11 @@ function CandyUI_Minimap:SetOptions()
 		wndOptionsBtn:SetCheck(self.db.profile.tToggledIcons[eType])
 	end
 	
+	--SetWatchButton
+	self.wndControls:FindChild("GeneralControls:HideWatch"):SetCheck(self.db.profile.general.tHideWatch)
+	
 	--Position
+	self.wndWatch:SetAnchorOffsets(unpack(self.db.profile.general.tWatchOffsets))
 	self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
 	
 	--General
@@ -1520,6 +1550,16 @@ end
 
 function CandyUI_Minimap:OnRotateMapClick( wndHandler, wndControl, eMouseButton )
 end
+
+function CandyUI_Minimap:OnHideWatch(wndHandler, wndControl, eMouseButton)
+	self.db.profile.general.tHideWatch = wndControl:GetParent():FindChild("HideWatch"):IsChecked()
+	if self.db.profile.general.tHideWatch then
+		self.wndWatch:Show(false,false)
+	else
+		self.wndWatch:Show(true,true)
+	end
+end
+
 
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Minimap Instance
