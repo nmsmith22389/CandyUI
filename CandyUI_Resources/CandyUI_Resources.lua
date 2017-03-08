@@ -1024,7 +1024,6 @@ end
 function CandyUI_Resources:OnInZoneClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
 	--Open Color Picker
-	SendVarToRover("testing var: tItem", "test")
 	self.strColorPickerTargetUnit = strUnit
 	self.strColorPickerTargetControl = "InZone"
 	self.colorPicker:Show(true)
