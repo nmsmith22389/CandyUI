@@ -602,6 +602,11 @@ function CandyUI_Resources:OnEngineerEnteredCombat(unitPlayer, bInCombat)
 		self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crBarColor)
 		self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crBarColor)
 	end
+	
+	if GameLib.IsCurrentInnateAbilityActive() then
+		self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crInZone)
+		self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crInZone)
+	end
 end
 
 function CandyUI_Resources:OnShowActionBarShortcut(eWhichBar, bIsVisible, nNumShortcuts)
