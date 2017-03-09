@@ -591,7 +591,7 @@ function CandyUI_Resources:OnEngineerEnteredCombat(unitPlayer, bInCombat)
 	
 	if bInCombat then
 		local unitPlayer = GameLib.GetPlayerUnit()
-		if unitPlayer:GetResource(1)<= 75 and  unitPlayer:GetResource(1)>= 25 then
+		if unitPlayer:GetResource(1)<= 70 and  unitPlayer:GetResource(1)>= 30 then
 			self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crInZone)
 			self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crInZone)
 		else
@@ -601,6 +601,11 @@ function CandyUI_Resources:OnEngineerEnteredCombat(unitPlayer, bInCombat)
 	else
 		self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crBarColor)
 		self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crBarColor)
+	end
+	
+	if GameLib.IsCurrentInnateAbilityActive() then
+		self.wndMain:FindChild("ProgressBar"):SetBGColor(self.db.profile.engineer.crInZone)
+		self.wndMain:FindChild("ProgressBar:Bar"):SetBarColor(self.db.profile.engineer.crInZone)
 	end
 end
 
@@ -1019,7 +1024,6 @@ end
 function CandyUI_Resources:OnInZoneClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():GetParent():FindChild("Title"):GetText()
 	--Open Color Picker
-	SendVarToRover("testing var: tItem", "test")
 	self.strColorPickerTargetUnit = strUnit
 	self.strColorPickerTargetControl = "InZone"
 	self.colorPicker:Show(true)

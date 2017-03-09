@@ -631,6 +631,7 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 		self:UpdateCastBar(wndFrame)
 	end
 	self:UpdateSelfCastBar(self.wndPlayerUF)
+	self:UpdateIntArmor()
 	
 	--[[
 	-RewardInfo
@@ -645,10 +646,39 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 	]]
 end
 
+function CandyUI_UnitFrames:UpdateIntArmor()
+	SendVarToRover("testing var: tItem1", self.db.profile["general"]["bShowOldInt"])
+
+	if self.db.profile["general"]["bShowOldInt"] then
+		--Player
+		self.wndPlayerUF:FindChild("InterruptArmor"):SetSprite("HUD_TargetFrame:spr_TargetFrame_InterruptArmor_Value")
+		self.wndPlayerUF:FindChild("InterruptArmor"):SetBGColor("white")
+		local npl, npt, npr, npb = self.wndPlayerUF:FindChild("CastBarPlayer"):GetAnchorOffsets()
+		self.wndPlayerUF:FindChild("InterruptArmor"):SetAnchorOffsets(npl + 256, npt -8, npr +58, npb +2)
+		
+		--Target
+		self.wndTargetUF:FindChild("InterruptArmor"):SetSprite("HUD_TargetFrame:spr_TargetFrame_InterruptArmor_Value")
+		self.wndTargetUF:FindChild("InterruptArmor"):SetBGColor("white")
+		local nnl, nnt, nnr, nnb = self.wndTargetUF:FindChild("CastBar"):GetAnchorOffsets()
+		self.wndTargetUF:FindChild("InterruptArmor"):SetAnchorOffsets(nnl +256, nnt -8, nnr +58, nnb+2)
+	else
+	 	--Player
+		self.wndPlayerUF:FindChild("InterruptArmor"):SetSprite("Sprites:InterruptArmor")
+		local npl, npt, npr, npb = self.wndPlayerUF:FindChild("CastBarPlayer"):GetAnchorOffsets()
+		self.wndPlayerUF:FindChild("InterruptArmor"):SetBGColor("AddonError")
+		self.wndPlayerUF:FindChild("InterruptArmor"):SetAnchorOffsets(npl + 256, npt +1, npr +54, npb - 2)
+		
+		--Target
+		self.wndTargetUF:FindChild("InterruptArmor"):SetSprite("Sprites:InterruptArmor")
+		local nnl, nnt, nnr, nnb = self.wndTargetUF:FindChild("CastBar"):GetAnchorOffsets()
+		self.wndTargetUF:FindChild("InterruptArmor"):SetBGColor("AddonError")
+		self.wndTargetUF:FindChild("InterruptArmor"):SetAnchorOffsets(nnl + 256, nnt +1 , nnr +54, nnb - 2)
+		
+	end
+end
+
 function CandyUI_UnitFrames:UpdateSelfCastBar(wndFrame)
-	SendVarToRover("testing var: tItem", "test")
 	local iUnit = GameLib.GetPlayerUnit()
-	SendVarToRover("testing var: tItem2", iUnit:ShouldShowCastBar())
 	if iUnit:ShouldShowCastBar() then
 		wndFrame:FindChild("CastBarPlayer"):FindChild("CastBarFull"):SetMax(iUnit:GetCastDuration())
 		wndFrame:FindChild("CastBarPlayer"):FindChild("CastBarFull"):SetProgress(iUnit:GetCastElapsed())
@@ -674,7 +704,6 @@ end
 function CandyUI_UnitFrames:UpdateCastBar(wndFrame)
 	local tUnit = GameLib.GetTargetUnit()
 	local iUnit = GameLib.GetPlayerUnit()
-	SendVarToRover("testing var: tItem", wndFrame:GetName())
 	if tUnit ~= nil then
 			if tUnit:ShouldShowCastBar() then
 				wndFrame:FindChild("CastBar"):FindChild("CastBarFull"):SetMax(tUnit:GetCastDuration())
@@ -684,7 +713,6 @@ function CandyUI_UnitFrames:UpdateCastBar(wndFrame)
 			end
 			local nVulnerable = tUnit:GetCCStateTimeRemaining(Unit.CodeEnumCCState.Vulnerability) or 0
 			if nVulnerable > 0 then
-				SendVarToRover("testing var: tItem", tUnit:GetCastDuration())
 				wndFrame:FindChild("CastBar"):FindChild("Moo"):SetProgress(tUnit:GetCastDuration())
 				wndFrame:FindChild("CastBar"):FindChild("Moo"):SetProgress(nVulnerable)
 				wndFrame:FindChild("HealthBar"):FindChild("Bar"):SetBarColor("magenta")
@@ -971,6 +999,8 @@ kcuiUFDefaults = {
 	profile = {
 		general = {
 			strFontSize = "CRB_InterfaceTiny_BB",
+			--Show Old Interupt
+			bShowOldInt = false
 		},
 		player = {
 			nPortraitStyle = 2,
@@ -1140,6 +1170,8 @@ function CandyUI_UnitFrames:SetOptions()
 	self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
 	self.wndToTUF:SetAnchorOffsets(unpack(self.db.profile.tot.tAnchorOffsets))
 	
+	--Show Old Interupt
+	self.wndControls:FindChild("GeneralControls"):FindChild("OldInterupt"):SetCheck(self.db.profile["general"]["bShowOldInt"])
 	--Unit Options
 	for _, strUnit in ipairs({"Player", "Target", "Focus"}) do
 		local strUnitLower = string.lower(strUnit)
@@ -1257,6 +1289,13 @@ function CandyUI_UnitFrames:SetLooks()
 	--Opacity
 	self.wndToTUF:SetOpacity(self.db.profile.tot.nOpacity)
 	self.wndToTUF:FindChild("BG"):SetOpacity(self.db.profile.tot.nBGOpacity)
+end
+-------------------------
+-- General Option Events
+-------------------------
+function CandyUI_UnitFrames:OnShowOldIntClick(wndHandler, wndControl)
+	self.db.profile["general"]["bShowOldInt"] = wndControl:GetParent():FindChild("OldInterupt"):IsChecked()
+	self:UpdateIntArmor()
 end
 -------------------------
 -- Player Option Events
