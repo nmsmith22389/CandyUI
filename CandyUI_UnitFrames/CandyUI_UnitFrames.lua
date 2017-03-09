@@ -647,7 +647,7 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
 end
 
 function CandyUI_UnitFrames:UpdateIntArmor()
-	SendVarToRover("testing var: tItem1", self.db.profile["general"]["bShowOldInt"])
+	--SendVarToRover("testing var: tItem1", self.db.profile["general"]["bShowOldInt"])
 
 	if self.db.profile["general"]["bShowOldInt"] then
 		--Player
