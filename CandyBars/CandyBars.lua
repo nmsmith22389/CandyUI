@@ -1580,75 +1580,54 @@ function CandyBars:RedrawSelectedMounts()
 end
 
 function CandyBars:ShowMountFlyout(self, button)
-  --[[
-    if self.unitPlayer == nil then
-      return
-    end
-  ]]
   local wndPopoutFrame = button:GetParent():FindChild("PopoutFrame")
   local wndMountPopout = button:GetParent():FindChild("PopoutList")
-  --local wndMenu = button:GetParent():FindChild("PopoutFrame")
-  --local wndList = button:GetParent():FindChild("PopoutList")
-  --[[
-  if button:GetName() == "MountButtonTemplate" then
-    wndPopoutFrame:Show(false)
-    self:RedrawSelectedMounts()
-    return
-  end
-  ]]
+
   wndMountPopout:DestroyChildren()
-
-
 
   local tMountList = AbilityBook.GetAbilitiesList(Spell.CodeEnumSpellTag.Mount) or {}
   local tSelectedSpellObj = nil
 
+  -- Loop over all the Mounts the game has given us.
   for idx, tMountData  in pairs(tMountList) do
-    local tSpellObject = tMountData.tTiers[1].splObject
+    -- We only care about those active. If the boolean is false,
+    -- it means th given spell is not active, thus not of use for
+    -- for the current character.
+    if tMountData.bIsActive then
+      local tSpellObject = tMountData.tTiers[1].splObject
 
-    if tSpellObject:GetId() == self.nSelectedMount then
-      tSelectedSpellObj = tSpellObject
-    end
+      if tSpellObject:GetId() == self.nSelectedMount then
+        tSelectedSpellObj = tSpellObject
+      end
 
-    local wndCurr = Apollo.LoadForm(self.xmlDoc, "MountButtonTemplate", wndMountPopout, self)
-    wndCurr:FindChild("MountBtnIcon"):SetSprite(tSpellObject:GetIcon())
-    wndCurr:SetData(tSpellObject)
+      local wndCurr = Apollo.LoadForm(self.xmlDoc, "MountButtonTemplate", wndMountPopout, self)
+      wndCurr:FindChild("MountBtnIcon"):SetSprite(tSpellObject:GetIcon())
+      wndCurr:SetData(tSpellObject)
 
-    if Tooltip and Tooltip.GetSpellTooltipForm then
-      wndCurr:SetTooltipDoc(nil)
-      Tooltip.GetSpellTooltipForm(self, wndCurr, tSpellObject, {})
+      if Tooltip and Tooltip.GetSpellTooltipForm then
+        wndCurr:SetTooltipDoc(nil)
+        Tooltip.GetSpellTooltipForm(self, wndCurr, tSpellObject, {})
+      end
     end
   end
-  --[[
-    if tSelectedSpellObj == nil and #tMountList > 0 then
-      tSelectedSpellObj = tMountList[1].tTiers[1].splObject
-    end
 
-    if tSelectedSpellObj ~= nil then
-      GameLib.SetShortcutMount(tSelectedSpellObj:GetId())
-    end
-  ]]
   local nCount = #wndMountPopout:GetChildren()
+
   if nCount > 0 then
     local nMax = 7
     local nMaxHeight = (wndMountPopout:ArrangeChildrenVert(0) / nCount) * nMax
     local nHeight = wndMountPopout:ArrangeChildrenVert(0)
+    local nLeft, nTop, nRight, nBottom = wndPopoutFrame:GetAnchorOffsets()
 
     nHeight = nHeight <= nMaxHeight and nHeight or nMaxHeight
 
-    local nLeft, nTop, nRight, nBottom = wndPopoutFrame:GetAnchorOffsets()
-
     wndPopoutFrame:SetAnchorOffsets(nLeft, nBottom - nHeight - 98, nRight, nBottom)
-    --self:RedrawBarVisibility()
     wndPopoutFrame:Show(true)
   else
     wndPopoutFrame:Show(false)
   end
-  --wndPopoutFrame:Show(true)
-  --if wndPopoutFrame:IsVisible() then
+
   wndPopoutFrame:ToFront()
-  --end
-  --wndPopoutFrame:Show(true)
 end
 
 function CandyBars:OnMountBtn(wndHandler, wndControl)
