@@ -4,7 +4,5 @@ ignore: # Files and directories beginning with a dot (such as .git) are automati
     - Scripts
     - README.md
 
-manual-changelog: CHANGELOG.txt
-
 license-output: LICENSE
 
