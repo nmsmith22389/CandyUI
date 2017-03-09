@@ -398,7 +398,7 @@ function CandyUI_Minimap:OnDocLoaded()
 		
 		--Updated the moment you log in
 		if self.db.profile.general.tHideWatch then
-			self.wndWatch:Show(false,false)
+			self.wndWatch:Show(false,true)
 		else
 			self.wndWatch:Show(true,true)
 			self.wndWatch:FindChild("Time"):SetText(GameLib.GetLocalTime()["nHour"]..":"..GameLib.GetLocalTime()["nMinute"])
@@ -488,8 +488,12 @@ end
 function CandyUI_Minimap:OnTimer()
 	if (self.db.profile.general.tHideWatch) then
 	else
+		if ( not self.wndWatch:IsShown()) then
+			self.wndWatch:Show(true,true)
+		end
 		local time = GameLib.GetLocalTime()
-		self.wndWatch:FindChild("Time"):SetText(time["nHour"]..":"..time["nMinute"])
+		local strTimeH, strTimeMin = self:Split(time["strFormattedTime"], ":")
+		self.wndWatch:FindChild("Time"):SetText(strTimeH..":"..strTimeMin)
 	end
 end
 
@@ -1566,3 +1570,29 @@ end
 -----------------------------------------------------------------------------------------------
 local CandyUI_MinimapInst = CandyUI_Minimap:new()
 CandyUI_MinimapInst:Init()
+
+
+
+-----------------------------------------------------------------------------------------------
+-- Usefull
+-----------------------------------------------------------------------------------------------
+
+-- Compatibility: Lua-5.1
+function CandyUI_MinimapInst:Split(str, pat)
+   local t = {}  -- NOTE: use {n = 0} in Lua-5.0
+   local fpat = "(.-)" .. pat
+   local last_end = 1
+   local s, e, cap = str:find(fpat, 1)
+   while s do
+      if s ~= 1 or cap ~= "" then
+	 table.insert(t,cap)
+      end
+      last_end = e+1
+      s, e, cap = str:find(fpat, last_end)
+   end
+   if last_end <= #str then
+      cap = str:sub(last_end)
+      table.insert(t, cap)
+   end
+   return unpack(t)
+end
