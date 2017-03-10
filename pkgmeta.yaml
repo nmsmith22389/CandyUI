@@ -10,7 +10,7 @@ move-folders:
   CandyUI/Options: CandyUI_Options
   CandyUI/Resources: CandyUI_Resources
   CandyUI/StarPanel: StarPanel
-  CandyUI?UnitFrames: CandyUI_UnitFrames
+  CandyUI/UnitFrames: CandyUI_UnitFrames
 
 ignore:
   - Scripts
