@@ -16,6 +16,7 @@ ignore:
   - Scripts
   - README.md
   - LICENSE
+  - CandyUI
 
 license-output: LICENSE
 enable-nolib-creation: no
