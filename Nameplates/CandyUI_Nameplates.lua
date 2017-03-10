@@ -241,7 +241,7 @@ function CandyUI_Nameplates:OnDocLoaded()
 			self:OnCUIOptionsLoaded()
 		else
 			--Schedule for later
-			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+			Apollo.RegisterEventHandler("CandyUI_Loaded", "OnCUIOptionsLoaded", self)
 		end	
 	
 	GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
@@ -308,7 +308,7 @@ end
 
 function CandyUI_Nameplates:OnCUIOptionsLoaded()
 	--Load Options
-	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	local wndOptionsControls = Apollo.GetAddon("CandyUI").wndOptions:FindChild("OptionsDialogueControls")
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("Nameplates", self.wndControls)
 	self:SetOptions()

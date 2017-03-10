@@ -276,7 +276,7 @@ function CandyBars:OnDocLoaded()
     if _cui.bOptionsLoaded == true then
       self:RegisterCUIOptions()
     else
-      Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "RegisterCUIOptions", self)
+      Apollo.RegisterEventHandler("CandyUI_Loaded", "RegisterCUIOptions", self)
     end
 
     Apollo.RegisterEventHandler("ShowActionBarShortcut", "ShowShortcutBar", self)
@@ -331,7 +331,7 @@ end
 
 function CandyBars:RegisterCUIOptions()
   --Load Options
-  local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+  local wndOptionsControls = Apollo.GetAddon("CandyUI").wndOptions:FindChild("OptionsDialogueControls")
   local wndControls = Apollo.LoadForm(self.xmlDoc, "CBOptions", wndOptionsControls, self)
 
   CUI_RegisterOptions("CandyBars", wndControls, true)

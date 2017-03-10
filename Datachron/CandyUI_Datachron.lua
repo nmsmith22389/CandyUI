@@ -33,7 +33,7 @@ function CandyUI_Datachron:Init()
 	local strConfigureButtonText = ""
 	local tDependencies = {
 		-- "UnitOrPackageName",
-		"CandyUI_Options",
+		"CandyUI",
 		"CandyUI_Minimap",
 	}
     Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)

@@ -286,7 +286,7 @@ function CandyUI_Minimap:Init()
 	local strConfigureButtonText = ""
 	local tDependencies = {
 		-- "UnitOrPackageName",
-		"CandyUI_Options"
+		"CandyUI"
 	}
     Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
@@ -460,7 +460,7 @@ function CandyUI_Minimap:OnDocLoaded()
 			self:OnCUIOptionsLoaded()
 		else
 			--Schedule for later
-			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+			Apollo.RegisterEventHandler("CandyUI_Loaded", "OnCUIOptionsLoaded", self)
 		end
 		
 		self.wndMain:SetAnchorOffsets(unpack(self.db.profile.general.tAnchorOffsets))
@@ -475,7 +475,7 @@ end
 
 function CandyUI_Minimap:OnCUIOptionsLoaded()
 	--Load Options
-	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	local wndOptionsControls = Apollo.GetAddon("CandyUI").wndOptions:FindChild("OptionsDialogueControls")
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("Minimap", self.wndControls)
 	self:SetOptions()

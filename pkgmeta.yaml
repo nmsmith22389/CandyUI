@@ -7,7 +7,6 @@ move-folders:
   CandyUI/InterfaceMenu: CandyUI_InterfaceMenu
   CandyUI/Minimap: CandyUI_Minimap
   CandyUI/Nameplates: CandyUI_Nameplates
-  CandyUI/Options: CandyUI_Options
   CandyUI/Resources: CandyUI_Resources
   CandyUI/StarPanel: StarPanel
   CandyUI/UnitFrames: CandyUI_UnitFrames

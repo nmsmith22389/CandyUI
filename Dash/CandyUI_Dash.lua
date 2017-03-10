@@ -71,7 +71,7 @@ function CandyUI_Dash:OnDocLoaded()
 		self:OnCUIOptionsLoaded()
 	else
 		--Schedule for later
-		Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "OnCUIOptionsLoaded", self)
+		Apollo.RegisterEventHandler("CandyUI_Loaded", "OnCUIOptionsLoaded", self)
 	end
 	
 	if self.db.char.currentProfile == nil and self.db:GetCurrentProfile() ~= nil then
@@ -109,7 +109,7 @@ end
 
 function CandyUI_Dash:OnCUIOptionsLoaded()
 	--Load Options
-	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	local wndOptionsControls = Apollo.GetAddon("CandyUI").wndOptions:FindChild("OptionsDialogueControls")
 	self.wndControls = Apollo.LoadForm(self.xmlDoc, "OptionsControlsList", wndOptionsControls, self)
 	CUI_RegisterOptions("Dash", self.wndControls)
 	self:SetOptions()	

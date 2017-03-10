@@ -23,7 +23,7 @@ v0.3.1
 	• Fixed general options.
 	
 
-CandyUI_Options
+CandyUI
 
 v0.4
 

@@ -267,7 +267,7 @@ function StarPanel:OnDocLoaded()
 		if _cui.bOptionsLoaded == true then
 			self:RegisterCUIOptions()
 		else
-			Apollo.RegisterEventHandler("CandyUI_OptionsLoaded", "RegisterCUIOptions", self)
+			Apollo.RegisterEventHandler("CandyUI_Loaded", "RegisterCUIOptions", self)
 		end
 	
 	local QuestTracker = nil -- Apollo.GetAddon("QuestTracker")
@@ -287,7 +287,7 @@ end
 
 function StarPanel:RegisterCUIOptions()
 	--Load Options
-	local wndOptionsControls = Apollo.GetAddon("CandyUI_Options").wndOptions:FindChild("OptionsDialogueControls")
+	local wndOptionsControls = Apollo.GetAddon("CandyUI").wndOptions:FindChild("OptionsDialogueControls")
 	local wndControls = Apollo.LoadForm(self.xmlDoc, "SPOptions", wndOptionsControls, self)
 	CUI_RegisterOptions("StarPanel", wndControls, true)
 end

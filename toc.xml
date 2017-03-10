@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="Neil Smith" APIVersion="14" Name="CandyUI_Options" Description="" Version="0.5">
+<Addon Author="Neil Smith" APIVersion="15" Name="CandyUI" Description="" Version="0.5">
     <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
     <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>
     <Script Name="Libs/GeminiHook/GeminiHook-1.0.lua"/>
 	<Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
-    <Script Name="CandyUI_Options.lua"/>
-    <Form Name="CandyUI_Options.xml"/>
+    <Script Name="CandyUI.lua"/>
+    <Form Name="CandyUI.xml"/>
 	<ReplaceAddon Name="ActionBarShortcut"/>
 	<ReplaceAddon Name="RecallFrame"/>
 	<ReplaceAddon Name="XPBar"/>
