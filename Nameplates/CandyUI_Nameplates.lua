@@ -1320,6 +1320,11 @@ function CandyUI_Nameplates:HelperDoHealthShieldBar(wndHealthUpdate, unitOwner, 
 		wndHealth:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColorLow)
 		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColorLow)
 	end
+	--Health color in Moo
+	if nVulnerabilityTime > 0 and self.db.profile[strUnitTypeLower].bShowMoo then
+		wndHealth:SetBarColor(self.db.profile[strUnitTypeLower].crHealthBarColorMoo)
+		wndHealthBG:SetBGColor(self.db.profile[strUnitTypeLower].crHealthBarColorMoo)
+	end
 	
 	--Show / Hide Absorb !!!!!!!!!!!!!
 	wndAbsorb:Show(nHealthCurr > 0 and nAbsorbMax > 0)
@@ -1649,10 +1654,12 @@ kcuiNPDefaults = {
 			crHealthBarColorHigh = "ff00ff00",
 			crHealthBarColorMid = "ffffff00",
 			crHealthBarColorLow = "ffff0000",
+			crHealthBarColorMoo = "magenta",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = false,
 			bUseColorThreshold = false,
+			bShowMoo = false
 		},
 		target = {
 			bShow = true,
@@ -1676,10 +1683,12 @@ kcuiNPDefaults = {
 			crHealthBarColorHigh = "ff00ff00",
 			crHealthBarColorMid = "ffffff00",
 			crHealthBarColorLow = "ffff0000",
+			crHealthBarColorMoo = "magenta",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = true,
 			bOnlyDamaged = false,
 			bUseColorThreshold = true,
+			bShowMoo = true
 		},
 		friendly = {
 			bShow = true,
@@ -1734,10 +1743,12 @@ kcuiNPDefaults = {
 			crHealthBarColorHigh = "ff00ff00",
 			crHealthBarColorMid = "ffffff00",
 			crHealthBarColorLow = "ffff0000",
+			crHealthBarColorMoo = "magenta",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = false,
 			bUseColorThreshold = true,
+			bShowMoo = true
 		},
 		neutral = {
 			bShow = true,
@@ -1762,10 +1773,12 @@ kcuiNPDefaults = {
 			crHealthBarColorHigh = "ff00ff00",
 			crHealthBarColorMid = "ffffff00",
 			crHealthBarColorLow = "ffff0000",
+			crHealthBarColorMoo = "magenta",
 			crShieldBarColor = "ff00bff3",
 			bShowHealthText = false,
 			bOnlyDamaged = true,
 			bUseColorThreshold = true,
+			bShowMoo = true
 		},
 		other = {
 			bShow = false,
@@ -1887,12 +1900,16 @@ function CandyUI_Nameplates:SetOptions()
 	playerControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.player.crHealthBarColorMid)
 	--Health Bar Color
 	playerControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.player.crHealthBarColorLow)
+	--Health Bar Color
+	playerControls:FindChild("HealthBarColorMoo:Swatch"):SetBGColor(Options.player.crHealthBarColorMoo)
 	--Shield Bar Color
 	playerControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.player.crShieldBarColor)
 	--Show HealthT ext
 	playerControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.player.bShowHealthText)
 	--Show
 	playerControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.player.bOnlyDamaged)
+	-- Show Moo
+	playerControls:FindChild("ShowMoo"):SetCheck(Options.player.bShowMoo)
 	--Show
 	--playerControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.player.bUseColorThreshold)
 --Target
@@ -1929,12 +1946,16 @@ function CandyUI_Nameplates:SetOptions()
 	targetControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.target.crHealthBarColorMid)
 	--Health Bar Color
 	targetControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.target.crHealthBarColorLow)
+	--Health Bar Color
+	targetControls:FindChild("HealthBarColorMoo:Swatch"):SetBGColor(Options.target.crHealthBarColorMoo)
 	--Shield Bar Color
 	targetControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.target.crShieldBarColor)
 	--Show HealthT ext
 	targetControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.target.bShowHealthText)
 	--ShowIfDamagedToggle
 	targetControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.target.bOnlyDamaged)
+	-- Show Moo
+	targetControls:FindChild("ShowMoo"):SetCheck(Options.target.bShowMoo)
 	--HealthColorThresholdToggle
 	--targetControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.target.bUseColorThreshold)
 --Friendly
@@ -2022,12 +2043,16 @@ function CandyUI_Nameplates:SetOptions()
 	enemyControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.enemy.crHealthBarColorMid)
 	--Health Bar Color
 	enemyControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.enemy.crHealthBarColorLow)
+	--Health Bar Color
+	enemyControls:FindChild("HealthBarColorMoo:Swatch"):SetBGColor(Options.enemy.crHealthBarColorMoo)
 	--Shield Bar Color
 	enemyControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.enemy.crShieldBarColor)
 	--Show HealthT ext
 	enemyControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.enemy.bShowHealthText)
 	--ShowIfDamagedToggle
 	enemyControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.enemy.bOnlyDamaged)
+	-- Show Moo
+	enemyControls:FindChild("ShowMoo"):SetCheck(Options.enemy.bShowMoo)
 	--HealthColorThresholdToggle
 	--enemyControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.enemy.bUseColorThreshold)
 --Neutral
@@ -2067,12 +2092,16 @@ function CandyUI_Nameplates:SetOptions()
 	neutralControls:FindChild("HealthBarColor:Swatch"):SetBGColor(Options.neutral.crHealthBarColorMid)
 	--Health Bar Color
 	neutralControls:FindChild("HealthBarColorLow:Swatch"):SetBGColor(Options.neutral.crHealthBarColorLow)
+	--Health Bar Color
+	neutralControls:FindChild("HealthBarColorMoo:Swatch"):SetBGColor(Options.neutral.crHealthBarColorMoo)
 	--Shield Bar Color
 	neutralControls:FindChild("ShieldBarColor:Swatch"):SetBGColor(Options.neutral.crShieldBarColor)
 	--Show HealthT ext
 	neutralControls:FindChild("ShowHealthTextToggle"):SetCheck(Options.neutral.bShowHealthText)
 	--ShowIfDamagedToggle
 	neutralControls:FindChild("ShowIfDamagedToggle"):SetCheck(Options.neutral.bOnlyDamaged)
+	-- Show Moo
+	neutralControls:FindChild("ShowMoo"):SetCheck(Options.neutral.bShowMoo)
 	--HealthColorThresholdToggle
 	--neutralControls:FindChild("HealthColorThresholdToggle"):SetCheck(Options.neutral.bUseColorThreshold)
 --Other
@@ -2132,6 +2161,9 @@ function CandyUI_Nameplates:ColorPickerCallback(strColor)
 	elseif self.strColorPickerTargetControl == "HealthBarLow" then
 		self.db.profile[strUnitLower].crHealthBarColorLow = strColor
 		self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColorLow"):FindChild("Swatch"):SetBGColor(strColor)
+	elseif self.strColorPickerTargetControl == "HealthBarMoo" then
+		self.db.profile[strUnitLower].crHealthBarColorMoo = strColor
+		self.wndControls:FindChild(strUnit.."Controls"):FindChild("HealthBarColorMoo"):FindChild("Swatch"):SetBGColor(strColor)
 	elseif self.strColorPickerTargetControl == "ShieldBar" then
 		self.db.profile[strUnitLower].crShieldBar = strColor
 		self.wndControls:FindChild(strUnit.."Controls"):FindChild("ShieldBarColor"):FindChild("Swatch"):SetBGColor(strColor)
@@ -2145,6 +2177,7 @@ function CandyUI_Nameplates:OnShowClick( wndHandler, wndControl, eMouseButton )
 	
 	self.db.profile[strUnitLower].bShow = wndControl:IsChecked()
 end
+
 
 function CandyUI_Nameplates:OnNameToggleClick( wndHandler, wndControl, eMouseButton )
 	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
@@ -2231,6 +2264,8 @@ function CandyUI_Nameplates:OnHealthBarColorClick( wndHandler, wndControl, eMous
 		self.strColorPickerTargetControl = "HealthBarMid"
 	elseif string.find(strControlText, "Low") then
 		self.strColorPickerTargetControl = "HealthBarLow"
+	elseif string.find(strControlText, "Moo") then
+		self.strColorPickerTargetControl = "HealthBarMoo"
 	end
 	--Open Color Picker
 	self.strColorPickerTargetUnit = strUnit
@@ -2333,6 +2368,13 @@ function CandyUI_Nameplates:OnShowGuildUnitsClick( wndHandler, wndControl, eMous
 	local strUnitLower = string.lower(strUnit)
 	
 	self.db.profile[strUnitLower].bShowGuild = wndControl:IsChecked()
+end
+
+function CandyUI_Nameplates:OnShowMooClick( wndHandler, wndControl, eMouseButton )
+	local strUnit = wndControl:GetParent():FindChild("Title"):GetText()
+	local strUnitLower = string.lower(strUnit)
+	
+	self.db.profile[strUnitLower].bShowMoo = wndControl:IsChecked()
 end
 
 ---------------------------------------------------------------------------------------------------
