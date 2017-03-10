@@ -1,9 +1,21 @@
 package-as: CandyUI
 
-ignore: # Files and directories beginning with a dot (such as .git) are automatically ignored, as is the pgkmeta file itself.
-    - Scripts
-    - README.md
-    - LICENSE
+move-folders:
+  CandyUI/CandyBars: CandyBars
+  CandyUI/Dash: CandyUI_Dash
+  CandyUI/Datachron: CandyUI_Datachron
+  CandyUI/InterfaceMenu: CandyUI_InterfaceMenu
+  CandyUI/Minimap: CandyUI_Minimap
+  CandyUI/Nameplates: CandyUI_Nameplates
+  CandyUI/Options: CandyUI_Options
+  CandyUI/Resources: CandyUI_Resources
+  CandyUI/StarPanel: StarPanel
+  CandyUI?UnitFrames: CandyUI_UnitFrames
+
+ignore:
+  - Scripts
+  - README.md
+  - LICENSE
 
 license-output: LICENSE
-
+enable-nolib-creation: no
