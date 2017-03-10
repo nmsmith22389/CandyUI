@@ -510,7 +510,7 @@ function CandyUI_Resources:OnGeneratePetCommandTooltip(wndControl, wndHandler, e
 	elseif eType == Tooltip.TooltipGenerateType_Spell then
 		xml = XmlDoc.new()
 		if arg1 ~= nil then
-			xml:AddLine(arg1:GetFlavor())
+			xml:AddLine(arg1:GetTooltips()["strCasterTooltip"])
 		end
 		wndControl:SetTooltipDoc(xml)
 	end
@@ -1112,7 +1112,7 @@ function CandyUI_Resources:OnGeneratePetCommandTooltip(wndControl, wndHandler, e
 	elseif eType == Tooltip.TooltipGenerateType_Spell then
 		xml = XmlDoc.new()
 		if arg1 ~= nil then
-			xml:AddLine(arg1:GetFlavor())
+			xml:AddLine(arg1:GetTooltips()["strCasterTooltip"])
 		end
 		wndControl:SetTooltipDoc(xml)
 	end
