@@ -1636,7 +1636,7 @@ kcuiNPDefaults = {
 			nViewDistance = 100, --Check?
 			bAutoPosition = true,
 			bShowSimple = false,
-			bUsePerspective = false,
+			bUsePerspective = false
 		},
 		player = {
 			bShow = true,
@@ -1720,6 +1720,7 @@ kcuiNPDefaults = {
 			bShowHealthText = false,
 			bOnlyDamaged = true,
 			bUseColorThreshold = true,
+			bShowMoo = false
 		},
 		enemy = {
 			bShow = true,
