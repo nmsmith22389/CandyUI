@@ -957,13 +957,17 @@ function CandyUI_UnitFrames:OnGenerateBuffTooltip(wndHandler, wndControl, tType,
 	if wndHandler == wndControl or Tooltip == nil then
 		return
 	end
+
 	Tooltip.GetBuffTooltipForm(self, wndControl, splBuff, {bFutureSpell = false})
 end
 
---#############################################################################################
+-- This function is triggered whenever one of the windows is moved by the player.
+-- When the event is triggered, we get the new anchor offsets of the control that raised the event
+-- and store them inside our internal database for tracking the position and saving it.
 function CandyUI_UnitFrames:OnUFMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
 	local strName = wndControl:GetName()
-	local tAnchors = {wndControl:GetAnchorOffsets()}
+	local tAnchors = { wndControl:GetAnchorOffsets() }
+
 	if strName == "PlayerUF" then
 		self.db.profile.player.tAnchorOffsets = tAnchors
 	elseif strName == "TargetUF" then
@@ -977,10 +981,12 @@ end
 
 function CandyUI_UnitFrames:OnMouseUp( wndHandler, wndControl, eMouseButton, nLastRelativeMouseX, nLastRelativeMouseY )
 	local unit = wndControl:GetData()
+
 	if eMouseButton == GameLib.CodeEnumInputMouse.Left and unit ~= nil then
 		GameLib.SetTargetUnit(unit)
 		return false
 	end
+
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right and unit ~= nil then
 		Event_FireGenericEvent("GenericEvent_NewContextMenuPlayerDetailed", nil, unit:GetName(), unit)
 		return true
@@ -1164,7 +1170,9 @@ local tBarTextFormatOptions = {
 --===============================
 function CandyUI_UnitFrames:SetOptions()
 
-	--Positions
+	-- Apply the stored anchor offsets to the 4 Unitframe windows.
+	-- These offsets are always stored in the local profile, and are automatically
+	-- updated every time the user drags the relevant window.
 	self.wndPlayerUF:SetAnchorOffsets(unpack(self.db.profile.player.tAnchorOffsets))
 	self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
 	self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
