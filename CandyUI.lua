@@ -113,7 +113,7 @@ function CandyUI:OnLoad()
 	self.xmlDoc = XmlDoc.CreateFromFile("CandyUI.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
 	self.db = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, kcuiODefaults)
-	
+	self.bEditMode = false -- By default, edit mode is disabled.
 end
 
 -----------------------------------------------------------------------------------------------
@@ -202,17 +202,58 @@ end
 -----------------------------------------------------------------------------------------------
 -- CandyUI Functions
 -----------------------------------------------------------------------------------------------
--- Define general functions here
+
+-- Prints out the provided message into the Debug channel, regardless of what Chat Addon
+-- is being used.
+function CandyUI:Print(sMessage)
+	ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Debug, tostring(sMessage), "CandyUI")
+end
 
 -- on SlashCommand "/CandyUI"
-function CandyUI:OnCandyUIOn()
-	self.wndOptions:Invoke() -- show the window
-	self:OnOptionsHomeClick()
-	
-	local bAllProfilesSame = self:CheckCurrentProfiles()
-	
-	if not bAllProfilesSame then
-		--self:SetCurrentProfiles(_cui.strCurrentProfile)
+-- This function is registered as eventhandler for the OnSlashCommand event.
+-- Because we support arguments to our slash command, we need to properly parse them.
+-- By default we will open the configuration.
+function CandyUI:OnCandyUIOn(sCmd, sArgs)
+	local tArgc = {}
+	local sCommand = "config"
+
+	-- Loop over the arguments provided, and split them
+	-- Store each argument inside the local table for future use.
+	for sWord in string.gmatch(sArgs, "[^%s]+") do
+		table.insert(tArgc, sWord)
+	end
+
+	-- Extract the first argument.
+	if #tArgc >= 1 then
+		sCommand = string.lower(tArgc[1])
+		table.remove(tArgc, 1)
+	end
+
+	if sCommand == "config" then
+		self.wndOptions:Invoke() -- show the window
+		self:OnOptionsHomeClick()
+
+		local bAllProfilesSame = self:CheckCurrentProfiles()
+
+		if not bAllProfilesSame then
+			--self:SetCurrentProfiles(_cui.strCurrentProfile)
+		end
+	elseif sCommand == "edit" then
+		self.bEditMode = not self.bEditMode
+		self:ToggleEditMode()
+	else
+		self:Print(("Unknown command: %s"):format(sCommand))
+	end
+end
+
+-- Toggles the edit mode in all modules based on the internal boolean value of bEditMode.
+-- Edit mode allows the User to drag all parent windows across the screen, repositioning them
+-- to his own liking.
+function CandyUI:ToggleEditMode()
+	if self.bEditMode then
+		-- TODO: Loop over Apollo.GetAddon("CandyUI").tAddons and check all windows controls
+	else
+		-- TODO: Loop over Apollo.GetAddon("CandyUI").tAddons and check all windows controls
 	end
 end
 
