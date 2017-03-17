@@ -3,7 +3,7 @@
     <Script Name="CandyUI_Resources.lua"/>
     <Form Name="CandyUI_Resources.xml"/>
     <ReplaceAddon Name="ClassResources"/>
-	<ReplaceAddon Name="StalkerResource"/>
-	<ReplaceAddon Name="WarriorResource"/>
-	<ReplaceAddon Name="Medic"/>
+    <ReplaceAddon Name="Medic"/>
+    <ReplaceAddon Name="StalkerResource"/>
+    <ReplaceAddon Name="WarriorResource"/>
 </Addon>

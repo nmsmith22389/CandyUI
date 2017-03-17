@@ -265,6 +265,15 @@ end
 -----------------------------------------------------------------------------------------------
 
 function CandyUI_Resources:OnCreateSlinger()
+	---Charge Bar--------------------------------------------------------------------
+	Apollo.RegisterEventHandler("StartSpellThreshold", 	"OnStartSpellThreshold", self)
+	Apollo.RegisterEventHandler("ClearSpellThreshold", 	"OnClearSpellThreshold", self)
+	Apollo.RegisterEventHandler("UpdateSpellThreshold", "OnUpdateSpellThreshold", self)
+	
+	self.wndCharge = Apollo.LoadForm(self.xmlDoc, "SpellslingerChargeForm", nil, self)
+	self.wndCharge:Show(false)
+	-----------------------------------------------------------------------------------
+
 	Apollo.RegisterEventHandler("NextFrame", 		"OnSlingerUpdateTimer", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 			"OnSlingerEnteredCombat", self)
 
@@ -288,6 +297,9 @@ function CandyUI_Resources:OnCreateSlinger()
 	
 	local l, t, r, b = unpack(self.db.profile.spellslinger.tAnchorOffsets)
 	self.wndMain:SetAnchorOffsets(l, t, l + self.db.profile.spellslinger.nWidth, b)
+	local l2, t2, r2, b2 = unpack(self.db.profile.spellslinger.ChargeAnchorOffsets)
+	self.wndCharge:SetAnchorOffsets(l2,t2,r2,b2)
+	
 end
 
 function CandyUI_Resources:OnSlingerUpdateTimer()
@@ -390,6 +402,18 @@ function CandyUI_Resources:OnSlingerUpdateTimer()
 			self.wndMain:FindChild("Ass3"):Show(false)
 		end
 	end
+	------------------- 
+	--ChargeBar
+	-------------------
+	if self.wndCharge:IsShown() then
+		local fPercentDone = GameLib.GetSpellThresholdTimePrcntDone(self.db.profile.spellslinger.tCurrentOpSpellid)
+		if self.db.profile.spellslinger.nCurrentTier == 1 then
+			self.wndCharge:FindChild("Charge1"):FindChild("ProgressBar1"):SetMax(1)
+			self.wndCharge:FindChild("Charge1"):FindChild("ProgressBar1"):SetProgress(fPercentDone)
+		else
+			self.wndCharge:FindChild("Charge2"):FindChild("ProgressBar2"):SetProgress(fPercentDone)
+		end
+	end
 end
 
 function CandyUI_Resources:OnSlingerEnteredCombat(unitPlayer, bInCombat)
@@ -407,6 +431,39 @@ function CandyUI_Resources:OnSlingerEnteredCombat(unitPlayer, bInCombat)
 		end
 	end
 end
+------------------- 
+--ChargeBar
+-------------------
+function CandyUI_Resources:OnStartSpellThreshold(idSpell, nMaxThresholds, eCastMethod)
+	if ( self.db.profile.spellslinger.tCurrentOpSpellid == idSpell) then 
+		self.db.profile.spellslinger.nCurrentTier = 2
+		self.wndCharge:FindChild("Charge1"):FindChild("ProgressBar1"):SetProgress(1)
+		return
+	end
+	self.db.profile.spellslinger.tCurrentOpSpellid = idSpell
+	self.db.profile.spellslinger.nMaxThresholds = nMaxThresholds
+	self.db.profile.spellslinger.eCastMethod = eCastMethod
+	self.db.profile.spellslinger.nCurrentTier = 1
+	if eCastMethod ==  Spell.CodeEnumCastMethod.ChargeRelease then
+		self.wndCharge:Show(true)
+	end
+end
+
+function CandyUI_Resources:OnClearSpellThreshold(idSpell)
+	self.db.profile.spellslinger.tCurrentOpSpellid = nil
+	self.db.profile.spellslinger.nMaxThresholds = nil
+	self.db.profile.spellslinger.nCurrentTier = 0
+	self.wndCharge:Show(false)
+	self.wndCharge:FindChild("Charge1"):FindChild("ProgressBar1"):SetProgress(0)
+	self.wndCharge:FindChild("Charge2"):FindChild("ProgressBar2"):SetProgress(0)
+end
+
+function CandyUI_Resources:OnUpdateSpellThreshold(idSpell, nNewThreshold)
+	self.db.profile.spellslinger.nCurrentTier = nNewThreshold
+end
+
+
+
 -----------------------------------------------------------------------------------------------
 -- Medic
 -----------------------------------------------------------------------------------------------
@@ -515,6 +572,7 @@ function CandyUI_Resources:OnGeneratePetCommandTooltip(wndControl, wndHandler, e
 		wndControl:SetTooltipDoc(xml)
 	end
 end
+
 
 -----------------------------------------------------------------------------------------------
 -- Engineer
@@ -848,6 +906,11 @@ kcuiRDefaults = {
 			bHealingTorrent = true,
 			crSurgeColor = "xkcdRed",
 			tAnchorOffsets = {-250, -13, 250, 12},
+			tCurrentOpSpellid = nil,
+			nMaxThresholds = 0,
+			nCurrentTier = 0,
+			eCastMethod	= nil,	
+			ChargeAnchorOffsets = {-125, 203, 99, 284},
 		},
 		stalker = {
 			--general
@@ -1084,6 +1147,10 @@ function CandyUI_Resources:OnFullColorClick( wndHandler, wndControl, eMouseButto
 	self.colorPicker:ToFront()
 end
 
+function CandyUI_Resources:OnShowChargBar( wndHandler, wndControl, eMouseButton)
+	self.wndCharge:Show(true)
+end
+
 ---------------------------------------------------------------------------------------------------
 -- EngineerResourceForm Functions
 ---------------------------------------------------------------------------------------------------
@@ -1147,6 +1214,9 @@ function CandyUI_Resources:OnBarMoved( wndHandler, wndControl, nOldLeft, nOldTop
 		self.db.profile.stalker.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
 	elseif wndControl:GetName() == "WarriorResourceForm" then
 		self.db.profile.warrior.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+	elseif wndControl:GetName() == "SpellslingerChargeForm" then
+		self.db.profile.spellslinger.ChargeAnchorOffsets = {wndControl:GetAnchorOffsets()}
+
 	end
 end
 
