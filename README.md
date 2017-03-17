@@ -3,88 +3,15 @@ CandyUI
 
 A Wildstar UI Replacement
 
-###Last Update
+![candyUI.jpg](candyUI.jpg)
 
-CandyUI_Resources
+## Commands
 
-v0.3.6
+- */candyui* or */cui* to bring up the options
 
-	• Optimized loading process.
+## Window Management
+All management of the various windows and unitframes is controlled through Carbine's WindowsManager.
+If you want to prevent windows from moving, or make them movable,
+then use the *escape* -> *Interface* -> *Positioning* options of the client.
 
-
-CandyUI_Minimap
-
-v0.3.1
-
-	• Fixed error on profile switch.
-	
-	• Optimized loading process.
-	
-	• Fixed general options.
-	
-
-CandyUI
-
-v0.4
-
-	• Welcome screen added and appears only on first run.
-	
-	• Modules list added.
-	
-	• Thanks page updated.
-	
-	• CB and SP option shortcuts added to CUI options.
-	
-	• CUI global variable added.
-	
-	• Added single tiered options support.
-	
-	• Options are now sorted alphabetically.
-	
-	• Now disables RecallFrame.
-	
-	• Now disables XPBar. (to hide UI)
-	
-	• Profile system added.
-	
-
-
-CandyUI_UnitFrames
-
-v0.3.4
-
-	• Fixed error when max health = 0.
-	
-	• Fixed cluster bug. (ln832)
-	
-	• Optimized loading process.
-	
-
-
-CandyUI_Nameplates
-
-v0.4.5
-
-	• Optimized loading process.
-	
-
-
-CandyBars
-
-v1.2.5
-
-	• Added CUI options support
-	
-
-
-StarPanel
-
-v1.2.4
-
--Added CUI options support.
-
--Fixed QT bug.
-
-
-
-
+![CandyUI](https://i.imgur.com/o9zNYfX.jpg)
