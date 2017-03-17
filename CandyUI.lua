@@ -256,6 +256,10 @@ function CandyUI:ToggleEditMode()
   if Apollo.GetAddon("CandyUI_Minimap") then
     Apollo.GetAddon("CandyUI_Minimap"):ToggleEditMode(self.bEditMode)
   end
+
+  if Apollo.GetAddon("CandyUI_InterfaceMenu") then
+    Apollo.GetAddon("CandyUI_InterfaceMenu"):ToggleEditMode(self.bEditMode)
+  end
 end
 
 function CandyUI:OnCandyUIOff()
