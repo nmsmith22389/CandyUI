@@ -1285,8 +1285,11 @@ function CandyUI_Minimap:OnDatachronButtonUncheck( wndHandler, wndControl, eMous
 	Sound.Play(Sound.PlayUI38CloseRemoteWindowDigital)
 end
 
-function CandyUI_Minimap:OnMinimapMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
-	self.db.profile.general.tAnchorOffsets = {wndControl:GetAnchorOffsets()}
+-- This function is triggered whenever one of the windows is moved by the player.
+-- When the event is triggered, we get the new anchor offsets of the control that raised the event
+-- and store them inside our internal database for tracking the position and saving it.
+function CandyUI_Minimap:OnMinimapMoved(wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom)
+	self.db.profile.general.tAnchorOffsets = { wndControl:GetAnchorOffsets() }
 end
 
 kcuiMMDefaults = {

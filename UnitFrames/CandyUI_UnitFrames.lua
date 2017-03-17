@@ -964,7 +964,7 @@ end
 -- This function is triggered whenever one of the windows is moved by the player.
 -- When the event is triggered, we get the new anchor offsets of the control that raised the event
 -- and store them inside our internal database for tracking the position and saving it.
-function CandyUI_UnitFrames:OnUFMoved( wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom )
+function CandyUI_UnitFrames:OnUFMoved(wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom)
 	local strName = wndControl:GetName()
 	local tAnchors = { wndControl:GetAnchorOffsets() }
 
@@ -1183,7 +1183,6 @@ end
 --			Set Options
 --===============================
 function CandyUI_UnitFrames:SetOptions()
-
 	-- Apply the stored anchor offsets to the 4 Unitframe windows.
 	-- These offsets are always stored in the local profile, and are automatically
 	-- updated every time the user drags the relevant window.
