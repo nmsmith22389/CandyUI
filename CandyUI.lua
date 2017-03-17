@@ -41,8 +41,6 @@ local karCUIModules = {
 _cui
 	bOptionsLoaded				--Whether the options addon is loaded
 	tAddonLoadStatus			--A table of which addons are loaded (children are boolean)
-	
-
 ]]
 --======================================================
 
@@ -119,7 +117,6 @@ end
 -- CandyUI OnDocLoaded
 -----------------------------------------------------------------------------------------------
 function CandyUI:OnDocLoaded()
-
   if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
 
     self.wndOptions = Apollo.LoadForm(self.xmlDoc, "OptionsDialogue", nil, self)
