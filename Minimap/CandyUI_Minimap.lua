@@ -1289,7 +1289,7 @@ end
 -- When the event is triggered, we get the new anchor offsets of the control that raised the event
 -- and store them inside our internal database for tracking the position and saving it.
 function CandyUI_Minimap:OnMinimapMoved(wndHandler, wndControl, nOldLeft, nOldTop, nOldRight, nOldBottom)
-	self.db.profile.general.tAnchorOffsets = { wndControl:GetAnchorOffsets() }
+  self.db.profile.general.tAnchorOffsets = { wndControl:GetAnchorOffsets() }
 end
 
 kcuiMMDefaults = {
