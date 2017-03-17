@@ -1165,6 +1165,20 @@ local tBarTextFormatOptions = {
 	["Min / Max (Percent)"] = 3,
 }
 
+-- This function toggles the "Edit Mode" for the UnitFrames on or off.
+-- The "Edit Mode" allows the windows to be dragged across the screen by the User.
+function CandyUI_UnitFrames:ToggleEditMode(bEnabled)
+  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
+  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
+  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
+  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
+
+  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
+  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
+  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
+  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
+end
+
 --===============================
 --			Set Options
 --===============================

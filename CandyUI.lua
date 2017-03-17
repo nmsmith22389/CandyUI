@@ -249,38 +249,12 @@ end
 -- Edit mode allows the User to drag all parent windows across the screen, repositioning them
 -- to his own liking.
 function CandyUI:ToggleEditMode()
-  if self.bEditMode then
-    if Apollo.GetAddon("CandyUI_UnitFrames") then
-      Apollo.GetAddon("CandyUI_UnitFrames").wndPlayerUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndTargetUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndFocusUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndToTUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndPlayerUF:SetStyle("IgnoreMouse", false)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndTargetUF:SetStyle("IgnoreMouse", false)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndFocusUF:SetStyle("IgnoreMouse", false)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndToTUF:SetStyle("IgnoreMouse", false)
-    end
+  if Apollo.GetAddon("CandyUI_UnitFrames") then
+    Apollo.GetAddon("CandyUI_UnitFrames"):ToggleEditMode(self.bEditMode)
+  end
 
-    if Apollo.GetAddon("CandyUI_Minimap") then
-      Apollo.GetAddon("CandyUI_Minimap").wndMiniMap:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_Minimap").wndMiniMap:SetStyle("IgnoreMouse", false)
-    end
-  else
-    if Apollo.GetAddon("CandyUI_UnitFrames") then
-      Apollo.GetAddon("CandyUI_UnitFrames").wndPlayerUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndTargetUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndFocusUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndToTUF:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndPlayerUF:SetStyle("IgnoreMouse", false)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndTargetUF:SetStyle("IgnoreMouse", false)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndFocusUF:SetStyle("IgnoreMouse", false)
-      Apollo.GetAddon("CandyUI_UnitFrames").wndToTUF:SetStyle("IgnoreMouse", false)
-    end
-
-    if Apollo.GetAddon("CandyUI_Minimap") then
-      Apollo.GetAddon("CandyUI_Minimap").wndMiniMap:SetStyle("Moveable", true)
-      Apollo.GetAddon("CandyUI_Minimap").wndMiniMap:SetStyle("IgnoreMouse", false)
-    end
+  if Apollo.GetAddon("CandyUI_Minimap") then
+    Apollo.GetAddon("CandyUI_Minimap"):ToggleEditMode(self.bEditMode)
   end
 end
 
