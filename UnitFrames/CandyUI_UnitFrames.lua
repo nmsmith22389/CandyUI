@@ -1164,14 +1164,14 @@ local tBarTextFormatOptions = {
 -- The "Edit Mode" allows the windows to be dragged across the screen by the User.
 function CandyUI_UnitFrames:ToggleEditMode(bEnabled)
   self.wndPlayerUF:SetStyle("Moveable", bEnabled)
-  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
-  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
-  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
+  self.wndTargetUF:SetStyle("Moveable", bEnabled)
+  self.wndFocusUF:SetStyle("Moveable", bEnabled)
+  self.wndToTUF:SetStyle("Moveable", bEnabled)
 
   self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
+  self.wndTargetUF:SetStyle("IgnoreMouse", not bEnabled)
+  self.wndFocusUF:SetStyle("IgnoreMouse", not bEnabled)
+  self.wndToTUF:SetStyle("IgnoreMouse", not bEnabled)
 end
 
 --===============================
