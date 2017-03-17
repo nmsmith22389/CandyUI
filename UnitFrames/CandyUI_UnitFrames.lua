@@ -7,7 +7,6 @@
 -- This work is licensed under the GNU GENERAL PUBLIC LICENSE.
 -- A copy of this license is included with this release.
 -----------------------------------------------------------------------------------------------
-
 require "Window"
 
 -----------------------------------------------------------------------------------------------
@@ -15,9 +14,6 @@ require "Window"
 -----------------------------------------------------------------------------------------------
 local CandyUI_UnitFrames = {}
 
---%%%%%%%%%%%
---   ROUND
---%%%%%%%%%%%
 local function round(num, idp)
   local mult = 10 ^ (idp or 0)
   if num >= 0 then return math.floor(num * mult + 0.5) / mult
@@ -28,8 +24,6 @@ end
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
--- e.g. local kiExampleVariableMax = 999
-
 local karClassToIcon =
 {
   [GameLib.CodeEnumClass.Warrior] = "Sprites:Class_Warrior",
@@ -39,6 +33,7 @@ local karClassToIcon =
   [GameLib.CodeEnumClass.Stalker] = "Sprites:Class_Stalker",
   [GameLib.CodeEnumClass.Spellslinger] = "Sprites:Class_Spellslinger",
 }
+
 -----------------------------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------------------------
@@ -47,16 +42,14 @@ function CandyUI_UnitFrames:new(o)
   setmetatable(o, self)
   self.__index = self
 
-  -- initialize variables here
-
   return o
 end
 
 function CandyUI_UnitFrames:Init()
   local bHasConfigureFunction = false
   local strConfigureButtonText = ""
-  local tDependencies = {-- "UnitOrPackageName",
-  }
+  local tDependencies = { }
+
   Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
 
@@ -74,7 +67,6 @@ end
 -- CandyUI_UnitFrames OnDocLoaded
 -----------------------------------------------------------------------------------------------
 function CandyUI_UnitFrames:OnDocLoaded()
-
   if self.db.char.currentProfile == nil and self.db:GetCurrentProfile() ~= nil then
     self.db.char.currentProfile = self.db:GetCurrentProfile()
   elseif self.db.char.currentProfile ~= nil and self.db.char.currentProfile ~= self.db:GetCurrentProfile() then
@@ -84,14 +76,18 @@ function CandyUI_UnitFrames:OnDocLoaded()
   Apollo.LoadSprites("Sprites.xml")
 
   self.wndPlayerUF = Apollo.LoadForm(self.xmlDoc, "PlayerUF", nil, self)
+
   for i = 1, 4 do
     local wndCurr = Apollo.LoadForm(self.xmlDoc, "ClusterTarget", self.wndPlayerUF:FindChild("ClusterFrame"), self)
   end
+
   self.wndPlayerUF:FindChild("ClusterFrame"):ArrangeChildrenVert()
   self.wndTargetUF = Apollo.LoadForm(self.xmlDoc, "TargetUF", nil, self)
+
   for i = 1, 4 do
     local wndCurr = Apollo.LoadForm(self.xmlDoc, "ClusterTarget", self.wndTargetUF:FindChild("ClusterFrame"), self)
   end
+
   self.wndTargetUF:FindChild("ClusterFrame"):ArrangeChildrenVert()
   self.wndToTUF = Apollo.LoadForm(self.xmlDoc, "ToTUF", nil, self)
   self.wndToTUF:Show(false, true)
@@ -102,11 +98,10 @@ function CandyUI_UnitFrames:OnDocLoaded()
 
   --Check for Options addon
   local bOptionsLoaded = _cui.bOptionsLoaded
+
   if bOptionsLoaded then
-    --Load Options
     self:OnCUIOptionsLoaded()
   else
-    --Schedule for later
     Apollo.RegisterEventHandler("CandyUI_Loaded", "OnCUIOptionsLoaded", self)
   end
 
@@ -115,23 +110,41 @@ function CandyUI_UnitFrames:OnDocLoaded()
   self.colorPicker = GeminiColor:CreateColorPicker(self, "ColorPickerCallback", false, "ffffffff")
   self.colorPicker:Show(false, true)
 
-  --Apollo.RegisterEventHandler("CandyUI_UnitFramesClicked", "OnOptionsHome", self)
   Apollo.RegisterEventHandler("NextFrame", "OnCharacterLoaded", self)
   Apollo.RegisterEventHandler("CharacterCreated", "OnCharacterLoaded", self)
   Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
   Apollo.RegisterEventHandler("AlternateTargetUnitChanged", "OnAlternateTargetUnitChanged", self)
-
-  --self.wndPlayerUF:SetAnchorOffsets(unpack(self.db.profile.player.tAnchorOffsets))
-  --self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
-  --self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
-  --self.wndToTUF:SetAnchorOffsets(unpack(self.db.profile.tot.tAnchorOffsets))
+  Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
 
   if GameLib.GetPlayerUnit() and GameLib.GetPlayerUnit():GetTarget() then
     self:OnTargetUnitChanged(GameLib.GetPlayerUnit():GetTarget())
   end
 
-  --self:SetOptions()
-  --self:SetLooks()
+  -- Because there exists a race condition between the initialization and registration
+  -- with the windowmanager, we're going to call the function ourselves manually.
+  -- Just to be safe.
+  self:OnWindowManagementReady()
+end
+
+-- This function is called by the Wildstar WindowManager when it's loaded and ready
+-- to handle all requests related to the UI. This allows us to offload this to the
+-- client and not track everything ourselves.
+function CandyUI_UnitFrames:OnWindowManagementReady()
+  -- Register the Player UnitFrame
+  Event_FireGenericEvent("WindowManagementRegister", { strName = "CandyUI - UnitFrames - Player", nSaveVersion = 1})
+  Event_FireGenericEvent("WindowManagementAdd", { wnd = self.wndPlayerUF, strName = "CandyUI - UnitFrames - Player", nSaveVersion = 1})
+
+  -- Register the Target UnitFrame
+  Event_FireGenericEvent("WindowManagementRegister", { strName = "CandyUI - UnitFrames - Target", nSaveVersion = 1})
+  Event_FireGenericEvent("WindowManagementAdd", { wnd = self.wndTargetUF, strName = "CandyUI - UnitFrames - Target", nSaveVersion = 1})
+
+  -- Register the Focus UnitFrame
+  Event_FireGenericEvent("WindowManagementRegister", { strName = "CandyUI - UnitFrames - Focus Target", nSaveVersion = 1})
+  Event_FireGenericEvent("WindowManagementAdd", { wnd = self.wndFocusUF, strName = "CandyUI - UnitFrames - Focus Target", nSaveVersion = 1 })
+
+  -- Register the Target of Target UnitFrame
+  Event_FireGenericEvent("WindowManagementRegister", { strName = "CandyUI - UnitFrames - Target of Target", nSaveVersion = 1})
+  Event_FireGenericEvent("WindowManagementAdd", { wnd = self.wndToTUF, strName = "CandyUI - UnitFrames - Target of Target", nSaveVersion = 1 })
 end
 
 function CandyUI_UnitFrames:OnCUIOptionsLoaded()
@@ -1160,32 +1173,10 @@ local tBarTextFormatOptions = {
   ["Min / Max (Percent)"] = 3,
 }
 
--- This function toggles the "Edit Mode" for the UnitFrames on or off.
--- The "Edit Mode" allows the windows to be dragged across the screen by the User.
-function CandyUI_UnitFrames:ToggleEditMode(bEnabled)
-  self.wndPlayerUF:SetStyle("Moveable", bEnabled)
-  self.wndTargetUF:SetStyle("Moveable", bEnabled)
-  self.wndFocusUF:SetStyle("Moveable", bEnabled)
-  self.wndToTUF:SetStyle("Moveable", bEnabled)
-
-  self.wndPlayerUF:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndTargetUF:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndFocusUF:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndToTUF:SetStyle("IgnoreMouse", not bEnabled)
-end
-
 --===============================
 --			Set Options
 --===============================
 function CandyUI_UnitFrames:SetOptions()
-  -- Apply the stored anchor offsets to the 4 Unitframe windows.
-  -- These offsets are always stored in the local profile, and are automatically
-  -- updated every time the user drags the relevant window.
-  self.wndPlayerUF:SetAnchorOffsets(unpack(self.db.profile.player.tAnchorOffsets))
-  self.wndTargetUF:SetAnchorOffsets(unpack(self.db.profile.target.tAnchorOffsets))
-  self.wndFocusUF:SetAnchorOffsets(unpack(self.db.profile.focus.tAnchorOffsets))
-  self.wndToTUF:SetAnchorOffsets(unpack(self.db.profile.tot.tAnchorOffsets))
-
   --Show Old Interupt
   self.wndControls:FindChild("GeneralControls"):FindChild("OldInterupt"):SetCheck(self.db.profile["general"]["bShowOldInt"])
   --Unit Options
@@ -1342,32 +1333,6 @@ function CandyUI_UnitFrames:ColorPickerCallback(strColor)
     self["wnd" .. strUnit .. "UF"]:FindChild("HealthBar"):FindChild("AbsorbBar"):SetBarColor(self.db.profile[strUnitLower].crAbsorbBar)
     --self["wnd"..strUnit.."UF"]:FindChild("HealthBar"):SetBGColor(self.db.profile[strUnitLower].crHealthBar)
   end
-  --[[
-  if self.strColorPickerTargetUnit == "Player" then
-    if self.strColorPickerTargetControl == "HealthBar" then
-      self.db.profile.player.crHealthBar = strColor
-      self.wndControls:FindChild("PlayerControls"):FindChild("HealthBarColor"):FindChild("Swatch"):SetBGColor(strColor)
-      self.wndPlayerUF:FindChild("HealthBar"):FindChild("Bar"):SetBarColor(self.db.profile.player.crHealthBar)
-      self.wndPlayerUF:FindChild("HealthBar"):SetBGColor(self.db.profile.player.crHealthBar)
-    elseif self.strColorPickerTargetControl == "ShieldBar" then
-      self.db.profile.player.crShieldBar = strColor
-      self.wndControls:FindChild("PlayerControls"):FindChild("ShieldBarColor"):FindChild("Swatch"):SetBGColor(strColor)
-      self.wndPlayerUF:FindChild("ShieldBar"):SetBarColor(self.db.profile.player.crShieldBar)
-      self.wndPlayerUF:FindChild("ShieldBarBG"):SetBGColor(self.db.profile.player.crShieldBar)
-    elseif self.strColorPickerTargetControl == "FocusBar" then
-      self.db.profile.player.crFocusBar = strColor
-      self.wndControls:FindChild("PlayerControls"):FindChild("FocusBarColor"):FindChild("Swatch"):SetBGColor(strColor)
-      self.wndPlayerUF:FindChild("FocusBar"):SetBarColor(self.db.profile.player.crFocusBar)
-      self.wndPlayerUF:FindChild("FocusBarBG"):SetBGColor(self.db.profile.player.crFocusBar)
-    end
-  elseif self.strColorPickerTargetUnit == "Target" then
-
-  elseif self.strColorPickerTargetUnit == "Focus" then
-
-  elseif self.strColorPickerTargetUnit == "ToT" then
-
-  end
-  ]]
 end
 
 --Portrait Style

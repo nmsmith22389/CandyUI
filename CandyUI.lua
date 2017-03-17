@@ -210,52 +210,13 @@ end
 -- Because we support arguments to our slash command, we need to properly parse them.
 -- By default we will open the configuration.
 function CandyUI:OnCandyUIOn(sCmd, sArgs)
-  local tArgc = {}
-  local sCommand = "config"
+  self.wndOptions:Invoke() -- show the window
+  self:OnOptionsHomeClick()
 
-  -- Loop over the arguments provided, and split them
-  -- Store each argument inside the local table for future use.
-  for sWord in string.gmatch(sArgs, "[^%s]+") do
-    table.insert(tArgc, sWord)
-  end
+  local bAllProfilesSame = self:CheckCurrentProfiles()
 
-  -- Extract the first argument.
-  if #tArgc >= 1 then
-    sCommand = string.lower(tArgc[1])
-    table.remove(tArgc, 1)
-  end
-
-  if sCommand == "config" then
-    self.wndOptions:Invoke() -- show the window
-    self:OnOptionsHomeClick()
-
-    local bAllProfilesSame = self:CheckCurrentProfiles()
-
-    if not bAllProfilesSame then
-      --self:SetCurrentProfiles(_cui.strCurrentProfile)
-    end
-  elseif sCommand == "edit" then
-    self.bEditMode = not self.bEditMode
-    self:ToggleEditMode()
-  else
-    self:Print(("Unknown command: %s"):format(sCommand))
-  end
-end
-
--- Toggles the edit mode in all modules based on the internal boolean value of bEditMode.
--- Edit mode allows the User to drag all parent windows across the screen, repositioning them
--- to his own liking.
-function CandyUI:ToggleEditMode()
-  if Apollo.GetAddon("CandyUI_UnitFrames") then
-    Apollo.GetAddon("CandyUI_UnitFrames"):ToggleEditMode(self.bEditMode)
-  end
-
-  if Apollo.GetAddon("CandyUI_Minimap") then
-    Apollo.GetAddon("CandyUI_Minimap"):ToggleEditMode(self.bEditMode)
-  end
-
-  if Apollo.GetAddon("CandyUI_InterfaceMenu") then
-    Apollo.GetAddon("CandyUI_InterfaceMenu"):ToggleEditMode(self.bEditMode)
+  if not bAllProfilesSame then
+    --self:SetCurrentProfiles(_cui.strCurrentProfile)
   end
 end
 

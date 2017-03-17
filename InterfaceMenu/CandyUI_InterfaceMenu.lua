@@ -140,16 +140,6 @@ function CandyUI_InterfaceMenu:OnDocLoaded()
 	end	
 end
 
--- This function toggles the "Edit Mode" for the UnitFrames on or off.
--- The "Edit Mode" allows the windows to be dragged across the screen by the User.
-function CandyUI_InterfaceMenu:ToggleEditMode(bEnabled)
-  self.wndMain:SetStyle("Moveable", bEnabled)
-  self.wndList:SetStyle("Moveable", bEnabled)
-
-  self.wndMain:SetStyle("IgnoreMouse", not bEnabled)
-  self.wndList:SetStyle("IgnoreMouse", not bEnabled)
-end
-
 function CandyUI_InterfaceMenu:OnCharacterCreated()	
 	Apollo.CreateTimer("TimeUpdateTimer", 1.0, true)
 end

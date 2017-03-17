@@ -495,14 +495,6 @@ end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Minimap Functions
 -----------------------------------------------------------------------------------------------
-
--- This function toggles the "Edit Mode" for the UnitFrames on or off.
--- The "Edit Mode" allows the windows to be dragged across the screen by the User.
-function CandyUI_Minimap:ToggleEditMode(bEnabled)
-  self.wndMiniMap:SetStyle("Moveable", bEnabled)
-  self.wndMiniMap:SetStyle("IgnoreMouse", not bEnabled)
-end
-
 function CandyUI_Minimap:OnCharacterCreated()
 	if not self.unitPlayerDisposition then
 		self.unitPlayerDisposition = GameLib.GetPlayerUnit()
