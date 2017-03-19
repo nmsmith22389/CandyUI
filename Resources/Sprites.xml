@@ -58,15 +58,15 @@
         <Frame Texture="CandyUI_Resources\Sprites\IndicatorArrow_R.tga" x0="0" x1="0" x2="0" x3="14" x4="14" x5="14" y0="0" y1="0" y2="0" y3="26" y4="26" y5="26" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="ChargeBarBG" Cycle="1">
-        <Frame Texture="C:\Users\FP\Pictures\ChargeBarBG.tga" x0="16" x1="16" x2="232" x3="232" x4="232" x5="232" y0="9" y1="9" y2="9" y3="9" y4="9" y5="214" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Resources\Sprites\ChargeBarBG.tga" x0="16" x1="16" x2="232" x3="232" x4="232" x5="232" y0="9" y1="9" y2="9" y3="9" y4="9" y5="214" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="ChargeBar_Bright" Cycle="1">
-        <Frame Texture="C:\Users\FP\Pictures\ChargeBar_Bright.tga" x0="26" x1="26" x2="26" x3="26" x4="26" x5="242" y0="16" y1="16" y2="16" y3="16" y4="16" y5="222" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Resources\Sprites\ChargeBar_Bright.tga" x0="26" x1="26" x2="26" x3="26" x4="26" x5="242" y0="16" y1="16" y2="16" y3="16" y4="16" y5="222" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="ChargeBar_Green" Cycle="1">
-        <Frame Texture="C:\Users\FP\Pictures\ChargeBar_Green.tga" x0="30" x1="30" x2="30" x3="30" x4="30" x5="228" y0="23" y1="23" y2="23" y3="23" y4="23" y5="223" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Resources\Sprites\ChargeBar_Green.tga" x0="30" x1="30" x2="30" x3="30" x4="30" x5="228" y0="23" y1="23" y2="23" y3="23" y4="23" y5="223" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
     <Sprite Name="ChargeBar_Red" Cycle="1">
-        <Frame Texture="C:\Users\FP\Pictures\ChargeBar_Red.tga" x0="18" x1="18" x2="18" x3="18" x4="18" x5="241" y0="16" y1="16" y2="16" y3="16" y4="16" y5="229" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+        <Frame Texture="CandyUI_Resources\Sprites\ChargeBar_Red.tga" x0="18" x1="18" x2="18" x3="18" x4="18" x5="241" y0="16" y1="16" y2="16" y3="16" y4="16" y5="229" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
     </Sprite>
 </Sprites>
