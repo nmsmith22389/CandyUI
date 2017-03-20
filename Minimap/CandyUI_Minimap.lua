@@ -492,6 +492,14 @@ end
 function CandyUI_Minimap:OnUpdateInventory()
 	self.wndBottom:FindChild("BagButton:Text"):SetText(GameLib.GetEmptyInventorySlots())
 end
+
+-- This function is called by the Wildstar WindowManager when it's loaded and ready
+-- to handle all requests related to the UI. This allows us to offload this to the
+-- client and not track everything ourselves.
+function CandyUI_Minimap:OnWindowManagementReady()
+    Event_FireGenericEvent("WindowManagementRegister", { strName = "CandyUI - Minimap", nSaveVersion = 1 })
+    Event_FireGenericEvent("WindowManagementAdd", { wnd = self.wndMain, strName = "CandyUI - Minimap", nSaveVersion = 1 })
+end
 -----------------------------------------------------------------------------------------------
 -- CandyUI_Minimap Functions
 -----------------------------------------------------------------------------------------------
@@ -1253,18 +1261,11 @@ function CandyUI_Minimap:OnBagButtonClick( wndHandler, wndControl, eMouseButton 
 	Event_FireGenericEvent("InterfaceMenu_ToggleInventory")
 end
 
-function CandyUI_Minimap:OnDatachronButtonCheck( wndHandler, wndControl, eMouseButton )	
-	--wndControl:AttachWindow(g_wndDatachron)
-	--local nDCWidth = g_wndDatachron:GetWidth()
-	--local nDCHeight = g_wndDatachron:GetHeight()
-	
-	--local nMMLeft, nMMTop, nMMRight, nMMBottom = Apollo.GetAddon("CandyUI_Minimap").wndMain:GetAnchorOffsets()
-	
-	--g_wndDatachron:SetAnchorOffsets(nMMRight - nDCWidth, nMMBottom + 10, nMMRight, nMMBottom + nDCHeight + 10)
-	
+-- This function is called whenever the User clicks on the Datachron button of the minimap
+-- The function will make the Datachron visible for the player.
+function CandyUI_Minimap:OnDatachronButtonCheck( wndHandler, wndControl, eMouseButton )
 	g_wndDatachron:Show(true)
 	Event_FireGenericEvent("DatachronRestored")
-
 	Sound.Play(Sound.PlayUI37OpenRemoteWindowDigital)
 end
 
