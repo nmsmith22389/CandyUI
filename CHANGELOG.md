@@ -1,6 +1,6 @@
 # CandyUI Changelog
 
-## v0.6 [unreleased]
+## v0.6 [20/03/2017]
 
 - **CandyUI_UnitFrames**
   - Player, Target, Focus and Target of Target are now moveable
