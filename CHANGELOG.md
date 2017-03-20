@@ -16,6 +16,11 @@
   - Core values for engineer updated
   - New sprite added for better display
   
+- **Minimap**
+  - Fixed disappearing minimap
+  - Added minimap to the client Windowmanager
+  - Minimap is now resizeable & moveable
+  
 # v0.5
 
 - **API 14 Release**

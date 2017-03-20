@@ -14,8 +14,9 @@ move-folders:
 ignore:
   - README.md
   - LICENSE
-  - CHANGELOG.MD
+  - CHANGELOG.md
   - candyUI.jpg
 
 license-output: LICENSE
+manual-changelog: CHANGELOG.md
 enable-nolib-creation: no
