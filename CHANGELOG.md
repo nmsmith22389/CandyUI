@@ -1,5 +1,7 @@
 # CandyUI Changelog
 
+## v0.7 [unreleased]
+
 ## v0.6 [20/03/2017]
 
 - **CandyUI_UnitFrames**
