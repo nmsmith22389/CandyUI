@@ -336,8 +336,11 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
   local nHealthMax = uUnit:GetMaxHealth()
   local nHealthCurr = uUnit:GetHealth()
   local nHealthPerc = round((nHealthCurr / nHealthMax) * 100)
-  self:SetBarValue(barHealth, nHealthCurr, 0, nHealthMax)
-
+  if nAbsorbMax > 0 then
+    self:SetBarValue(barHealth, nHealthCurr, 0,(nHealthMax/80)*100)
+  else
+    self:SetBarValue(barHealth, nHealthCurr, 0, nHealthMax)
+  end
   --Health Text
   local nShowHealthText = wndFrame:GetName() == "PlayerUF" and self.db.profile.player.nHealthText or wndFrame:GetName() == "TargetUF" and self.db.profile.target.nHealthText or wndFrame:GetName() == "FocusUF" and self.db.profile.focus.nHealthText
   local nHealthFormat = wndFrame:GetName() == "PlayerUF" and self.db.profile.player.nHealthFormat or wndFrame:GetName() == "TargetUF" and self.db.profile.target.nHealthFormat or wndFrame:GetName() == "FocusUF" and self.db.profile.focus.nHealthFormat
@@ -399,7 +402,7 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
       wndFrame:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_Grey")
       --barHealth:SetEmptySprite("Sprites:HealthEmpty_Grey")
       barHealth:SetFullSprite("Sprites:HealthFull_Grey")
-      wndFrame:FindChild("HealthBar:AbsorbBar"):SetFullSprite("Sprites:HealthFull_Grey")
+      wndFrame:FindChild("HealthBar:AbsorbBar"):SetFullSprite("Sprites:ShieldFull_Grey")
       local nsl, nst, nsr, nsb = wndFrame:FindChild("ShieldBar"):GetAnchorOffsets()
       local nhl, nht, nhr, nhb = wndFrame:FindChild("HealthBar"):GetAnchorOffsets()
       wndFrame:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsl - 4, nhb)
@@ -417,7 +420,7 @@ function CandyUI_UnitFrames:UpdateUnitFrame(wndFrame, uUnit)
       wndFrame:FindChild("HealthBar"):SetSprite("Sprites:HealthEmpty_RoundedGrey")
       --barHealth:SetEmptySprite("Sprites:HealthEmpty_RoundedGrey")
       barHealth:SetFullSprite("Sprites:HealthFull_RoundedGrey")
-      wndFrame:FindChild("HealthBar:AbsorbBar"):SetFullSprite("Sprites:HealthFull_RoundedGrey")
+      wndFrame:FindChild("HealthBar:AbsorbBar"):SetFullSprite("Sprites:ShieldFull_Grey")
       local nhl, nht, nhr, nhb = wndFrame:FindChild("HealthBar"):GetAnchorOffsets()
       local nsl, nst, nsr, nsb = wndFrame:FindChild("ShieldBar"):GetAnchorOffsets()
       wndFrame:FindChild("HealthBar"):SetAnchorOffsets(nhl, nht, nsr, nhb)
