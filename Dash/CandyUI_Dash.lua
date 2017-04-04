@@ -84,7 +84,7 @@ function CandyUI_Dash:OnDocLoaded()
 	
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 					"OnEnteredCombat", self)
 	Apollo.RegisterEventHandler("RefreshHealthShieldBar", 				"OnFrameUpdate", self)	
-
+	Apollo.RegisterEventHandler("SprintEnergyUpdated",			"OnSprintEnergyUpdated", self)
 	Apollo.RegisterTimerHandler("HealthShieldBarTimer", 				"OnFrameUpdate", self)
 	Apollo.RegisterTimerHandler("EnduranceDisplayTimer", 				"OnEnduranceDisplayTimer", self)
 
@@ -246,7 +246,26 @@ end
 	--self.wndDisableDash:FindChild("DisableDashToggleFlash"):Show(not wndControl:IsChecked())
 	--self:OnFrameUpdate()
 --end
-
+---------------------------------------------------------------------------------------------------
+-- Sprintbar Functions (added by Charge)
+---------------------------------------------------------------------------------------------------
+function CandyUI_Dash:OnSprintEnergyUpdated(nRunCurr, nRunMax)
+	local bar = self.wndMain:FindChild("SprintBar")
+	
+	bar:SetMax(nRunMax)
+	bar:SetProgress(nRunCurr)
+	SendVarToRover("testing var: tItem", nRunMax)
+	if (nRunCurr < 170) then 
+		bar:SetBGColor("red")
+		return
+	end
+	if (nRunCurr < 340) then 
+		bar:SetBGColor("xkcdAmber")
+		return
+	end
+	bar:SetBGColor("ChatGuild")
+	
+end
 
 ---------------------------------------------------------------------------------------------------
 -- DashForm Functions
