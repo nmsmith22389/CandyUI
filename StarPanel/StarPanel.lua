@@ -20,7 +20,7 @@ USEFULL function in _G
 -RequestReloadUI()
 -PlayerPathLib = <65>
 -GetAbilitiesWindow = <function 590>,
-  GetCharacterWindow = <function 591>,
+  GetacterWindow = <function 591>,
   GetConColor = <function 592>,
   GetCurrentSubZoneName = <function 593>,
   GetCurrentZoneName = <function 594>,
@@ -440,6 +440,60 @@ function StarPanel:InitializeDataTexts(self)
 	}
 	self:RegisterMenuOption(self, "Gold", tName, tCustOps, nil, 4)
 	
+	--Tirploons (Added by Charge)
+	dt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= "Triploons: ",
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= "IconSprites:Icon_Windows_UI_CRB_Coin_Raid_RMT",
+		["nIconSize"]	= 17,
+		["OnUpdate"]	= function()
+			--local nTriploons = AccountItemLib.GetAccountCurrency(AccountItemLib.CodeEnumAccountCurrency.Omnibits)
+			local nTriploons = GameLib.GetPlayerCurrency( Money.CodeEnumCurrencyType.Triploons)
+			local text = tostring(nTriploons:GetAmount())
+			return text	
+		end
+	}
+	self:RegisterDataText(self, "Triploons", dt, nil)
+	self:RegisterDefaultOptions(self, "Triploons")
+	
+	
+	--Omnibits(Added by Charge)
+	dt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= "Omnibits: ",
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= "IconSprites:Icon_Windows_UI_CRB_Coin_OmniBit",
+		["nIconSize"]	= 17,
+		["OnUpdate"]	= function()
+			local nOmnibits = AccountItemLib.GetAccountCurrency(AccountItemLib.CodeEnumAccountCurrency.Omnibits)
+			local text = tostring(nOmnibits:GetAmount())
+			return text	
+		end
+	}
+	self:RegisterDataText(self, "Omnibits", dt, nil)
+	self:RegisterDefaultOptions(self, "Omnibits")
+		
+	
+	--ServiceToken(Added by Charge)
+	dt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= "Service Tokens: ",
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= "IconSprites:Icon_Windows_UI_CRB_Coin_ServiceToken",
+		["nIconSize"]	= 17,
+		["OnUpdate"]	= function()
+			local nST = AccountItemLib.GetAccountCurrency(AccountItemLib.CodeEnumAccountCurrency.ServiceToken)
+			local text = tostring(nST:GetAmount())
+			return text	
+		end
+	}
+	self:RegisterDataText(self, "ServiceToken", dt, nil)
+	self:RegisterDefaultOptions(self, "ServiceToken")
+		
 	--Latency
 	dt = {
 		["type"]		= "dataFeed",
