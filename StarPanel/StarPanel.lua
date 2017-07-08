@@ -440,61 +440,58 @@ function StarPanel:InitializeDataTexts(self)
 	}
 	self:RegisterMenuOption(self, "Gold", tName, tCustOps, nil, 4)
 	
-	--Tirploons (Added by Charge)
-	dt = {
-		["type"]		= "dataFeed",
-		["strLabel"]	= "Triploons: ",
-		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
-		["crText"]		= ApolloColor.new("white"),
-		["imgIcon"]		= "IconSprites:Icon_Windows_UI_CRB_Coin_Raid_RMT",
-		["nIconSize"]	= 17,
-		["OnUpdate"]	= function()
-			--local nTriploons = AccountItemLib.GetAccountCurrency(AccountItemLib.CodeEnumAccountCurrency.Omnibits)
-			local nTriploons = GameLib.GetPlayerCurrency( Money.CodeEnumCurrencyType.Triploons)
-			local text = tostring(nTriploons:GetAmount())
-			return text	
-		end
-	}
-	self:RegisterDataText(self, "Triploons", dt, nil)
-	self:RegisterDefaultOptions(self, "Triploons")
+	local Number_of_Currencies = 14
 	
-	
-	--Omnibits(Added by Charge)
-	dt = {
-		["type"]		= "dataFeed",
-		["strLabel"]	= "Omnibits: ",
-		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
-		["crText"]		= ApolloColor.new("white"),
-		["imgIcon"]		= "IconSprites:Icon_Windows_UI_CRB_Coin_OmniBit",
-		["nIconSize"]	= 17,
-		["OnUpdate"]	= function()
-			local nOmnibits = AccountItemLib.GetAccountCurrency(AccountItemLib.CodeEnumAccountCurrency.Omnibits)
-			local text = tostring(nOmnibits:GetAmount())
-			return text	
+	--Character Currencies (Added by Charge)
+	for i = 2, Number_of_Currencies, 1 do
+		if i ~= 8 then -- 8 = Gold 
+			local Currency = GameLib.GetPlayerCurrency(i)
+			local info =  Currency:GetDenomInfo()[1]
+			local dt = {
+				["type"]		= "dataFeed",
+				["strLabel"]	= info.strName..": ",
+				["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+				["crText"]		= ApolloColor.new("white"),
+				["imgIcon"]		= info.strSprite,
+				["nIconSize"]	= 17,
+				["OnUpdate"]	= function()
+					local nCurrency = GameLib.GetPlayerCurrency(i)
+					local text = tostring(nCurrency:GetAmount())
+					return text	
+				end
+			}
+			-- For some reason it doesn'T show all essences when use inf.strName only (therefor replaced with  info.strName.." "
+			self:RegisterDataText(self, info.strName.." ", dt,  nil)
+			self:RegisterDefaultOptions(self, info.strName.." ")
 		end
-	}
-	self:RegisterDataText(self, "Omnibits", dt, nil)
-	self:RegisterDefaultOptions(self, "Omnibits")
-		
+	end
 	
-	--ServiceToken(Added by Charge)
-	dt = {
-		["type"]		= "dataFeed",
-		["strLabel"]	= "Service Tokens: ",
-		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
-		["crText"]		= ApolloColor.new("white"),
-		["imgIcon"]		= "IconSprites:Icon_Windows_UI_CRB_Coin_ServiceToken",
-		["nIconSize"]	= 17,
-		["OnUpdate"]	= function()
-			local nST = AccountItemLib.GetAccountCurrency(AccountItemLib.CodeEnumAccountCurrency.ServiceToken)
-			local text = tostring(nST:GetAmount())
-			return text	
+	--Account Currencies (Added by Charge)
+	for i = 1, 14, 1 do
+	if i ~=10 and i ~= 4 then
+		local ACurrency = AccountItemLib.GetAccountCurrency(i)
+		local Ainfo =  ACurrency:GetDenomInfo()[1]	
+		SendVarToRover(Ainfo.strName, Ainfo)
+				dt = {
+				["type"]		= "dataFeed",
+				["strLabel"]	= Ainfo.strName..": ",
+				["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+				["crText"]		= ApolloColor.new("white"),
+				["imgIcon"]		= Ainfo.strSprite,
+				["nIconSize"]	= 17,
+				["OnUpdate"]	= function()
+					local nACurrency = AccountItemLib.GetAccountCurrency(i)
+					local text = tostring(nACurrency:GetAmount())
+					return text	
+				end
+			}
+			self:RegisterDataText(self, Ainfo.strName.."  ", dt, nil)
+			self:RegisterDefaultOptions(self, Ainfo.strName.."  ")
 		end
-	}
-	self:RegisterDataText(self, "ServiceToken", dt, nil)
-	self:RegisterDefaultOptions(self, "ServiceToken")
-		
+	end
+			
 	--Latency
+	
 	dt = {
 		["type"]		= "dataFeed",
 		["strLabel"]	= "Ping: ",
@@ -1097,7 +1094,8 @@ function StarPanel:InitializeDataTexts(self)
 	}
 	self:RegisterMenuOption(self, "Bags", tName, tCustOps, nil, 4)
 	
-	
+	--The following function is replaces by function in line 444 (from Charge) 
+	--[[
 	--Currency
 	if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
 		--self.db.profile.tDTOptions["Currency"] = {}
@@ -1178,6 +1176,8 @@ function StarPanel:InitializeDataTexts(self)
 		"Gained",
 	}
 	self:RegisterMenuOption(self, "Currency", tName, tCustOps, nil, 4)
+	
+	]]--
 	
 	--Friends
 	dt = {
