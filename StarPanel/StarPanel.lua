@@ -20,7 +20,7 @@ USEFULL function in _G
 -RequestReloadUI()
 -PlayerPathLib = <65>
 -GetAbilitiesWindow = <function 590>,
-  GetCharacterWindow = <function 591>,
+  GetacterWindow = <function 591>,
   GetConColor = <function 592>,
   GetCurrentSubZoneName = <function 593>,
   GetCurrentZoneName = <function 594>,
@@ -440,7 +440,142 @@ function StarPanel:InitializeDataTexts(self)
 	}
 	self:RegisterMenuOption(self, "Gold", tName, tCustOps, nil, 4)
 	
+	local Number_of_Currencies = 14
+	
+	--Character Currencies (Added by Charge)
+	for i = 2, Number_of_Currencies, 1 do
+		if i ~= 8 then -- 8 = Gold 
+			local Currency = GameLib.GetPlayerCurrency(i)
+			local info =  Currency:GetDenomInfo()[1]
+			local dt = {
+				["type"]		= "dataFeed",
+				["strLabel"]	= info.strName..": ",
+				["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+				["crText"]		= ApolloColor.new("white"),
+				["imgIcon"]		= info.strSprite,
+				["nIconSize"]	= 17,
+				["OnUpdate"]	= function()
+					local nCurrency = GameLib.GetPlayerCurrency(i)
+					local text = tostring(nCurrency:GetAmount())
+					return text	
+				end
+			}
+			-- For some reason it doesn'T show all essences when use inf.strName only (therefor replaced with  info.strName.." "
+			self:RegisterDataText(self, info.strName.." ", dt,  nil)
+			self:RegisterDefaultOptions(self, info.strName.." ")
+		end
+	end
+	
+	--Account Currencies (Added by Charge)
+	for i = 1, 14, 1 do
+	if i ~=10 and i ~= 4 then
+		local ACurrency = AccountItemLib.GetAccountCurrency(i)
+		local Ainfo =  ACurrency:GetDenomInfo()[1]	
+		SendVarToRover(Ainfo.strName, Ainfo)
+				dt = {
+				["type"]		= "dataFeed",
+				["strLabel"]	= Ainfo.strName..": ",
+				["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+				["crText"]		= ApolloColor.new("white"),
+				["imgIcon"]		= Ainfo.strSprite,
+				["nIconSize"]	= 17,
+				["OnUpdate"]	= function()
+					local nACurrency = AccountItemLib.GetAccountCurrency(i)
+					local text = tostring(nACurrency:GetAmount())
+					return text	
+				end
+			}
+			self:RegisterDataText(self, Ainfo.strName.."  ", dt, nil)
+			self:RegisterDefaultOptions(self, Ainfo.strName.."  ")
+		end
+	end
+	--The following function is replaces by function in line 444 (from Charge) 
+	--[[
+	--Currency
+	if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
+		--self.db.profile.tDTOptions["Currency"] = {}
+		--self.db.profile.tDTOptions["Currency"]["nDisplayMode"] = 3
+		--self.db.profile.tDTOptions["Currency"]["nDisp"] = 1
+	end
+
+	local ddt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= function()
+			if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
+				return GameLib.GetPlayerCurrency(3):GetDenomInfo()[1].strName..": "
+			else
+				return GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strName..": "
+			end
+		end,
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= function()
+			if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
+				return GameLib.GetPlayerCurrency(3):GetDenomInfo()[1].strSprite
+			else
+				return GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strSprite
+			end
+		end,
+		["nIconSize"]	= 17,
+		["OnUpdate"]	= function()
+			local type = self.db.profile.tDTOptions["Currency"]["nDisplayMode"]
+			local tInfo =  GameLib.GetPlayerCurrency(type):GetDenomInfo()[1]
+			local strName = tInfo.strName
+			local strImg = tInfo.strSprite
+			self.DataTexts.Currency.strLabel = strName..": "
+			self.DataTexts.Currency.imgIcon = strImg
+			local nMoney = GameLib.GetPlayerCurrency(type):GetAmount()
+			local nMoneyGained
+			if self.tStartingCurrency[type] then
+				nMoneyGained = nMoney - self.tStartingCurrency[type]
+			else
+				nMoneyGained = 0
+			end
+			--local strMoneyGainedString = CopperToMoneyString(nMoneyGained)
+			local text
+			local dtype = tonumber(self.db.profile.tDTOptions["Currency"]["nDisp"])
+			if dtype == 1 then
+				text = nMoney
+			elseif dtype == 2 then
+				text = nMoneyGained.." gained"
+			else
+				text = nMoney
+			end
+			return text			
+		end
+	}
+	ops = {
+		["nDisplayMode"] = 3,
+		["nDisp"] = 1,
+	}
+
+	self:RegisterDataText(self, "Currency", ddt, ops)
+	self:RegisterDefaultOptions(self, "Currency")
+
+	local tName = {
+		["nDisplayMode"] = "Currency Type",
+	}
+	local tCustOps = {
+		[2] = "Renown",
+		[3] = "Elder Gems",
+		[4] = "Crafting Vouchers",
+		[5] = "Prestige",
+	}
+	self:RegisterMenuOption(self, "Currency", tName, tCustOps, nil, 4)
+	
+	local tName = {
+		["nDisp"] = "Display Mode",
+	}
+	local tCustOps = {
+		"Amount",
+		"Gained",
+	}
+	self:RegisterMenuOption(self, "Currency", tName, tCustOps, nil, 4)
+	
+	]]--
+		
 	--Latency
+	
 	dt = {
 		["type"]		= "dataFeed",
 		["strLabel"]	= "Ping: ",
@@ -1043,87 +1178,6 @@ function StarPanel:InitializeDataTexts(self)
 	}
 	self:RegisterMenuOption(self, "Bags", tName, tCustOps, nil, 4)
 	
-	
-	--Currency
-	if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
-		--self.db.profile.tDTOptions["Currency"] = {}
-		--self.db.profile.tDTOptions["Currency"]["nDisplayMode"] = 3
-		--self.db.profile.tDTOptions["Currency"]["nDisp"] = 1
-	end
-
-	local ddt = {
-		["type"]		= "dataFeed",
-		["strLabel"]	= function()
-			if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
-				return GameLib.GetPlayerCurrency(3):GetDenomInfo()[1].strName..": "
-			else
-				return GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strName..": "
-			end
-		end,
-		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
-		["crText"]		= ApolloColor.new("white"),
-		["imgIcon"]		= function()
-			if self.db.profile.tDTOptions["Currency"] == nil or self.db.profile.tDTOptions["Currency"]["nDisplayMode"] == 1 then
-				return GameLib.GetPlayerCurrency(3):GetDenomInfo()[1].strSprite
-			else
-				return GameLib.GetPlayerCurrency(tonumber(self.db.profile.tDTOptions["Currency"]["nDisplayMode"])):GetDenomInfo()[1].strSprite
-			end
-		end,
-		["nIconSize"]	= 17,
-		["OnUpdate"]	= function()
-			local type = self.db.profile.tDTOptions["Currency"]["nDisplayMode"]
-			local tInfo =  GameLib.GetPlayerCurrency(type):GetDenomInfo()[1]
-			local strName = tInfo.strName
-			local strImg = tInfo.strSprite
-			self.DataTexts.Currency.strLabel = strName..": "
-			self.DataTexts.Currency.imgIcon = strImg
-			local nMoney = GameLib.GetPlayerCurrency(type):GetAmount()
-			local nMoneyGained
-			if self.tStartingCurrency[type] then
-				nMoneyGained = nMoney - self.tStartingCurrency[type]
-			else
-				nMoneyGained = 0
-			end
-			--local strMoneyGainedString = CopperToMoneyString(nMoneyGained)
-			local text
-			local dtype = tonumber(self.db.profile.tDTOptions["Currency"]["nDisp"])
-			if dtype == 1 then
-				text = nMoney
-			elseif dtype == 2 then
-				text = nMoneyGained.." gained"
-			else
-				text = nMoney
-			end
-			return text			
-		end
-	}
-	ops = {
-		["nDisplayMode"] = 3,
-		["nDisp"] = 1,
-	}
-
-	self:RegisterDataText(self, "Currency", ddt, ops)
-	self:RegisterDefaultOptions(self, "Currency")
-
-	local tName = {
-		["nDisplayMode"] = "Currency Type",
-	}
-	local tCustOps = {
-		[2] = "Renown",
-		[3] = "Elder Gems",
-		[4] = "Crafting Vouchers",
-		[5] = "Prestige",
-	}
-	self:RegisterMenuOption(self, "Currency", tName, tCustOps, nil, 4)
-	
-	local tName = {
-		["nDisp"] = "Display Mode",
-	}
-	local tCustOps = {
-		"Amount",
-		"Gained",
-	}
-	self:RegisterMenuOption(self, "Currency", tName, tCustOps, nil, 4)
 	
 	--Friends
 	dt = {
