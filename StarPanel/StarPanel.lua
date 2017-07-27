@@ -471,7 +471,6 @@ function StarPanel:InitializeDataTexts(self)
 	if i ~=10 and i ~= 4 then
 		local ACurrency = AccountItemLib.GetAccountCurrency(i)
 		local Ainfo =  ACurrency:GetDenomInfo()[1]	
-		SendVarToRover(Ainfo.strName, Ainfo)
 				dt = {
 				["type"]		= "dataFeed",
 				["strLabel"]	= Ainfo.strName..": ",
