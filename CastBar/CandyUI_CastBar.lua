@@ -137,8 +137,9 @@ end
 
 
 function CandyUI_CastBar:OnStartSpellThreshold(idSpell, nMaxThresholds, eCastMethod)
+
 	if ( self.db.profile.general.id == idSpell) then 
-		self.db.profile.general.nCurrentTier = self.db.profile.general.nCurrentTier
+		self.db.profile.general.nCurrentTier = self.db.profile.general.nCurrentTier +1
 		return
 	end
 	--if u start attacking while "show" is active
@@ -157,6 +158,9 @@ function CandyUI_CastBar:OnStartSpellThreshold(idSpell, nMaxThresholds, eCastMet
 end
 
 function CandyUI_CastBar:OnClearSpellThreshold(idSpell)
+	if self.db.profile.general.id ~= idSpell then
+		return
+	end
 	self.db.profile.general.id = nil
 	self.db.profile.general.nCurrentTier = 0
 	self.db.profile.general.nMaxThresholds = nil
@@ -166,6 +170,9 @@ function CandyUI_CastBar:OnClearSpellThreshold(idSpell)
 end
 
 function CandyUI_CastBar:OnUpdateSpellThreshold(idSpell, nNewThreshold)
+	if self.db.profile.general.id ~= idSpell and self.db.profile.general.id ~= nil then
+		return
+	end
 	self.db.profile.general.nCurrentTier = nNewThreshold
 	self.wndCharge:FindChild("ChargeBarP"):SetBarColor(self.db.profile.general.color[nNewThreshold])
 	self.wndCharge:FindChild("ChargeCount"):SetText(tostring(nNewThreshold).." / "..tostring(self.db.profile.general.nMaxThresholds))
