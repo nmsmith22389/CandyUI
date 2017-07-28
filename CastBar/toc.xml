@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Charge" APIVersion="15" Name="CandyUI_CastBar" Description="Better CastBar">
+    <Script Name="CandyUI_CastBar.lua"/>
+    <Form Name="CandyUI_CastBar.xml"/>
+    <ReplaceAddon Name="CastBar"/>
+</Addon>
