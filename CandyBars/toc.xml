@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="Neil Smith" APIVersion="15" Name="CandyBars" Description="Description." Version="2.1">
+<Addon Author="Neil Smith" APIVersion="15" Name="CandyBars" Description="Description." Version="2.3">
     <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
     <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>
     <Form Name="CandyBars.xml"/>
