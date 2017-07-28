@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="Neil Smith" APIVersion="15" Name="CandyUI_InterfaceMenu" Description="" Version="0.7">
+<Addon Author="Neil Smith" APIVersion="15" Name="CandyUI_InterfaceMenu" Description="" Version="0.7.1">
     <Script Name="CandyUI_InterfaceMenu.lua"/>
     <Form Name="CandyUI_InterfaceMenu.xml"/>
     <ReplaceAddon Name="InterfaceMenuList"/>
