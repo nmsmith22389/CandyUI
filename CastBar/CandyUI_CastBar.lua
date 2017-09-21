@@ -25,7 +25,7 @@ local kcuiCBDefaults = {
 			nCurrentTier = nil,
 			nMaxThresholds = nil,
 			eCastMethod = nil,
-			tAnchorOffsetCharge = {811, 751, 1063, 774 },
+			tAnchorOffsetCharge = {347, 169, 599, 192},
 			color = {"AcidGreen", "AttributeName", "BrightRed" },
 			},
 		}
