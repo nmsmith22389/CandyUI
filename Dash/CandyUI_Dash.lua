@@ -254,7 +254,6 @@ function CandyUI_Dash:OnSprintEnergyUpdated(nRunCurr, nRunMax)
 	
 	bar:SetMax(nRunMax)
 	bar:SetProgress(nRunCurr)
-	SendVarToRover("testing var: tItem", nRunMax)
 	if (nRunCurr < 170) then 
 		bar:SetBGColor("red")
 		return
