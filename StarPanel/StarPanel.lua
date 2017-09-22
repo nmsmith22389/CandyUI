@@ -96,7 +96,7 @@ end
 -----------------------------
 --  left padding string
 -----------------------------
-local string.lpad = function(str, len, char)
+local lpad = function(str, len, char)
     if char == nil then char = ' ' end
     return string.rep(char, len - #str) .. str
 end
@@ -401,15 +401,8 @@ function StarPanel:InitializeDataTexts(self)
 		["imgIcon"]		= nil,
 		["bRightSide"]	= true,
 		["OnUpdate"]	= function()
-			local source = self.db.profile.tDTOptions["Time"]["strSource"]
-			local t
-			if source == "server" then
-				t = GameLib.GetServerTime()
-			else
-				t = GameLib.GetLocalTime()
-			end
-			
-			local text = tostring(t.nHour) .. ":" .. string.lpad(tostring(t.nMinute), 2, '0')
+			local t = GameLib.GetLocalTime()			
+			local text = tostring(t.nHour) .. ":" .. lpad(tostring(t.nMinute), 2, '0')
 			return text
 		end,
 		["OnTooltip"]	= function()
@@ -419,9 +412,9 @@ function StarPanel:InitializeDataTexts(self)
 			xml:AddLine("Time", "UI_TextHoloTitle", "CRB_InterfaceLarge_O", "Left")
 			xml:AddLine(" ", "UI_TextHoloTitle", "CRB_InterfaceMedium", "Left")
 			xml:AddLine("Server:         ", "UI_TextHoloBody", "CRB_InterfaceMedium_O", "Left")	
-			xml:AppendText(tostring(svt.nHour) .. ":" .. string.lpad(tostring(svt.nMinute), 2, '0') .. ":" .. string.lpad(tostring(svt.nSecond), 2, '0'), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
+			xml:AppendText(tostring(svt.nHour) .. ":" .. lpad(tostring(svt.nMinute), 2, '0') .. ":" .. lpad(tostring(svt.nSecond), 2, '0'), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
 			xml:AddLine("Local:          ", "UI_TextHoloBody", "CRB_InterfaceMedium_O", "Left")	
-			xml:AppendText(tostring(lct.nHour) .. ":" .. string.lpad(tostring(lct.nMinute), 2, '0') .. ":" .. string.lpad(tostring(lct.nSecond), 2, '0'), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
+			xml:AppendText(tostring(lct.nHour) .. ":" .. lpad(tostring(lct.nMinute), 2, '0') .. ":" .. lpad(tostring(lct.nSecond), 2, '0'), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
 			
 			--:AddLine("Time", "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "left")
 			
