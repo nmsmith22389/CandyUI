@@ -401,7 +401,14 @@ function StarPanel:InitializeDataTexts(self)
 		["imgIcon"]		= nil,
 		["bRightSide"]	= true,
 		["OnUpdate"]	= function()
-			local t = GameLib.GetLocalTime()			
+			local source = self.db.profile.tDTOptions["Time"]["strSource"]
+			local t			
+			if source == "server" then
+				t = GameLib.GetServerTime()
+			else
+				t = GameLib.GetLocalTime()
+			end
+					
 			local text = tostring(t.nHour) .. ":" .. lpad(tostring(t.nMinute), 2, '0')
 			return text
 		end,
