@@ -409,7 +409,7 @@ function StarPanel:InitializeDataTexts(self)
 				t = GameLib.GetLocalTime()
 			end
 					
-			local text = tostring(t.nHour) .. ":" .. lpad(tostring(t.nMinute), 2, '0')
+			local text = " " .. tostring(t.nHour) .. ":" .. lpad(tostring(t.nMinute), 2, '0')
 			return text
 		end,
 		["OnTooltip"]	= function()
