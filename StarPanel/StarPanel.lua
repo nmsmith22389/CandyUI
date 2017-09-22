@@ -384,6 +384,49 @@ function StarPanel:InitializeDataTexts(self)
 	self:RegisterDataText(self, "Time", dt, ops)
 	self:RegisterDefaultOptions(self, "Time")
 	
+	--Time24
+	dt = {
+		["type"]		= "dataFeed",
+		["strLabel"]	= "Time: ",
+		["crLabel"]		= ApolloColor.new("UI_TextHoloBody"),
+		["crText"]		= ApolloColor.new("white"),
+		["imgIcon"]		= nil,
+		["bRightSide"]	= true,
+		["OnUpdate"]	= function()
+			local source = self.db.profile.tDTOptions["Time"]["strSource"]
+			local t
+			if source == "server" then
+				t = GameLib.GetServerTime()
+			else
+				t = GameLib.GetLocalTime()
+			end
+			
+			local text = tostring(t.nHour) .. ":" .. tostring(t.nMinute)
+			return text
+		end,
+		["OnTooltip"]	= function()
+			local xml = XmlDoc.new()
+			local svt = GameLib.GetServerTime()
+			local lct = GameLib.GetLocalTime()
+			xml:AddLine("Time", "UI_TextHoloTitle", "CRB_InterfaceLarge_O", "Left")
+			xml:AddLine(" ", "UI_TextHoloTitle", "CRB_InterfaceMedium", "Left")
+			xml:AddLine("Server:         ", "UI_TextHoloBody", "CRB_InterfaceMedium_O", "Left")	
+			xml:AppendText(tostring(svt.nHour) .. ":" .. tostring(svt.nMinute) .. ":" .. tostring(svt.nSecond), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
+			xml:AddLine("Local:          ", "UI_TextHoloBody", "CRB_InterfaceMedium_O", "Left")	
+			xml:AppendText(tostring(lct.nHour) .. ":" .. tostring(lct.nMinute) .. ":" .. tostring(lct.nSecond), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
+			
+			--:AddLine("Time", "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "left")
+			
+			return xml			
+		end,
+	}
+	
+	ops = {
+		["strSource"]	= "server",
+	}
+	self:RegisterDataText(self, "Time24", dt, ops)
+	self:RegisterDefaultOptions(self, "Time24")
+	
 	local tName = {
 		["strSource"] = "Source",
 	}
