@@ -94,6 +94,14 @@ local function GetProfs()
 end
 
 -----------------------------
+--  left padding string
+-----------------------------
+local string.lpad = function(str, len, char)
+    if char == nil then char = ' ' end
+    return string.rep(char, len - #str) .. str
+end
+
+-----------------------------
 --   Copper to Money String
 -----------------------------
 local function CopperToMoneyString(nCopperIn)
@@ -401,7 +409,7 @@ function StarPanel:InitializeDataTexts(self)
 				t = GameLib.GetLocalTime()
 			end
 			
-			local text = tostring(t.nHour) .. ":" .. tostring(t.nMinute)
+			local text = tostring(t.nHour) .. ":" .. string.lpad(tostring(t.nMinute), 2, '0')
 			return text
 		end,
 		["OnTooltip"]	= function()
@@ -411,9 +419,9 @@ function StarPanel:InitializeDataTexts(self)
 			xml:AddLine("Time", "UI_TextHoloTitle", "CRB_InterfaceLarge_O", "Left")
 			xml:AddLine(" ", "UI_TextHoloTitle", "CRB_InterfaceMedium", "Left")
 			xml:AddLine("Server:         ", "UI_TextHoloBody", "CRB_InterfaceMedium_O", "Left")	
-			xml:AppendText(tostring(svt.nHour) .. ":" .. tostring(svt.nMinute) .. ":" .. tostring(svt.nSecond), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
+			xml:AppendText(tostring(svt.nHour) .. ":" .. string.lpad(tostring(svt.nMinute), 2, '0') .. ":" .. string.lpad(tostring(svt.nSecond), 2, '0'), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
 			xml:AddLine("Local:          ", "UI_TextHoloBody", "CRB_InterfaceMedium_O", "Left")	
-			xml:AppendText(tostring(lct.nHour) .. ":" .. tostring(lct.nMinute) .. ":" .. tostring(lct.nSecond), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
+			xml:AppendText(tostring(lct.nHour) .. ":" .. string.lpad(tostring(lct.nMinute), 2, '0') .. ":" .. string.lpad(tostring(lct.nSecond), 2, '0'), "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "Right")
 			
 			--:AddLine("Time", "UI_TextHoloBodyHighlight", "CRB_InterfaceMedium_O", "left")
 			
