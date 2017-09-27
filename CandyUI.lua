@@ -21,6 +21,7 @@ local CandyUI = {}
 -- e.g. local kiExampleVariableMax = 999
 
 local karCUIModules = {
+  "CandyUI_CastBar",
   "CandyUI_Dash",
   "CandyUI_Datachron",
   "CandyUI_InterfaceMenu",
